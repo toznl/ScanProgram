@@ -20,11 +20,13 @@ namespace ScanProgram
 
         private void Path_Button_Click(object sender, RoutedEventArgs e)
         {
+            file_info file_Info = new file_info();  
             OpenFileDialog dlgOpenFile = new OpenFileDialog();
             dlgOpenFile.Filter = "*.json | *.*";
             if (dlgOpenFile.ShowDialog().ToString() == "OK")
             {
-
+                file_Info.filePath = dlgOpenFile.FileName;
+                
             }
 
         }

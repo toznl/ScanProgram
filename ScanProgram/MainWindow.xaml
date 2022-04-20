@@ -18,10 +18,11 @@
 
     <Grid Margin="-21,-35,-30,-6">
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="374*"/>
-            <ColumnDefinition Width="507*"/>
+            <ColumnDefinition Width="396*"/>
+            <ColumnDefinition Width="461*"/>
+            <ColumnDefinition Width="76*"/>
         </Grid.ColumnDefinitions>
-        <Grid HorizontalAlignment="Left" Height="1032" VerticalAlignment="Top" Width="1188" Margin="39,50,0,0" Grid.ColumnSpan="2">
+        <Grid HorizontalAlignment="Left" Height="1032" VerticalAlignment="Top" Width="1188" Margin="39,50,0,0" Grid.ColumnSpan="3">
             <!--#region 원점이동 -->
             <!--원점 이동, 원점 설정 버튼-->
             <!--원점 이동, 원점 설정 버튼-->
@@ -135,13 +136,16 @@
             <TextBox x:Name="offset_Y" HorizontalAlignment="Left" Margin="216,498,0,0" Text="30" TextWrapping="Wrap" VerticalAlignment="Top" Width="33" Height="13" FontSize="10"/>
             <Button Content="저장"  x:Name="auto_Capture_Copy" HorizontalAlignment="Left" Margin="211,516,0,0" VerticalAlignment="Top" Height="16" Width="38" RenderTransformOrigin="0.308,-0.065" FontSize="10"/>
             <GroupBox Header="Camera" Margin="106,510,1002,373" FontSize="10"/>
-            <RadioButton GroupName="Camera" x:Name="RGB_Camera" Content="RGB" HorizontalAlignment="Left" Margin="111,528,0,0" VerticalAlignment="Top" />
-            <RadioButton GroupName="Camera" Content="NIR" x:Name="NIR_Camera" HorizontalAlignment="Left" Margin="111,543,0,0" VerticalAlignment="Top"/>
-            <RadioButton GroupName="Camera" Content="UV" x:Name="UV_Camera" HorizontalAlignment="Left" Margin="112,557,0,0" VerticalAlignment="Top"/>
+            <RadioButton GroupName="Radio_Camera" x:Name="Radio_Camera_RGB_Camera" Content="RGB" HorizontalAlignment="Left" Margin="111,528,0,0" VerticalAlignment="Top" />
+            <RadioButton GroupName="Radio_Camera" Content="NIR" x:Name="Radio_Camera_NIR_Camera" HorizontalAlignment="Left" Margin="111,543,0,0" VerticalAlignment="Top"/>
+            <RadioButton GroupName="Radio_Camera" Content="UV" x:Name="Radio_Camera_UV_Camera" HorizontalAlignment="Left" Margin="112,557,0,0" VerticalAlignment="Top"/>
             <TextBlock HorizontalAlignment="Left" Margin="116,723,0,0" TextWrapping="Wrap" VerticalAlignment="Top" FontSize="10"><Run Language="ko-kr" Text="z"/></TextBlock>
             <TextBox x:Name="align_Y_Copy" HorizontalAlignment="Left" Margin="133,730,0,0" Text="30" TextWrapping="Wrap" VerticalAlignment="Top" Width="60" Height="17" TextBlock.FontSize="10"/>
-            <Button Content="Connect" HorizontalAlignment="Left" Height="24" Margin="118,597,0,0" VerticalAlignment="Top" Width="56" Click="Camera_Connect_Button_Click"/>
-            <Button Content="Grab" HorizontalAlignment="Left" Height="24" Margin="118,625,0,0" VerticalAlignment="Top" Width="56" Click="Camera_Grab_Button_Click"/>
+            <Button x:Name="Camera_Connect" Content="Connect" HorizontalAlignment="Left" Height="24" Margin="118,577,0,0" VerticalAlignment="Top" Width="56" Click="Camera_Connect_Button_Click"/>
+            <Button x:Name="Camera_Grab" Content="Grab" HorizontalAlignment="Left" Height="24" Margin="118,602,0,0" VerticalAlignment="Top" Width="56" Click="Camera_Grab_Button_Click"/>
+            <Button x:Name="Camera_Disconnect" Content="Disconnect" HorizontalAlignment="Left" Height="24" Margin="118,627,0,0" VerticalAlignment="Top" Width="56" Click="Camera_Disconnect_Button_Click"/>
+            <Image HorizontalAlignment="Left" Height="100" Margin="230,377,0,0" VerticalAlignment="Top" Width="100"/>
+
         </Grid>
 
     </Grid>

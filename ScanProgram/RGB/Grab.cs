@@ -3,6 +3,9 @@ using System;
 using System.ComponentModel;
 using System.Threading;
 using System.Drawing;
+using OpenCvSharp;
+
+using System.IO;
 
 
 namespace ScanProgram
@@ -146,6 +149,8 @@ namespace ScanProgram
         // Callback function for when a frame is grabbed by the camera
         private void Xfer_XferNotify(object sender, SapXferNotifyEventArgs args)
         {
+            
+
             SaperaCapture demo = args.Context as SaperaCapture;
             // If grabbing in trash buffer, do not display the image, update the
             // appropriate number of frames on the status bar instead
@@ -181,15 +186,16 @@ namespace ScanProgram
             buffer = new SapBufferWithTrash(3, device, SapBuffer.MemoryType.ScatterGather);
             // Initialize transfer between device and buffer
             transfer = new SapAcqDeviceToBuf(device, buffer);
-
+            
             m_conv = new SapColorConversion(device, buffer);
             m_pro = new SapMyProcessing(buffer, m_conv);
-            //view = new SapView(m_conv.OutputBuffer);
+            
 
             // Initialize frame handler for end of frame events
             transfer.Pairs[0].EventType = SapXferPair.XferEventType.EndOfFrame;
             transfer.XferNotify += new SapXferNotifyHandler(Xfer_XferNotify);
             transfer.XferNotifyContext = this;
+
 
             #region Create Objects
             // Check if device was created
@@ -199,6 +205,7 @@ namespace ScanProgram
                 location.Dispose();
                 return;
             }
+
             // Check if software color conversion is supported
             if (device.RawBayerOutput == false)
             {
@@ -208,12 +215,6 @@ namespace ScanProgram
             // Enable/Disable bayer conversion
             // This call may require to modify the acquisition output format.
             // For this reason, it has to be done after creating the acquisition object but before
-            // creating the output buffer object.
-            if (m_conv != null && !m_conv.Enable(true, false))
-            {
-                DestroyObjects();
-                return;
-            }
             // Create buffer object
             if (buffer != null && !buffer.Initialized)
             {
@@ -224,6 +225,16 @@ namespace ScanProgram
                 }
                 buffer.Clear();
             }
+
+       
+
+            // creating the output buffer object.
+            if (m_conv != null && !m_conv.Enable(true, false))
+            {
+                DestroyObjects();
+                return;
+            }
+  
             // Create color conversion object
             if (m_conv != null && !m_conv.Initialized)
             {
@@ -254,6 +265,8 @@ namespace ScanProgram
                     return;
                 }
             }
+
+
             // Create transfer object
             if (transfer != null && !transfer.Initialized)
             {
@@ -275,17 +288,21 @@ namespace ScanProgram
 
                 m_pro.AutoEmpty = true;
             }
+            
+            
+
+
+
             #endregion
 
             m_conv.OutputFormat = SapFormat.RGB8888;
-
+            
+            
 
 
             try
             {
                 // Start grabbing frames
-                transfer.Grab();
-                view = new SapView(buffer);
                 
 
             }
@@ -308,23 +325,13 @@ namespace ScanProgram
         public void Grab()
         {
             
-            SapBuffer buffer = new SapBuffer(1, 640, 480, SapFormat.Mono8,
-             SapBuffer.MemoryType.ScatterGather);
-            bool success = buffer.Create();
-
-
-            Graphics view_grap; 
-            new SapView(buffer).ReleaseGraphics(view_grap);
-            view_box = 
-            success = view.Create();
-
-            while(success==true)
-            {
-                view.Show();
-            }
-            
-
 
         }
+        public void Kill_Object()
+        {
+            DisposeObjects();
+            DestroyObjects();
+        }
+
     }
 }
