@@ -27,7 +27,7 @@
 
   <ItemGroup>
     <Reference Include="DALSA.SaperaLT.SapClassBasic">
-      <HintPath>..\..\..\..\..\Program Files\Teledyne DALSA\Sapera\Components\NET\Bin\DALSA.SaperaLT.SapClassBasic.dll</HintPath>
+      <HintPath>C:\Program Files\Teledyne DALSA\Sapera\Components\NET\Bin\DALSA.SaperaLT.SapClassBasic.dll</HintPath>
     </Reference>
     <Reference Include="System.Windows.Forms">
       <HintPath>..\..\..\..\..\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.7.2\System.Windows.Forms.dll</HintPath>
