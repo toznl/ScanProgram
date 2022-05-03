@@ -1,0 +1,11 @@
+1. VNIR UV 위치 바꾸기
+2. 로봇 Servo On
+3. Home- > Homing(원점)
+4. 실제좌표 -> 나오게
+5. Robot Init -> 초기원점 Offset
+6. 전체 z까지 추가
+7. Manual 이동시 간격 따로 추가
+8. Camera, Auto 중간에 Calibration
+ -   조명값 조절(센서값 받아와서 조정)
+     WhiteBalance(Example에서 넣고), Lens 보정, Vignette, 
+     Color보정
