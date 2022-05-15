@@ -7,8 +7,8 @@
         mc:Ignorable="d"
         Title="ArtAdd" Height="450" Width="800">
     <Grid>
-        <Button x:Name="Json_Create" Content="파일정보저장" HorizontalAlignment="Left" Margin="680,384,0,0" VerticalAlignment="Top" Height="30" Width="80" Click="Create_Button_Click"/>
-        <Button x:Name="Json_FilePath" Content="파일경로" HorizontalAlignment="Left" Margin="585,384,0,0" VerticalAlignment="Top" Height="30" Width="80" Click="Path_Button_Click"/>
+        <Button x:Name="Json_Create" Content="파일정보저장" HorizontalAlignment="Left" Margin="675,374,0,0" VerticalAlignment="Top" Height="30" Width="80" Click="Create_Button_Click"/>
+        <Button x:Name="Json_FilePath" Content="파일경로" HorizontalAlignment="Left" Margin="580,374,0,0" VerticalAlignment="Top" Height="30" Width="80" Click="Path_Button_Click"/>
 
     </Grid>
 </Window>

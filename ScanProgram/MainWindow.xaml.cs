@@ -38,7 +38,6 @@ namespace ScanProgram
         public int camera_Mode;
         public string fileinfo_header;
         public string fileinfo_filepath;
-        public file_info prop;
 
         public float final_Start_X;
         public float final_Start_Y;
@@ -453,14 +452,7 @@ namespace ScanProgram
 
         void calibration_Click(object sender, RoutedEventArgs e)
         {
-            OpenFileDialog dlgOpenFile = new OpenFileDialog();
-            dlgOpenFile.Filter = "*.json | *.*";
-            if (dlgOpenFile.ShowDialog().ToString() == "OK")
-            {
-                prop.filePath = dlgOpenFile.FileName;
-                log.AppendText($"Art Information File Loaded : [{prop.filePath}]\r");
-            }
-
+  
         }
         public UInt32 IndexCal(UInt32 Index)
         {
@@ -521,19 +513,14 @@ namespace ScanProgram
             ProcState = (UInt16)MXP_KernelState.Close;
             log.AppendText("Emergency Stop\r");
         }
-        private void file_Setting_Click(object sender, RoutedEventArgs e)
-        {
-            ScanProgram.FileSetting fileSettingWindow = new ScanProgram.FileSetting();
-
-            fileSettingWindow.Show();
-            log.AppendText("FileSetting Windows Opened\r");
-        }
 
         private void art_Add_Click(object sender, RoutedEventArgs e)
         {
             ScanProgram.ArtAdd artAddWindow = new ScanProgram.ArtAdd();
 
             artAddWindow.Show();
+            artAddWindow.Top = this.Top + (this.ActualHeight - artAddWindow.Height) / 2;
+            artAddWindow.Left = this.Left + (this.ActualWidth - artAddWindow.Width) / 2;
             log.AppendText("ArtAdd Windows Opened\r");
         }
 
@@ -737,7 +724,7 @@ namespace ScanProgram
             Motion_Function.MXP_MC_MoveRelative(1,
                                     1,
                                     Convert.ToSingle(100),
-                                    Convert.ToSingle(align_Y.Text),
+                                    Convert.ToSingle(align_Y_Manual.Text),
                                     Convert.ToSingle(50),
                                     Convert.ToSingle(50),
                                     Convert.ToSingle(500),
@@ -753,7 +740,7 @@ namespace ScanProgram
             Motion_Function.MXP_MC_MoveRelative(1,
                                     1,
                                     Convert.ToSingle(100),
-                                    -Convert.ToSingle(align_Y.Text),
+                                    -Convert.ToSingle(align_Y_Manual.Text),
                                     Convert.ToSingle(50),
                                     Convert.ToSingle(50),
                                     Convert.ToSingle(500),
@@ -769,7 +756,7 @@ namespace ScanProgram
             Motion_Function.MXP_MC_MoveRelative(0,
                                     0,
                                     Convert.ToSingle(100),
-                                    -Convert.ToSingle(align_X.Text),
+                                    -Convert.ToSingle(align_X_Manual.Text),
                                     Convert.ToSingle(50),
                                     Convert.ToSingle(50),
                                     Convert.ToSingle(500),
@@ -785,7 +772,7 @@ namespace ScanProgram
             Motion_Function.MXP_MC_MoveRelative(0,
                                     0,
                                     Convert.ToSingle(100),
-                                    Convert.ToSingle(align_X.Text),
+                                    Convert.ToSingle(align_X_Manual.Text),
                                     Convert.ToSingle(50),
                                     Convert.ToSingle(50),
                                     Convert.ToSingle(500),
@@ -958,6 +945,11 @@ namespace ScanProgram
                 Radio_Camera_RGB_Camera.IsEnabled = false;
                 Radio_Camera_NIR_Camera.IsEnabled = false;
                 Radio_Camera_UV_Camera.IsEnabled = false;
+                button_cali_WB.IsEnabled = true;
+                button_cali_Light.IsEnabled = true;
+                button_cali_Lens.IsEnabled = true;
+                button_cali_Color.IsEnabled = true;
+
 
 
 
@@ -1291,6 +1283,47 @@ namespace ScanProgram
 
 
     }
+
+        private void cali_WB_Click(object sender, RoutedEventArgs e)
+        {
+            ScanProgram.Calibration.WhiteBalance wb_Window = new ScanProgram.Calibration.WhiteBalance();
+
+            wb_Window.Show();
+            wb_Window.Top = this.Top + (this.ActualHeight - wb_Window.Height) / 2;
+            wb_Window.Left = this.Left + (this.ActualWidth - wb_Window.Width) / 2;
+            log.AppendText("WhiteBalance Window Opened\r");
+        }
+
+        private void button_cali_Light_Click(object sender, RoutedEventArgs e)
+        {
+            ScanProgram.Calibration.LightControl lc_Window = new ScanProgram.Calibration.LightControl();
+
+            lc_Window.Show();
+            lc_Window.Top = this.Top + (this.ActualHeight - lc_Window.Height) / 2;
+            lc_Window.Left = this.Left + (this.ActualWidth - lc_Window.Width) / 2;
+            log.AppendText("LightControl Window Opened\r");
+        }
+
+        private void button_cali_Lens_Click(object sender, RoutedEventArgs e)
+        {
+            ScanProgram.Calibration.Lens lens_Window = new ScanProgram.Calibration.Lens();
+
+            lens_Window.Show();
+            lens_Window.Top = this.Top + (this.ActualHeight - lens_Window.Height) / 2;
+            lens_Window.Left = this.Left + (this.ActualWidth - lens_Window.Width) / 2;
+            log.AppendText("Lens Calibration Window Opened\r");
+        }
+
+        private void button_cali_Color_Click(object sender, RoutedEventArgs e)
+        {
+            ScanProgram.Calibration.Color color_Window = new ScanProgram.Calibration.Color();
+
+            color_Window.Show();
+            color_Window.Top = this.Top + (this.ActualHeight - color_Window.Height) / 2;
+            color_Window.Left = this.Left + (this.ActualWidth - color_Window.Width) / 2;
+            log.AppendText("Lens Calibration Window Opened\r");
+        }
+
         private void Camera_Grab_Button_Click(object sender, RoutedEventArgs e)
         {
             if(CameraMod == 1)

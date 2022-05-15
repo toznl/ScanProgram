@@ -39,8 +39,6 @@ C:\Users\ever\Desktop\ScanProgram\ScanProgram\obj\Debug\netcoreapp3.0\ScanProgra
 E:\SynologyDrive_Kitech\01. 로봇그룹\2022 미술품과제\ScanProgram\ScanProgram\obj\Debug\netcoreapp3.0\ScanProgram.csproj.AssemblyReference.cache
 E:\SynologyDrive_Kitech\01. 로봇그룹\2022 미술품과제\ScanProgram\ScanProgram\obj\Debug\netcoreapp3.0\styles.baml
 E:\SynologyDrive_Kitech\01. 로봇그룹\2022 미술품과제\ScanProgram\ScanProgram\obj\Debug\netcoreapp3.0\ArtAdd.g.cs
-E:\SynologyDrive_Kitech\01. 로봇그룹\2022 미술품과제\ScanProgram\ScanProgram\obj\Debug\netcoreapp3.0\Calibration.g.cs
-E:\SynologyDrive_Kitech\01. 로봇그룹\2022 미술품과제\ScanProgram\ScanProgram\obj\Debug\netcoreapp3.0\FileSetting.g.cs
 E:\SynologyDrive_Kitech\01. 로봇그룹\2022 미술품과제\ScanProgram\ScanProgram\obj\Debug\netcoreapp3.0\MainWindow.g.cs
 E:\SynologyDrive_Kitech\01. 로봇그룹\2022 미술품과제\ScanProgram\ScanProgram\obj\Debug\netcoreapp3.0\App.g.cs
 E:\SynologyDrive_Kitech\01. 로봇그룹\2022 미술품과제\ScanProgram\ScanProgram\obj\Debug\netcoreapp3.0\ScanProgram_MarkupCompile.cache
@@ -64,8 +62,6 @@ E:\SynologyDrive_Kitech\01. 로봇그룹\2022 미술품과제\ScanProgram\ScanPr
 E:\SynologyDrive_Kitech\01. 로봇그룹\2022 미술품과제\ScanProgram\ScanProgram\bin\Debug\netcoreapp3.0\DALSA.SaperaLT.SapClassBasic.dll
 E:\SynologyDrive_Kitech\01. 로봇그룹\2022 미술품과제\ScanProgram\ScanProgram\obj\Debug\netcoreapp3.0\App.baml
 E:\SynologyDrive_Kitech\01. 로봇그룹\2022 미술품과제\ScanProgram\ScanProgram\obj\Debug\netcoreapp3.0\ArtAdd.baml
-E:\SynologyDrive_Kitech\01. 로봇그룹\2022 미술품과제\ScanProgram\ScanProgram\obj\Debug\netcoreapp3.0\Calibration.baml
-E:\SynologyDrive_Kitech\01. 로봇그룹\2022 미술품과제\ScanProgram\ScanProgram\obj\Debug\netcoreapp3.0\FileSetting.baml
 E:\SynologyDrive_Kitech\01. 로봇그룹\2022 미술품과제\ScanProgram\ScanProgram\obj\Debug\netcoreapp3.0\MainWindow.baml
 E:\SynologyDrive_Kitech\01. 로봇그룹\2022 미술품과제\ScanProgram\ScanProgram\obj\Debug\netcoreapp3.0\ScanProgram.g.resources
 E:\SynologyDrive_Kitech\01. 로봇그룹\2022 미술품과제\ScanProgram\ScanProgram\obj\Debug\netcoreapp3.0\ScanProgram.GeneratedMSBuildEditorConfig.editorconfig
@@ -74,3 +70,5 @@ E:\SynologyDrive_Kitech\01. 로봇그룹\2022 미술품과제\ScanProgram\ScanPr
 E:\SynologyDrive_Kitech\01. 로봇그룹\2022 미술품과제\ScanProgram\ScanProgram\obj\Debug\netcoreapp3.0\ScanProgram.csproj.CoreCompileInputs.cache
 E:\SynologyDrive_Kitech\01. 로봇그룹\2022 미술품과제\ScanProgram\ScanProgram\obj\Debug\netcoreapp3.0\ScanProgram.csproj.CopyComplete
 E:\SynologyDrive_Kitech\01. 로봇그룹\2022 미술품과제\ScanProgram\ScanProgram\obj\Debug\netcoreapp3.0\ScanProgram.genruntimeconfig.cache
+E:\SynologyDrive_Kitech\01. 로봇그룹\2022 미술품과제\ScanProgram\ScanProgram\obj\Debug\netcoreapp3.0\Calibration\WhiteBalance.g.cs
+E:\SynologyDrive_Kitech\01. 로봇그룹\2022 미술품과제\ScanProgram\ScanProgram\obj\Debug\netcoreapp3.0\Calibration\WhiteBalance.baml
