@@ -16,16 +16,12 @@ C:\Users\ever\Desktop\ScanProgram\ScanProgram\bin\Debug\netcoreapp3.0\DALSA.Sape
 C:\Users\ever\Desktop\ScanProgram\ScanProgram\obj\Debug\netcoreapp3.0\ScanProgram.csproj.AssemblyReference.cache
 C:\Users\ever\Desktop\ScanProgram\ScanProgram\obj\Debug\netcoreapp3.0\styles.baml
 C:\Users\ever\Desktop\ScanProgram\ScanProgram\obj\Debug\netcoreapp3.0\ArtAdd.g.cs
-C:\Users\ever\Desktop\ScanProgram\ScanProgram\obj\Debug\netcoreapp3.0\Calibration.g.cs
-C:\Users\ever\Desktop\ScanProgram\ScanProgram\obj\Debug\netcoreapp3.0\FileSetting.g.cs
 C:\Users\ever\Desktop\ScanProgram\ScanProgram\obj\Debug\netcoreapp3.0\MainWindow.g.cs
 C:\Users\ever\Desktop\ScanProgram\ScanProgram\obj\Debug\netcoreapp3.0\App.g.cs
 C:\Users\ever\Desktop\ScanProgram\ScanProgram\obj\Debug\netcoreapp3.0\ScanProgram_MarkupCompile.cache
 C:\Users\ever\Desktop\ScanProgram\ScanProgram\obj\Debug\netcoreapp3.0\ScanProgram_MarkupCompile.lref
 C:\Users\ever\Desktop\ScanProgram\ScanProgram\obj\Debug\netcoreapp3.0\App.baml
 C:\Users\ever\Desktop\ScanProgram\ScanProgram\obj\Debug\netcoreapp3.0\ArtAdd.baml
-C:\Users\ever\Desktop\ScanProgram\ScanProgram\obj\Debug\netcoreapp3.0\Calibration.baml
-C:\Users\ever\Desktop\ScanProgram\ScanProgram\obj\Debug\netcoreapp3.0\FileSetting.baml
 C:\Users\ever\Desktop\ScanProgram\ScanProgram\obj\Debug\netcoreapp3.0\MainWindow.baml
 C:\Users\ever\Desktop\ScanProgram\ScanProgram\obj\Debug\netcoreapp3.0\ScanProgram.g.resources
 C:\Users\ever\Desktop\ScanProgram\ScanProgram\obj\Debug\netcoreapp3.0\ScanProgram.GeneratedMSBuildEditorConfig.editorconfig
@@ -72,3 +68,11 @@ E:\SynologyDrive_Kitech\01. 로봇그룹\2022 미술품과제\ScanProgram\ScanPr
 E:\SynologyDrive_Kitech\01. 로봇그룹\2022 미술품과제\ScanProgram\ScanProgram\obj\Debug\netcoreapp3.0\ScanProgram.genruntimeconfig.cache
 E:\SynologyDrive_Kitech\01. 로봇그룹\2022 미술품과제\ScanProgram\ScanProgram\obj\Debug\netcoreapp3.0\Calibration\WhiteBalance.g.cs
 E:\SynologyDrive_Kitech\01. 로봇그룹\2022 미술품과제\ScanProgram\ScanProgram\obj\Debug\netcoreapp3.0\Calibration\WhiteBalance.baml
+C:\Users\ever\Desktop\ScanProgram\ScanProgram\obj\Debug\netcoreapp3.0\Calibration\Color.g.cs
+C:\Users\ever\Desktop\ScanProgram\ScanProgram\obj\Debug\netcoreapp3.0\Calibration\Lens.g.cs
+C:\Users\ever\Desktop\ScanProgram\ScanProgram\obj\Debug\netcoreapp3.0\Calibration\LightControl.g.cs
+C:\Users\ever\Desktop\ScanProgram\ScanProgram\obj\Debug\netcoreapp3.0\Calibration\WhiteBalance.g.cs
+C:\Users\ever\Desktop\ScanProgram\ScanProgram\obj\Debug\netcoreapp3.0\Calibration\Color.baml
+C:\Users\ever\Desktop\ScanProgram\ScanProgram\obj\Debug\netcoreapp3.0\Calibration\Lens.baml
+C:\Users\ever\Desktop\ScanProgram\ScanProgram\obj\Debug\netcoreapp3.0\Calibration\LightControl.baml
+C:\Users\ever\Desktop\ScanProgram\ScanProgram\obj\Debug\netcoreapp3.0\Calibration\WhiteBalance.baml

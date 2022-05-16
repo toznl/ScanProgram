@@ -9,3 +9,28 @@
  -   조명값 조절(센서값 받아와서 조정)
      WhiteBalance(Example에서 넣고), Lens 보정, 
      Vignette, Color보정
+
+220516
+Offset 현재 좌표로 Set할수 있는 버튼 생성
+
+Connect Disconnect 한 버튼으로 전환
+
+Image Calibration (WB, Light) -> 원본
+
+Camera Calibration 
+렌즈, 컬러, 비네트 -> 후처리 (원본 촬영 후 작업) -> 결과물
+
+원본, 결과물 두가지 폴더
+
+Calibration 됐다 안됐다 표시할수잇는 상태 버튼
+회색/그린/레드
+Inactive Active Error
+
+자동캡쳐 누르면 캡쳐중 으로 비활성화되면서 버튼 바뀌게
+자동캡쳐후에 캡쳐완료로 버튼 바뀜
+
+캡쳐 누른 후에 Timer 돌게 현재 시간/소요시간
+
+Joystick 연결상태
+
+연결상태창

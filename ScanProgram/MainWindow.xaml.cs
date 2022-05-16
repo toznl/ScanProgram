@@ -945,14 +945,12 @@ namespace ScanProgram
                 Radio_Camera_RGB_Camera.IsEnabled = false;
                 Radio_Camera_NIR_Camera.IsEnabled = false;
                 Radio_Camera_UV_Camera.IsEnabled = false;
+                Radio_Camera_SWIR_Camera.IsEnabled = false;
+
                 button_cali_WB.IsEnabled = true;
                 button_cali_Light.IsEnabled = true;
                 button_cali_Lens.IsEnabled = true;
                 button_cali_Color.IsEnabled = true;
-
-
-
-
             }
             else if (Radio_Camera_NIR_Camera.IsChecked == true)
             {
