@@ -11,7 +11,7 @@
      Vignette, Color보정
 
 220516
-Offset 현재 좌표로 Set할수 있는 버튼 생성
+Offset 현재 좌표로 Set할수 있는 버튼 생성(o)
 
 Connect Disconnect 한 버튼으로 전환
 

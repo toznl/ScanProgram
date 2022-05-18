@@ -526,12 +526,41 @@ namespace ScanProgram
 
         private void zeroReturn_Click(object sender, RoutedEventArgs e)
         {
-            MXP.MXP_HOME_OUT Out = new MXP.MXP_HOME_OUT { };
+            MXP.MXP_MOVEABSOLUTE_IN x = new MXP.MXP_MOVEABSOLUTE_IN { };
+            MXP.MXP_MOVEABSOLUTE_OUT y = new MXP.MXP_MOVEABSOLUTE_OUT { };
 
-            for (UInt32 i = 0; i < MaxAxis; i++)
-            {
-                Motion_Function.MXP_MC_Home(i, IndexCal((UInt32)MXP_MotionBlockIndex.mcHome) + i, MXP.MXP_BUFFERMODE_ENUM.MXP_ABORTING, false, Out);
-            }
+            Motion_Function.MXP_MC_MoveAbsolute(0,
+                                     0,
+                                     Convert.ToSingle(100),
+                                     Convert.ToSingle(offset_X.Text),
+                                     Convert.ToSingle(50),
+                                     Convert.ToSingle(50),
+                                     Convert.ToSingle(500),
+                                     MXP.MXP_BUFFERMODE_ENUM.MXP_ABORTING,
+                                     MXP.MXP_DIRECTION_ENUM.MXP_POSITIVE_DIRECTION,
+                                     false, y);
+
+            Motion_Function.MXP_MC_MoveAbsolute(1,
+                           1,
+                           Convert.ToSingle(100),
+                           Convert.ToSingle(offset_Y.Text),
+                           Convert.ToSingle(50),
+                           Convert.ToSingle(50),
+                           Convert.ToSingle(500),
+                           MXP.MXP_BUFFERMODE_ENUM.MXP_ABORTING,
+                           MXP.MXP_DIRECTION_ENUM.MXP_POSITIVE_DIRECTION,
+                           false, y);
+
+            Motion_Function.MXP_MC_MoveAbsolute(2,
+                          2,
+                          Convert.ToSingle(100),
+                          Convert.ToSingle(offset_Z.Text),
+                          Convert.ToSingle(50),
+                          Convert.ToSingle(50),
+                          Convert.ToSingle(500),
+                          MXP.MXP_BUFFERMODE_ENUM.MXP_ABORTING,
+                          MXP.MXP_DIRECTION_ENUM.MXP_POSITIVE_DIRECTION,
+                          false, y);
 
             log.AppendText("Zero Return\r");
 
@@ -576,9 +605,9 @@ namespace ScanProgram
         }
         public void GetCurrentPosition(object sender, EventArgs e)
         {
-            ActPositionX = Motion_Function.MXP_MC_ReadActualPosition(0).ToString("F2");
-            ActPositionY = Motion_Function.MXP_MC_ReadActualPosition(1).ToString("F2");
-            ActPositionZ = Motion_Function.MXP_MC_ReadActualPosition(2).ToString("F2");
+            ActPositionX = (Motion_Function.MXP_MC_ReadActualPosition(0)-Convert.ToSingle(offset_X.Text)).ToString("F2");
+            ActPositionY = (Motion_Function.MXP_MC_ReadActualPosition(1)-Convert.ToSingle(offset_Y.Text)).ToString("F2");
+            ActPositionZ = (Motion_Function.MXP_MC_ReadActualPosition(2)-Convert.ToSingle(offset_Z.Text)).ToString("F2");
 
             Dispatcher.Invoke(DispatcherPriority.Normal, new Action(delegate
                 {
@@ -791,7 +820,7 @@ namespace ScanProgram
             Motion_Function.MXP_MC_MoveAbsolute(0,
                                     0,
                                     Convert.ToSingle(100),
-                                    Convert.ToSingle(start_X.Text),
+                                    Convert.ToSingle(start_X.Text)+Convert.ToSingle(offset_X.Text),
                                     Convert.ToSingle(50),
                                     Convert.ToSingle(50),
                                     Convert.ToSingle(500),
@@ -801,7 +830,7 @@ namespace ScanProgram
             Motion_Function.MXP_MC_MoveAbsolute(1,
                                     1,
                                     Convert.ToSingle(100),
-                                    Convert.ToSingle(start_Y.Text),
+                                    Convert.ToSingle(start_Y.Text) + Convert.ToSingle(offset_Y.Text),
                                     Convert.ToSingle(50),
                                     Convert.ToSingle(50),
                                     Convert.ToSingle(500),
@@ -817,9 +846,9 @@ namespace ScanProgram
             status_y = Motion_Function.MXP_MC_ReadAxisStatus(1);
 
 
-            for (int positionY = Convert.ToInt32(start_Y.Text); positionY > Convert.ToInt32(finish_Y.Text); positionY = positionY - Convert.ToInt32(align_Y.Text))
+            for (float positionY = Convert.ToSingle(start_Y.Text) + Convert.ToSingle(offset_Y.Text); positionY > Convert.ToSingle(finish_Y.Text) + Convert.ToSingle(offset_Y.Text); positionY = positionY - Convert.ToSingle(align_Y.Text))
             {
-                for (int positionX = Convert.ToInt32(start_X.Text); positionX < Convert.ToInt32(finish_X.Text); positionX = positionX + Convert.ToInt32(align_X.Text))
+                for (float positionX = Convert.ToSingle(start_X.Text) + Convert.ToSingle(offset_X.Text); positionX < Convert.ToSingle(finish_X.Text) + Convert.ToSingle(offset_X.Text); positionX = positionX + Convert.ToSingle(align_X.Text))
                 {
                     Motion_Function.MXP_MC_MoveAbsolute(0,
                                    0,
@@ -843,15 +872,14 @@ namespace ScanProgram
                                    MXP.MXP_DIRECTION_ENUM.MXP_POSITIVE_DIRECTION,
                                    false, y);
 
-                    Thread.Sleep(2000);
-                    Thread.Sleep(3000);
+                 
                     if (CameraMod == 1)
                     {
                         cap.Snap(CountY, CountX, fileinfo_header);
                     }
                     else if (CameraMod == 2)
                     {
-                        cap_nir.Snap(CountY, CountX, fileinfo_header);
+                       
 
                     }
                     CountX++;
@@ -859,7 +887,7 @@ namespace ScanProgram
                 Motion_Function.MXP_MC_MoveAbsolute(0,
                                    0,
                                    Convert.ToSingle(100),
-                                   Convert.ToSingle(start_X.Text),
+                                   Convert.ToSingle(start_X.Text)+Convert.ToSingle(offset_X.Text),
                                    Convert.ToSingle(50),
                                    Convert.ToSingle(50),
                                    Convert.ToSingle(500),
@@ -868,14 +896,13 @@ namespace ScanProgram
                                    false, y);
                 CountX = 1;
                 CountY++;
-                Thread.Sleep(15000);
                 log.AppendText("AutoCapture Finished\r");
             }
         }
         private void auto_Capture_Click(object sender, RoutedEventArgs e)
         {
             grab_pic.Tick += new EventHandler(auto_capture_method);
-            grab_pic.Interval = TimeSpan.FromMilliseconds(2);
+            grab_pic.Interval = TimeSpan.FromMilliseconds(5000);
 
             grab_pic.Start();
         }
@@ -902,8 +929,8 @@ namespace ScanProgram
             MXP.MXP_MOVERELATIVE_IN x = new MXP.MXP_MOVERELATIVE_IN { };
             MXP.MXP_MOVERELATIVE_OUT y = new MXP.MXP_MOVERELATIVE_OUT { };
 
-            Motion_Function.MXP_MC_MoveRelative(0,
-                                    0,
+            Motion_Function.MXP_MC_MoveRelative(2,
+                                    2,
                                     Convert.ToSingle(100),
                                     Convert.ToSingle(-10),
                                     Convert.ToSingle(50),
@@ -918,8 +945,8 @@ namespace ScanProgram
             MXP.MXP_MOVERELATIVE_IN x = new MXP.MXP_MOVERELATIVE_IN { };
             MXP.MXP_MOVERELATIVE_OUT y = new MXP.MXP_MOVERELATIVE_OUT { };
 
-            Motion_Function.MXP_MC_MoveRelative(0,
-                                    0,
+            Motion_Function.MXP_MC_MoveRelative(2,
+                                    2,
                                     Convert.ToSingle(100),
                                     Convert.ToSingle(10),
                                     Convert.ToSingle(50),
@@ -940,8 +967,7 @@ namespace ScanProgram
             {
                 cap = new SaperaCapture();
                 CameraMod = 1;
-                cap.Grab();
-
+                //cap.RGB_Cameara_Init();
                 Radio_Camera_RGB_Camera.IsEnabled = false;
                 Radio_Camera_NIR_Camera.IsEnabled = false;
                 Radio_Camera_UV_Camera.IsEnabled = false;
@@ -1322,11 +1348,48 @@ namespace ScanProgram
             log.AppendText("Lens Calibration Window Opened\r");
         }
 
+        private void setOffsetCurrentPos_Click(object sender, RoutedEventArgs e)
+        {
+            offset_X.Text = Motion_Function.MXP_MC_ReadActualPosition(0).ToString("F2");
+            offset_Y.Text = Motion_Function.MXP_MC_ReadActualPosition(1).ToString("F2");
+            offset_Z.Text = Motion_Function.MXP_MC_ReadActualPosition(2).ToString("F2");
+
+            log.AppendText("Set Current Position to Offset\r");
+
+        }
+
+        private void home_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void offset_X_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
+        {
+
+        }
+
+        private void setStartPoint_Click(object sender, RoutedEventArgs e)
+        {
+            start_X.Text = (Motion_Function.MXP_MC_ReadActualPosition(0)-Convert.ToSingle(offset_X.Text)).ToString("F2");
+            start_Y.Text = (Motion_Function.MXP_MC_ReadActualPosition(1)-Convert.ToSingle(offset_Y.Text)).ToString("F2");
+            start_Z.Text = (Motion_Function.MXP_MC_ReadActualPosition(2)-Convert.ToSingle(offset_Z.Text)).ToString("F2");
+
+            log.AppendText("Set Current Position to StartPoint\r");
+        }
+
+        private void setEndPoint_Click(object sender, RoutedEventArgs e)
+        {
+            finish_X.Text = (Motion_Function.MXP_MC_ReadActualPosition(0) - Convert.ToSingle(offset_X.Text)).ToString("F2");
+            finish_Y.Text = (Motion_Function.MXP_MC_ReadActualPosition(1) - Convert.ToSingle(offset_Y.Text)).ToString("F2");
+            finish_Z.Text = (Motion_Function.MXP_MC_ReadActualPosition(2) - Convert.ToSingle(offset_Z.Text)).ToString("F2");
+
+            log.AppendText("Set Current Position to EndPoint\r");
+        }
+
         private void Camera_Grab_Button_Click(object sender, RoutedEventArgs e)
         {
             if(CameraMod == 1)
             {
-                cap.Grab();
             }
             if (CameraMod == 3)
             {

@@ -34,7 +34,7 @@
             <Button Content="원점이동"  x:Name="zeroReturn" HorizontalAlignment="Left" Margin="19,0,0,0" VerticalAlignment="Center" Height="18" Width="65" FontSize="10" Click="zeroReturn_Click"/>
 
             <Border BorderThickness="1" BorderBrush="Black" RenderTransformOrigin="0.425,0.479" Margin="372,0,28,250">
-                <Image x:Name="view_box" Margin="2,9,0,0" HorizontalAlignment="Left" Width="448" Height="309" VerticalAlignment="Top"/>
+                <Image  x:Name="view_box" Margin="2,9,0,0" HorizontalAlignment="Left" Width="448" Height="309" VerticalAlignment="Top"/>
             </Border>
 
             <!--로그 창-->
@@ -116,9 +116,9 @@
             <TextBlock HorizontalAlignment="Left" Margin="236,14,0,0" Text="X" TextWrapping="Wrap" VerticalAlignment="Top" FontSize="10"/>
             <TextBlock HorizontalAlignment="Left" Margin="236,29,0,0" Text="Y" TextWrapping="Wrap" VerticalAlignment="Top" FontSize="10"/>
             <TextBlock HorizontalAlignment="Left" Margin="236,44,0,0" Text="Z" TextWrapping="Wrap" VerticalAlignment="Top" FontSize="10"/>
-            <TextBox x:Name="offset_X" HorizontalAlignment="Left" Margin="243,14,0,0" Text="40" TextWrapping="Wrap" VerticalAlignment="Top" Width="33" Height="14" FontSize="10"/>
-            <TextBox x:Name="offset_Y" HorizontalAlignment="Left" Margin="243,29,0,0" Text="30" TextWrapping="Wrap" VerticalAlignment="Top" Width="33" Height="14" FontSize="10"/>
-            <TextBox x:Name="offset_Z" HorizontalAlignment="Left" Margin="243,44,0,0" Text="30" TextWrapping="Wrap" VerticalAlignment="Top" Width="33" Height="14" FontSize="10"/>
+            <TextBox x:Name="offset_X" HorizontalAlignment="Left" Margin="243,14,0,0" Text="0" TextWrapping="Wrap" VerticalAlignment="Top" Width="33" Height="14" FontSize="10" TextChanged="offset_X_TextChanged"/>
+            <TextBox x:Name="offset_Y" HorizontalAlignment="Left" Margin="243,29,0,0" Text="0" TextWrapping="Wrap" VerticalAlignment="Top" Width="33" Height="14" FontSize="10"/>
+            <TextBox x:Name="offset_Z" HorizontalAlignment="Left" Margin="243,44,0,0" Text="0" TextWrapping="Wrap" VerticalAlignment="Top" Width="33" Height="14" FontSize="10"/>
 
             <Button x:Name="Camera_Connect" Content="Connect" HorizontalAlignment="Left" Height="24" Margin="75,76,0,0" VerticalAlignment="Top" Width="65" Click="Camera_Connect_Button_Click"/>
             <Button x:Name="Camera_Grab" Content="Grab" HorizontalAlignment="Left" Height="24" Margin="75,102,0,0" VerticalAlignment="Top" Width="65" Click="Camera_Grab_Button_Click"/>
@@ -153,6 +153,9 @@
             <Button x:Name="button_cali_Light" Content="조명값 조절" HorizontalAlignment="Left" Height="24" Margin="19,204,0,0" VerticalAlignment="Top" Width="81" IsEnabled="False"/>
             <Button x:Name="button_cali_Lens" Content="렌즈 보정" HorizontalAlignment="Left" Height="24" Margin="19,230,0,0" VerticalAlignment="Top" Width="81" IsEnabled="False"/>
             <Button x:Name="button_cali_Color" Content="컬러 보정" HorizontalAlignment="Left" Height="24" Margin="110,178,0,0" VerticalAlignment="Top" Width="82" IsEnabled="False" />
+            <Button x:Name="setOffsetCurrentPos" Content="현재포지션 원점" HorizontalAlignment="Left" Margin="628,478,0,0" VerticalAlignment="Top" Click="setOffsetCurrentPos_Click"/>
+            <Button x:Name="setStartPoint" Content="현재포지션 시작" HorizontalAlignment="Left" Margin="630,503,0,0" VerticalAlignment="Top" Click="setStartPoint_Click"/>
+            <Button x:Name="setEndPoint" Content="현재포지션 끝점" HorizontalAlignment="Left" Margin="630,528,0,0" VerticalAlignment="Top" Click="setEndPoint_Click"/>
 
 
 

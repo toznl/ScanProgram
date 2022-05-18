@@ -1,8 +1,16 @@
 ﻿using DALSA.SaperaLT.SapClassBasic;
+using DALSA.SaperaLT.Examples.NET.Utils;
+
 using System;
 using System.ComponentModel;
-using System.Threading;
+using System.Windows.Threading;
+using System.Threading.Tasks;
+using System.Linq;
 using System.Drawing;
+using System.Windows.Forms;
+using System.Windows.Media.Imaging;
+
+using System.Drawing.Imaging;
 using OpenCvSharp;
 
 using System.IO;
@@ -13,6 +21,7 @@ namespace ScanProgram
     public class SaperaCapture : MainWindow
     {
         string serverName = "";
+        static float lastFrameRate = 0.0f;
         SapLocation location = null;
         SapAcqDevice device = null;
         SapTransfer transfer = null;
@@ -20,6 +29,8 @@ namespace ScanProgram
         SapView view = null;
         SapProcessing m_pro = null;
         SapColorConversion m_conv;
+        private static int picCountNum = 0; // Count the number of pictures collected, which is conducive to understanding m_Xfer.Sanp(15)The meaning of "15"
+
 
         // Create camera index parameter
         [Description("The index of the camera from which to acquire images.")]
@@ -147,19 +158,55 @@ namespace ScanProgram
 
         }
         // Callback function for when a frame is grabbed by the camera
-        private void Xfer_XferNotify(object sender, SapXferNotifyEventArgs args)
+        public void xfer_XferNotify(object sender, SapXferNotifyEventArgs args)
         {
-            
 
-            SaperaCapture demo = args.Context as SaperaCapture;
-            // If grabbing in trash buffer, do not display the image, update the
-            // appropriate number of frames on the status bar instead
-            if (args.Trash) { return; }
-            // Refresh view
-            else
+            // obtain m_Buffers As long as you know the address of the picture memory, you can actually have a variety of ways to get the picture (for example, convert to Bitmap)
+            IntPtr addr;
+            buffer.GetAddress(out addr);
+
+            // observation buffer Some attribute values of the picture in. The values in the comments after the statement are possible values
+            int count = buffer.Count; //2
+            SapFormat format = buffer.Format; //Uint8
+            double rate = buffer.FrameRate; //30.0,This value changes dynamically during continuous acquisition
+            int height = buffer.Height; //2800
+            int weight = buffer.Width; //4096
+            int pixd = buffer.PixelDepth; //8
+
+
+            // Read pictures from memory and convert them into bitmap Formats, creating palettes, printing to PictureBox
+            PixelFormat pf = PixelFormat.Format8bppIndexed;
+            Bitmap bmp = new Bitmap(weight, height, buffer.Pitch, pf, addr);
+            ColorPalette m_grayPalette;
+            using (Bitmap tempbmp = new Bitmap(1, 1, PixelFormat.Format8bppIndexed))
             {
-                m_pro.ExecuteNext();
+                m_grayPalette = tempbmp.Palette;
             }
+            for (int i = 0; i <= 255; i++)
+            {
+                m_grayPalette.Entries[i] = Color.FromArgb(i, i, i);
+            }
+
+            bmp.Palette = m_grayPalette;
+
+            Image img = Image.FromHbitmap(bmp.GetHbitmap());
+            Dispatcher.Invoke(DispatcherPriority.Normal, new Action(delegate
+            {
+                BitmapImage bitmapImage = new BitmapImage();
+
+                MemoryStream memory = new MemoryStream();
+                img.Save(memory, ImageFormat.Png);
+                bitmapImage.BeginInit();
+                bitmapImage.StreamSource = memory;
+                bitmapImage.EndInit();
+
+
+                view_box.Source = bitmapImage;
+            }));
+
+
+            //memory.Flush();
+
         }
 
         public SaperaCapture()
@@ -186,15 +233,11 @@ namespace ScanProgram
             buffer = new SapBufferWithTrash(3, device, SapBuffer.MemoryType.ScatterGather);
             // Initialize transfer between device and buffer
             transfer = new SapAcqDeviceToBuf(device, buffer);
-            
+
             m_conv = new SapColorConversion(device, buffer);
             m_pro = new SapMyProcessing(buffer, m_conv);
-            
 
-            // Initialize frame handler for end of frame events
-            transfer.Pairs[0].EventType = SapXferPair.XferEventType.EndOfFrame;
-            transfer.XferNotify += new SapXferNotifyHandler(Xfer_XferNotify);
-            transfer.XferNotifyContext = this;
+
 
 
             #region Create Objects
@@ -212,6 +255,11 @@ namespace ScanProgram
                 DestroyObjects();
                 return;
             }
+
+            transfer.XferNotify += new SapXferNotifyHandler(xfer_XferNotify);
+            transfer.XferNotifyContext = this;
+            transfer.Pairs[0].EventType = SapXferPair.XferEventType.EndOfFrame;
+            transfer.Pairs[0].Cycle = SapXferPair.CycleMode.NextWithTrash;
             // Enable/Disable bayer conversion
             // This call may require to modify the acquisition output format.
             // For this reason, it has to be done after creating the acquisition object but before
@@ -226,7 +274,7 @@ namespace ScanProgram
                 buffer.Clear();
             }
 
-       
+
 
             // creating the output buffer object.
             if (m_conv != null && !m_conv.Enable(true, false))
@@ -234,7 +282,7 @@ namespace ScanProgram
                 DestroyObjects();
                 return;
             }
-  
+
             // Create color conversion object
             if (m_conv != null && !m_conv.Initialized)
             {
@@ -288,23 +336,14 @@ namespace ScanProgram
 
                 m_pro.AutoEmpty = true;
             }
-            
-            
-
-
-
             #endregion
-
             m_conv.OutputFormat = SapFormat.RGB8888;
-            
-            
-
 
             try
             {
                 // Start grabbing frames
+                transfer.Grab();
                 
-
             }
             finally
             {
@@ -317,14 +356,13 @@ namespace ScanProgram
             string fileName;
             fileName = i.ToString("D2") + "_" + x.ToString("D2") + "_" + y;
             log.AppendText(serverName + location.ToString());
-            Thread.Sleep(3000);
             m_conv.OutputBuffer.Save(fileName + ".tif", "-format tif");
             log.AppendText(serverName);
         }
 
         public void Grab()
         {
-            
+
 
         }
         public void Kill_Object()
