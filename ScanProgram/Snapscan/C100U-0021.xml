@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<snapscan_system_description version="1">
+    <system_id>C100U-0021</system_id>
+	<camera_type>scd</camera_type>
+    <camera_board_id>28B702030283</camera_board_id>
+    <translation_stage_id>120010881</translation_stage_id>
+    <sensor_calibration_file>CDL640-LS100-1100_1700-12.12.3.11.xml</sensor_calibration_file>
+</snapscan_system_description>

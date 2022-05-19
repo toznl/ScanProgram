@@ -9,7 +9,8 @@
       "ScanProgram/1.0.0": {
         "dependencies": {
           "OpenCvSharp4": "4.5.2.20210404",
-          "DALSA.SaperaLT.SapClassBasic": "8.51.1.2023"
+          "DALSA.SaperaLT.SapClassBasic": "8.51.1.2023",
+          "scanSnapDll": "1.0.8174.29669"
         },
         "runtime": {
           "ScanProgram.dll": {}
@@ -93,6 +94,14 @@
             "fileVersion": "8.51.1.2023"
           }
         }
+      },
+      "scanSnapDll/1.0.8174.29669": {
+        "runtime": {
+          "scanSnapDll.dll": {
+            "assemblyVersion": "1.0.8174.29669",
+            "fileVersion": "0.0.0.0"
+          }
+        }
       }
     }
   },
@@ -145,6 +154,11 @@
       "hashPath": "system.runtime.compilerservices.unsafe.5.0.0.nupkg.sha512"
     },
     "DALSA.SaperaLT.SapClassBasic/8.51.1.2023": {
+      "type": "reference",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "scanSnapDll/1.0.8174.29669": {
       "type": "reference",
       "serviceable": false,
       "sha512": ""

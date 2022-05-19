@@ -1,19 +1,14 @@
-﻿using DALSA.SaperaLT.SapClassBasic;
-using DALSA.SaperaLT.Examples.NET.Utils;
-
-using System;
+﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
-using System.Windows.Threading;
-using System.Threading.Tasks;
-using System.Linq;
+using System.Data;
 using System.Drawing;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 using System.Windows.Forms;
-using System.Windows.Media.Imaging;
-
 using System.Drawing.Imaging;
-using OpenCvSharp;
-
-using System.IO;
+using DALSA.SaperaLT.SapClassBasic;
 
 
 namespace ScanProgram
@@ -21,7 +16,6 @@ namespace ScanProgram
     public class SaperaCapture : MainWindow
     {
         string serverName = "";
-        static float lastFrameRate = 0.0f;
         SapLocation location = null;
         SapAcqDevice device = null;
         SapTransfer transfer = null;
@@ -29,8 +23,7 @@ namespace ScanProgram
         SapView view = null;
         SapProcessing m_pro = null;
         SapColorConversion m_conv;
-        private static int picCountNum = 0; // Count the number of pictures collected, which is conducive to understanding m_Xfer.Sanp(15)The meaning of "15"
-
+        public Image img = null;
 
         // Create camera index parameter
         [Description("The index of the camera from which to acquire images.")]
@@ -158,10 +151,21 @@ namespace ScanProgram
 
         }
         // Callback function for when a frame is grabbed by the camera
-        public void xfer_XferNotify(object sender, SapXferNotifyEventArgs args)
+        private void Xfer_XferNotify(object sender, SapXferNotifyEventArgs args)
         {
+            SaperaCapture demo = args.Context as SaperaCapture;
+            // If grabbing in trash buffer, do not display the image, update the
+            // appropriate number of frames on the status bar instead
+            if (args.Trash) { return; }
+            // Refresh view
+            else
+            {
+                m_pro.ExecuteNext();
+            }
+            // First, judge whether this frame is an abandoned frame. If so, return immediately and wait for the next frame (but this sentence sometimes) m_Xfer.Snap(n)It will cause frame loss, you can comment it out (try it)
+            if (args.Trash) return;
 
-            // obtain m_Buffers As long as you know the address of the picture memory, you can actually have a variety of ways to get the picture (for example, convert to Bitmap)
+            // obtain buffer As long as you know the address of the picture memory, you can actually have a variety of ways to get the picture (for example, convert to Bitmap)
             IntPtr addr;
             buffer.GetAddress(out addr);
 
@@ -173,7 +177,7 @@ namespace ScanProgram
             int weight = buffer.Width; //4096
             int pixd = buffer.PixelDepth; //8
 
-
+            
             // Read pictures from memory and convert them into bitmap Formats, creating palettes, printing to PictureBox
             PixelFormat pf = PixelFormat.Format8bppIndexed;
             Bitmap bmp = new Bitmap(weight, height, buffer.Pitch, pf, addr);
@@ -189,24 +193,7 @@ namespace ScanProgram
 
             bmp.Palette = m_grayPalette;
 
-            Image img = Image.FromHbitmap(bmp.GetHbitmap());
-            Dispatcher.Invoke(DispatcherPriority.Normal, new Action(delegate
-            {
-                BitmapImage bitmapImage = new BitmapImage();
-
-                MemoryStream memory = new MemoryStream();
-                img.Save(memory, ImageFormat.Png);
-                bitmapImage.BeginInit();
-                bitmapImage.StreamSource = memory;
-                bitmapImage.EndInit();
-
-
-                view_box.Source = bitmapImage;
-            }));
-
-
-            //memory.Flush();
-
+            img = (Image)bmp;
         }
 
         public SaperaCapture()
@@ -236,9 +223,12 @@ namespace ScanProgram
 
             m_conv = new SapColorConversion(device, buffer);
             m_pro = new SapMyProcessing(buffer, m_conv);
+            //view = new SapView(m_conv.OutputBuffer);
 
-
-
+            // Initialize frame handler for end of frame events
+            transfer.Pairs[0].EventType = SapXferPair.XferEventType.EndOfFrame;
+            transfer.XferNotify += new SapXferNotifyHandler(Xfer_XferNotify);
+            transfer.XferNotifyContext = this;
 
             #region Create Objects
             // Check if device was created
@@ -248,21 +238,21 @@ namespace ScanProgram
                 location.Dispose();
                 return;
             }
-
             // Check if software color conversion is supported
             if (device.RawBayerOutput == false)
             {
                 DestroyObjects();
                 return;
             }
-
-            transfer.XferNotify += new SapXferNotifyHandler(xfer_XferNotify);
-            transfer.XferNotifyContext = this;
-            transfer.Pairs[0].EventType = SapXferPair.XferEventType.EndOfFrame;
-            transfer.Pairs[0].Cycle = SapXferPair.CycleMode.NextWithTrash;
             // Enable/Disable bayer conversion
             // This call may require to modify the acquisition output format.
             // For this reason, it has to be done after creating the acquisition object but before
+            // creating the output buffer object.
+            if (m_conv != null && !m_conv.Enable(true, false))
+            {
+                DestroyObjects();
+                return;
+            }
             // Create buffer object
             if (buffer != null && !buffer.Initialized)
             {
@@ -273,16 +263,6 @@ namespace ScanProgram
                 }
                 buffer.Clear();
             }
-
-
-
-            // creating the output buffer object.
-            if (m_conv != null && !m_conv.Enable(true, false))
-            {
-                DestroyObjects();
-                return;
-            }
-
             // Create color conversion object
             if (m_conv != null && !m_conv.Initialized)
             {
@@ -313,8 +293,6 @@ namespace ScanProgram
                     return;
                 }
             }
-
-
             // Create transfer object
             if (transfer != null && !transfer.Initialized)
             {
@@ -337,18 +315,14 @@ namespace ScanProgram
                 m_pro.AutoEmpty = true;
             }
             #endregion
+
             m_conv.OutputFormat = SapFormat.RGB8888;
 
-            try
-            {
+
                 // Start grabbing frames
                 transfer.Grab();
-                
-            }
-            finally
-            {
-                //Destroy objects
-            }
+           
+
         }
 
         public void Snap(int i, int x, string y)
@@ -363,13 +337,6 @@ namespace ScanProgram
         public void Grab()
         {
 
-
         }
-        public void Kill_Object()
-        {
-            DisposeObjects();
-            DestroyObjects();
-        }
-
     }
 }

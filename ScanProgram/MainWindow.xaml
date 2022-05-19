@@ -125,7 +125,7 @@
             <Button x:Name="Camera_Disconnect" Content="Disconnect" HorizontalAlignment="Left" Height="24" Margin="75,128,0,0" VerticalAlignment="Top" Width="65" Click="Camera_Disconnect_Button_Click"/>
 
             <RadioButton GroupName="Radio_Camera" x:Name="Radio_Camera_RGB_Camera" Content="RGB" HorizontalAlignment="Left" Margin="19,85,0,0" VerticalAlignment="Top" />
-            <RadioButton GroupName="Radio_Camera" Content="VNIR" x:Name="Radio_Camera_NIR_Camera" HorizontalAlignment="Left" Margin="19,114,0,0" VerticalAlignment="Top"/>
+            <RadioButton GroupName="Radio_Camera" Content="VNIR" x:Name="Radio_Camera_VNIR_Camera" HorizontalAlignment="Left" Margin="19,114,0,0" VerticalAlignment="Top"/>
             <RadioButton GroupName="Radio_Camera" Content="UV" x:Name="Radio_Camera_UV_Camera" HorizontalAlignment="Left" Margin="19,100,0,0" VerticalAlignment="Top"/>
             <RadioButton GroupName="Radio_Camera" Content="SWIR" x:Name="Radio_Camera_SWIR_Camera" HorizontalAlignment="Left" Margin="19,129,0,0" VerticalAlignment="Top"/>
             <TextBlock HorizontalAlignment="Left" Margin="314,13,0,0" Text="X" TextWrapping="Wrap" VerticalAlignment="Top" FontSize="10"/>

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Text;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Windows;
@@ -11,11 +12,11 @@ using System.Windows.Media.Imaging;
 using System.Windows.Interop;
 
 using System.IO;
-    
+
 
 using PCOConvertStructures;
 using PCOConvertDll;
-
+using scanSnapDll;
 
 namespace ScanProgram
 {
@@ -34,7 +35,7 @@ namespace ScanProgram
         private DispatcherTimer snap_pic = new DispatcherTimer();
         private DispatcherTimer grab_pic = new DispatcherTimer();
         public System.Threading.Timer grabTimer;
-
+        public int grab_Init_Counter = 0;
         public int camera_Mode;
         public string fileinfo_header;
         public string fileinfo_filepath;
@@ -43,6 +44,7 @@ namespace ScanProgram
         public float final_Start_Y;
         public float final_Finish_X;
         public float final_Finish_Y;
+
 
         public int CameraMod;
         private System.ComponentModel.Container components = null;
@@ -449,10 +451,12 @@ namespace ScanProgram
             public static extern int PCO_EnableDialogCam(IntPtr hCamDialog, bool bEnable);
         };
         #endregion
+        BitmapImage bitmapImage = new BitmapImage();
 
+        MemoryStream memory = new MemoryStream();
         void calibration_Click(object sender, RoutedEventArgs e)
         {
-  
+
         }
         public UInt32 IndexCal(UInt32 Index)
         {
@@ -605,9 +609,9 @@ namespace ScanProgram
         }
         public void GetCurrentPosition(object sender, EventArgs e)
         {
-            ActPositionX = (Motion_Function.MXP_MC_ReadActualPosition(0)-Convert.ToSingle(offset_X.Text)).ToString("F2");
-            ActPositionY = (Motion_Function.MXP_MC_ReadActualPosition(1)-Convert.ToSingle(offset_Y.Text)).ToString("F2");
-            ActPositionZ = (Motion_Function.MXP_MC_ReadActualPosition(2)-Convert.ToSingle(offset_Z.Text)).ToString("F2");
+            ActPositionX = (Motion_Function.MXP_MC_ReadActualPosition(0) - Convert.ToSingle(offset_X.Text)).ToString("F2");
+            ActPositionY = (Motion_Function.MXP_MC_ReadActualPosition(1) - Convert.ToSingle(offset_Y.Text)).ToString("F2");
+            ActPositionZ = (Motion_Function.MXP_MC_ReadActualPosition(2) - Convert.ToSingle(offset_Z.Text)).ToString("F2");
 
             Dispatcher.Invoke(DispatcherPriority.Normal, new Action(delegate
                 {
@@ -820,7 +824,7 @@ namespace ScanProgram
             Motion_Function.MXP_MC_MoveAbsolute(0,
                                     0,
                                     Convert.ToSingle(100),
-                                    Convert.ToSingle(start_X.Text)+Convert.ToSingle(offset_X.Text),
+                                    Convert.ToSingle(start_X.Text) + Convert.ToSingle(offset_X.Text),
                                     Convert.ToSingle(50),
                                     Convert.ToSingle(50),
                                     Convert.ToSingle(500),
@@ -872,14 +876,14 @@ namespace ScanProgram
                                    MXP.MXP_DIRECTION_ENUM.MXP_POSITIVE_DIRECTION,
                                    false, y);
 
-                 
+
                     if (CameraMod == 1)
                     {
                         cap.Snap(CountY, CountX, fileinfo_header);
                     }
                     else if (CameraMod == 2)
                     {
-                       
+
 
                     }
                     CountX++;
@@ -887,7 +891,7 @@ namespace ScanProgram
                 Motion_Function.MXP_MC_MoveAbsolute(0,
                                    0,
                                    Convert.ToSingle(100),
-                                   Convert.ToSingle(start_X.Text)+Convert.ToSingle(offset_X.Text),
+                                   Convert.ToSingle(start_X.Text) + Convert.ToSingle(offset_X.Text),
                                    Convert.ToSingle(50),
                                    Convert.ToSingle(50),
                                    Convert.ToSingle(500),
@@ -956,20 +960,52 @@ namespace ScanProgram
                                     false, y);
         }
 
+        private void grabRGB(object sender, EventArgs e)
+        {
+            try
+            {
+                if (cap.img != null)
+                {
+                    cap.img.Save(memory, ImageFormat.Png);
 
+                    using (MemoryStream memory = new MemoryStream())
+                    {
+                        cap.img.Save(memory, System.Drawing.Imaging.ImageFormat.Bmp);
+                        memory.Position = 0;
+                        BitmapImage bitmapImage = new BitmapImage();
+                        bitmapImage.BeginInit();
+                        bitmapImage.StreamSource = memory;
+                        bitmapImage.CacheOption = BitmapCacheOption.OnLoad;
+                        bitmapImage.EndInit();
+                        view_box.Source = bitmapImage;
+                    }
+                }
+
+            }
+            catch (Exception ex)
+            {
+                log.AppendText(ex.ToString());
+            }
+        }
+
+        private void grabUV(object sender, EventArgs e)
+        {
+
+        }
 
         private void Camera_Connect_Button_Click(object sender, RoutedEventArgs e)
         {
-            
-            
-
             if (Radio_Camera_RGB_Camera.IsChecked == true)
             {
-                cap = new SaperaCapture();
+                if (cap == null)
+                {
+                    cap = new SaperaCapture();
+                }
+
                 CameraMod = 1;
                 //cap.RGB_Cameara_Init();
                 Radio_Camera_RGB_Camera.IsEnabled = false;
-                Radio_Camera_NIR_Camera.IsEnabled = false;
+                Radio_Camera_VNIR_Camera.IsEnabled = false;
                 Radio_Camera_UV_Camera.IsEnabled = false;
                 Radio_Camera_SWIR_Camera.IsEnabled = false;
 
@@ -977,17 +1013,42 @@ namespace ScanProgram
                 button_cali_Light.IsEnabled = true;
                 button_cali_Lens.IsEnabled = true;
                 button_cali_Color.IsEnabled = true;
+
+                snap_pic.Tick += new EventHandler(grabRGB);
+                snap_pic.Interval = TimeSpan.FromMilliseconds(100);
+                snap_pic.Start();
+
             }
-            else if (Radio_Camera_NIR_Camera.IsChecked == true)
+            else if (Radio_Camera_VNIR_Camera.IsChecked == true)
             {
                 CameraMod = 2;
+                //SnapScan snapScan = new SnapScan();
+                string path_snapscan_file = Environment.CurrentDirectory + "\\Snapscan\\C100U-0021.xml";
+                byte[] bytes = Encoding.ASCII.GetBytes(path_snapscan_file);
+                sbyte[] sbytes = new sbyte[bytes.Length];
+                unsafe
+                {
+                    fixed (sbyte* sbyte_point = sbytes)
+                    {
+                        sbyte* sbyte_pointer = sbyte_point;
+                        // snapScan.Example_CubeAcquisition_MinimumRequired(sbyte_point);
+                    }
+
+                }
+
+
+
+
+
+
             }
             else if (Radio_Camera_UV_Camera.IsChecked == true)
             {
                 CameraMod = 3;
                 Radio_Camera_RGB_Camera.IsEnabled = false;
-                Radio_Camera_NIR_Camera.IsEnabled = false;
+                Radio_Camera_VNIR_Camera.IsEnabled = false;
                 Radio_Camera_UV_Camera.IsEnabled = false;
+                Radio_Camera_SWIR_Camera.IsEnabled = false;
             }
             else
             {
@@ -1001,7 +1062,6 @@ namespace ScanProgram
 
             else if (cap == null && CameraMod == 2)
             {
-                cap_nir = new SaperaCapture_Nir();
             }
             else if (cap == null && CameraMod == 3)
             {
@@ -1021,7 +1081,7 @@ namespace ScanProgram
                 if (err == 0)
                 {
                     UInt16 wrecstate = 0;
-             
+
 
                     PCO_SDK_LibWrapper.PCO_GetRecordingState(cameraHandle, ref wrecstate);
                     if (wrecstate != 0)
@@ -1079,7 +1139,7 @@ namespace ScanProgram
 
                 Setupconvert();
 
-                
+
 
                 UInt32 dwWarn = 0, dwError = 0, dwStatus = 0;
                 UInt16 width = 0;
@@ -1106,15 +1166,16 @@ namespace ScanProgram
 
         private void Camera_Disconnect_Button_Click(object sender, RoutedEventArgs e)
         {
-            if(CameraMod == 1)
+            if (CameraMod == 1)
             {
                 //cap.Kill_Object();
             }
-            else if(CameraMod == 3){
+            else if (CameraMod == 3)
+            {
 
             }
             Radio_Camera_RGB_Camera.IsEnabled = true;
-            Radio_Camera_NIR_Camera.IsEnabled = true;
+            Radio_Camera_VNIR_Camera.IsEnabled = true;
             Radio_Camera_UV_Camera.IsEnabled = true;
 
         }
@@ -1163,13 +1224,13 @@ namespace ScanProgram
         }
         public void Grab_Timer()
         {
-            
+
         }
         private void UV_Camera_Grab()
         {
             Dispatcher.Invoke(DispatcherPriority.Normal, new Action(delegate
             {
-                
+
                 int err = 0;
                 int size;
                 System.IntPtr evhandle;
@@ -1302,11 +1363,11 @@ namespace ScanProgram
                     bitmapImage.EndInit();
                     view_box.Source = bitmapImage;
                 }
-                
+
             }));
 
 
-    }
+        }
 
         private void cali_WB_Click(object sender, RoutedEventArgs e)
         {
@@ -1370,9 +1431,9 @@ namespace ScanProgram
 
         private void setStartPoint_Click(object sender, RoutedEventArgs e)
         {
-            start_X.Text = (Motion_Function.MXP_MC_ReadActualPosition(0)-Convert.ToSingle(offset_X.Text)).ToString("F2");
-            start_Y.Text = (Motion_Function.MXP_MC_ReadActualPosition(1)-Convert.ToSingle(offset_Y.Text)).ToString("F2");
-            start_Z.Text = (Motion_Function.MXP_MC_ReadActualPosition(2)-Convert.ToSingle(offset_Z.Text)).ToString("F2");
+            start_X.Text = (Motion_Function.MXP_MC_ReadActualPosition(0) - Convert.ToSingle(offset_X.Text)).ToString("F2");
+            start_Y.Text = (Motion_Function.MXP_MC_ReadActualPosition(1) - Convert.ToSingle(offset_Y.Text)).ToString("F2");
+            start_Z.Text = (Motion_Function.MXP_MC_ReadActualPosition(2) - Convert.ToSingle(offset_Z.Text)).ToString("F2");
 
             log.AppendText("Set Current Position to StartPoint\r");
         }
@@ -1388,16 +1449,19 @@ namespace ScanProgram
 
         private void Camera_Grab_Button_Click(object sender, RoutedEventArgs e)
         {
-            if(CameraMod == 1)
+            if (CameraMod == 1)
             {
+                cap.Snap(1, 1, "xx");
             }
             if (CameraMod == 3)
             {
-                Thread UV_Grab = new Thread (new ThreadStart(UV_Camera_Grab));
+                Thread UV_Grab = new Thread(new ThreadStart(UV_Camera_Grab));
                 Thread Grab_Checker = new Thread(new ThreadStart(Grab_Timer));
                 Grab_Checker.Start();
                 UV_Grab.Start();
             }
         }
+
+
     }
 }

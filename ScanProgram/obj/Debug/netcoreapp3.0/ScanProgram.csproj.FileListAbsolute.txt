@@ -76,3 +76,4 @@ C:\Users\ever\Desktop\ScanProgram\ScanProgram\obj\Debug\netcoreapp3.0\Calibratio
 C:\Users\ever\Desktop\ScanProgram\ScanProgram\obj\Debug\netcoreapp3.0\Calibration\Lens.baml
 C:\Users\ever\Desktop\ScanProgram\ScanProgram\obj\Debug\netcoreapp3.0\Calibration\LightControl.baml
 C:\Users\ever\Desktop\ScanProgram\ScanProgram\obj\Debug\netcoreapp3.0\Calibration\WhiteBalance.baml
+C:\Users\ever\Desktop\ScanProgram\ScanProgram\bin\Debug\netcoreapp3.0\scanSnapDll.dll
