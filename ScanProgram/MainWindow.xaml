@@ -104,21 +104,21 @@
             <TextBox x:Name="finish_X" HorizontalAlignment="Left" Margin="192,290,0,0" Text="0" TextWrapping="Wrap" VerticalAlignment="Top" Width="33" Height="14" TextBlock.FontSize="10"/>
             <TextBox x:Name="finish_Y" HorizontalAlignment="Left" Margin="192,304,0,0" Text="0" TextWrapping="Wrap" VerticalAlignment="Top" Width="33" Height="14" TextBlock.FontSize="10"/>
             <TextBox x:Name="finish_Z" HorizontalAlignment="Left" Margin="192,320,0,0" Text="0" TextWrapping="Wrap" VerticalAlignment="Top" Width="33" Height="14" TextBlock.FontSize="10"/>
-            <TextBox x:Name="align_X" HorizontalAlignment="Left" Margin="322,13,0,0" Text="40" TextWrapping="Wrap" VerticalAlignment="Top" Width="33" Height="14" TextBlock.FontSize="10"/>
-            <TextBox x:Name="align_Y" HorizontalAlignment="Left" Margin="322,28,0,0" Text="30" TextWrapping="Wrap" VerticalAlignment="Top" Width="33" Height="14" TextBlock.FontSize="10"/>
-            <TextBox x:Name="align_Z" HorizontalAlignment="Left" Margin="322,43,0,0" Text="0" TextWrapping="Wrap" VerticalAlignment="Top" Width="33" Height="14" TextBlock.FontSize="10"/>
+            <TextBox x:Name="align_X" HorizontalAlignment="Left" Margin="277,0,0,0" Text="40" TextWrapping="Wrap" VerticalAlignment="Center" Width="32" Height="14" TextBlock.FontSize="10"/>
+            <TextBox x:Name="align_Y" HorizontalAlignment="Left" Margin="277,306,0,0" Text="30" TextWrapping="Wrap" VerticalAlignment="Top" Width="32" Height="14" TextBlock.FontSize="10"/>
+            <TextBox x:Name="align_Z" HorizontalAlignment="Left" Margin="277,321,0,0" Text="0" TextWrapping="Wrap" VerticalAlignment="Top" Width="32" Height="14" TextBlock.FontSize="10"/>
             <Button Content="셋팅저장"  x:Name="save_Setting" HorizontalAlignment="Left" Margin="126,343,0,0" VerticalAlignment="Top" Height="16" Width="66" RenderTransformOrigin="0.308,-0.065" FontSize="10" Click="save_Setting_Click"/>
             <Button Content="작품 정보"  x:Name="art_Add" HorizontalAlignment="Left" Margin="283,435,0,0" VerticalAlignment="Top" Height="20" Width="77" RenderTransformOrigin="0.308,-0.065" FontSize="10" Click="art_Add_Click"/>
             <Button Content="자동캡쳐"  x:Name="auto_Capture" HorizontalAlignment="Left" Margin="19,312,0,0" VerticalAlignment="Top" Height="44" Width="65" RenderTransformOrigin="0.308,-0.065" FontSize="10" Click="auto_Capture_Click"/>
 
             <TextBlock x:Name="currentPosition" HorizontalAlignment="Left" Text="Current Position will be showed" TextWrapping="Wrap" VerticalAlignment="Top" Height="33" Width="290" FontSize="20" Margin="485,317,0,0"/>
 
-            <TextBlock HorizontalAlignment="Left" Margin="236,14,0,0" Text="X" TextWrapping="Wrap" VerticalAlignment="Top" FontSize="10"/>
-            <TextBlock HorizontalAlignment="Left" Margin="236,29,0,0" Text="Y" TextWrapping="Wrap" VerticalAlignment="Top" FontSize="10"/>
-            <TextBlock HorizontalAlignment="Left" Margin="236,44,0,0" Text="Z" TextWrapping="Wrap" VerticalAlignment="Top" FontSize="10"/>
-            <TextBox x:Name="offset_X" HorizontalAlignment="Left" Margin="243,14,0,0" Text="0" TextWrapping="Wrap" VerticalAlignment="Top" Width="33" Height="14" FontSize="10" TextChanged="offset_X_TextChanged"/>
-            <TextBox x:Name="offset_Y" HorizontalAlignment="Left" Margin="243,29,0,0" Text="0" TextWrapping="Wrap" VerticalAlignment="Top" Width="33" Height="14" FontSize="10"/>
-            <TextBox x:Name="offset_Z" HorizontalAlignment="Left" Margin="243,44,0,0" Text="0" TextWrapping="Wrap" VerticalAlignment="Top" Width="33" Height="14" FontSize="10"/>
+            <TextBlock HorizontalAlignment="Left" Margin="250,16,0,0" Text="X" TextWrapping="Wrap" VerticalAlignment="Top" FontSize="10"/>
+            <TextBlock HorizontalAlignment="Left" Margin="250,30,0,0" Text="Y" TextWrapping="Wrap" VerticalAlignment="Top" FontSize="10"/>
+            <TextBlock HorizontalAlignment="Left" Margin="250,45,0,0" Text="Z" TextWrapping="Wrap" VerticalAlignment="Top" FontSize="10"/>
+            <TextBox x:Name="offset_X" HorizontalAlignment="Left" Margin="258,15,0,0" Text="0" TextWrapping="Wrap" VerticalAlignment="Top" Width="32" Height="14" FontSize="10" TextChanged="offset_X_TextChanged"/>
+            <TextBox x:Name="offset_Y" HorizontalAlignment="Left" Margin="258,30,0,0" Text="0" TextWrapping="Wrap" VerticalAlignment="Top" Width="32" Height="14" FontSize="10"/>
+            <TextBox x:Name="offset_Z" HorizontalAlignment="Left" Margin="258,45,0,0" Text="0" TextWrapping="Wrap" VerticalAlignment="Top" Width="32" Height="14" FontSize="10"/>
 
             <Button x:Name="Camera_Connect" Content="Connect" HorizontalAlignment="Left" Height="24" Margin="75,76,0,0" VerticalAlignment="Top" Width="65" Click="Camera_Connect_Button_Click"/>
             <Button x:Name="Camera_Grab" Content="Grab" HorizontalAlignment="Left" Height="24" Margin="75,102,0,0" VerticalAlignment="Top" Width="65" Click="Camera_Grab_Button_Click"/>
@@ -128,9 +128,9 @@
             <RadioButton GroupName="Radio_Camera" Content="VNIR" x:Name="Radio_Camera_VNIR_Camera" HorizontalAlignment="Left" Margin="19,114,0,0" VerticalAlignment="Top"/>
             <RadioButton GroupName="Radio_Camera" Content="UV" x:Name="Radio_Camera_UV_Camera" HorizontalAlignment="Left" Margin="19,100,0,0" VerticalAlignment="Top"/>
             <RadioButton GroupName="Radio_Camera" Content="SWIR" x:Name="Radio_Camera_SWIR_Camera" HorizontalAlignment="Left" Margin="19,129,0,0" VerticalAlignment="Top"/>
-            <TextBlock HorizontalAlignment="Left" Margin="314,13,0,0" Text="X" TextWrapping="Wrap" VerticalAlignment="Top" FontSize="10"/>
-            <TextBlock HorizontalAlignment="Left" Margin="314,28,0,0" Text="Y" TextWrapping="Wrap" VerticalAlignment="Top" FontSize="10"/>
-            <TextBlock HorizontalAlignment="Left" Margin="314,43,0,0" Text="Z" TextWrapping="Wrap" VerticalAlignment="Top" FontSize="10"/>
+            <TextBlock HorizontalAlignment="Left" Margin="269,0,0,0" Text="X" TextWrapping="Wrap" VerticalAlignment="Center" FontSize="10"/>
+            <TextBlock HorizontalAlignment="Left" Margin="269,306,0,0" Text="Y" TextWrapping="Wrap" VerticalAlignment="Top" FontSize="10"/>
+            <TextBlock HorizontalAlignment="Left" Margin="269,321,0,0" Text="Z" TextWrapping="Wrap" VerticalAlignment="Top" FontSize="10"/>
             <TextBlock HorizontalAlignment="Left" Margin="118,290,0,0" Text="X" TextWrapping="Wrap" VerticalAlignment="Top" FontSize="10"/>
             <TextBlock HorizontalAlignment="Left" Margin="118,304,0,0" Text="Y" TextWrapping="Wrap" VerticalAlignment="Top" FontSize="10" RenderTransformOrigin="13.491,3.462"/>
             <TextBlock HorizontalAlignment="Left" Margin="118,320,0,0" Text="Z" TextWrapping="Wrap" VerticalAlignment="Top" FontSize="10" RenderTransformOrigin="13.491,3.462"/>
@@ -139,23 +139,23 @@
             <TextBlock HorizontalAlignment="Left" Margin="185,320,0,0" Text="Z" TextWrapping="Wrap" VerticalAlignment="Top" FontSize="10"/>
             <TextBlock HorizontalAlignment="Left" Margin="93,304,0,0" Text="Start" TextWrapping="Wrap" VerticalAlignment="Top" FontSize="10"/>
             <TextBlock HorizontalAlignment="Left" Margin="163,304,0,0" TextWrapping="Wrap" VerticalAlignment="Top" FontSize="10"><Run Language="ko-kr" Text="End"/></TextBlock>
-            <TextBlock HorizontalAlignment="Left" Margin="205,29,0,0" Text="Offset" TextWrapping="Wrap" VerticalAlignment="Top" FontSize="10"/>
-            <TextBlock HorizontalAlignment="Left" Margin="286,28,0,0" Text="Align" TextWrapping="Wrap" VerticalAlignment="Top" FontSize="10"/>
-            <TextBox x:Name="align_X_Manual" HorizontalAlignment="Left" Margin="761,466,0,0" Text="0" TextWrapping="Wrap" VerticalAlignment="Top" Width="33" Height="14" TextBlock.FontSize="10"/>
-            <TextBox x:Name="align_Y_Manual" HorizontalAlignment="Left" Margin="761,481,0,0" Text="0" TextWrapping="Wrap" VerticalAlignment="Top" Width="33" Height="14" TextBlock.FontSize="10"/>
-            <TextBox x:Name="align_Z_Manual" HorizontalAlignment="Left" Margin="761,496,0,0" Text="0" TextWrapping="Wrap" VerticalAlignment="Top" Width="33" Height="14" TextBlock.FontSize="10"/>
-            <TextBlock HorizontalAlignment="Left" Margin="753,466,0,0" Text="X" TextWrapping="Wrap" VerticalAlignment="Top" FontSize="10"/>
-            <TextBlock HorizontalAlignment="Left" Margin="753,481,0,0" Text="Y" TextWrapping="Wrap" VerticalAlignment="Top" FontSize="10"/>
-            <TextBlock HorizontalAlignment="Left" Margin="753,496,0,0" Text="Z" TextWrapping="Wrap" VerticalAlignment="Top" FontSize="10"/>
-            <TextBlock HorizontalAlignment="Left" Margin="725,481,0,0" Text="Align" TextWrapping="Wrap" VerticalAlignment="Top" FontSize="10"/>
+            <TextBlock HorizontalAlignment="Left" Margin="220,30,0,0" Text="Offset" TextWrapping="Wrap" VerticalAlignment="Top" FontSize="10"/>
+            <TextBlock HorizontalAlignment="Left" Margin="241,306,0,0" Text="Align" TextWrapping="Wrap" VerticalAlignment="Top" FontSize="10"/>
+            <TextBox x:Name="align_X_Manual" HorizontalAlignment="Left" Margin="797,461,0,0" Text="0" TextWrapping="Wrap" VerticalAlignment="Top" Width="33" Height="14" TextBlock.FontSize="10"/>
+            <TextBox x:Name="align_Y_Manual" HorizontalAlignment="Left" Margin="797,476,0,0" Text="0" TextWrapping="Wrap" VerticalAlignment="Top" Width="33" Height="14" TextBlock.FontSize="10"/>
+            <TextBox x:Name="align_Z_Manual" HorizontalAlignment="Left" Margin="797,491,0,0" Text="0" TextWrapping="Wrap" VerticalAlignment="Top" Width="33" Height="14" TextBlock.FontSize="10"/>
+            <TextBlock HorizontalAlignment="Left" Margin="789,461,0,0" Text="X" TextWrapping="Wrap" VerticalAlignment="Top" FontSize="10"/>
+            <TextBlock HorizontalAlignment="Left" Margin="789,476,0,0" Text="Y" TextWrapping="Wrap" VerticalAlignment="Top" FontSize="10"/>
+            <TextBlock HorizontalAlignment="Left" Margin="789,491,0,0" Text="Z" TextWrapping="Wrap" VerticalAlignment="Top" FontSize="10"/>
+            <TextBlock HorizontalAlignment="Left" Margin="761,476,0,0" Text="Align" TextWrapping="Wrap" VerticalAlignment="Top" FontSize="10"/>
 
             <Button x:Name="button_cali_WB" Content="WhiteBalance" HorizontalAlignment="Left" Height="24" Margin="19,178,0,0" VerticalAlignment="Top" Width="81" IsEnabled="False" Click="cali_WB_Click"/>
             <Button x:Name="button_cali_Light" Content="조명값 조절" HorizontalAlignment="Left" Height="24" Margin="19,204,0,0" VerticalAlignment="Top" Width="81" IsEnabled="False"/>
             <Button x:Name="button_cali_Lens" Content="렌즈 보정" HorizontalAlignment="Left" Height="24" Margin="19,230,0,0" VerticalAlignment="Top" Width="81" IsEnabled="False"/>
             <Button x:Name="button_cali_Color" Content="컬러 보정" HorizontalAlignment="Left" Height="24" Margin="110,178,0,0" VerticalAlignment="Top" Width="82" IsEnabled="False" />
-            <Button x:Name="setOffsetCurrentPos" Content="현재포지션 원점" HorizontalAlignment="Left" Margin="628,478,0,0" VerticalAlignment="Top" Click="setOffsetCurrentPos_Click"/>
-            <Button x:Name="setStartPoint" Content="현재포지션 시작" HorizontalAlignment="Left" Margin="630,503,0,0" VerticalAlignment="Top" Click="setStartPoint_Click"/>
-            <Button x:Name="setEndPoint" Content="현재포지션 끝점" HorizontalAlignment="Left" Margin="630,528,0,0" VerticalAlignment="Top" Click="setEndPoint_Click"/>
+            <Button x:Name="setOffsetCurrentPos" Content="현재포지션 원점" HorizontalAlignment="Left" Margin="566,369,0,0" VerticalAlignment="Top" Click="setOffsetCurrentPos_Click" Width="94"/>
+            <Button x:Name="setStartPoint" Content="현재포지션 시작" HorizontalAlignment="Left" Margin="568,394,0,0" VerticalAlignment="Top" Click="setStartPoint_Click"/>
+            <Button x:Name="setEndPoint" Content="현재포지션 끝점" HorizontalAlignment="Left" Margin="568,419,0,0" VerticalAlignment="Top" Click="setEndPoint_Click"/>
 
 
 
