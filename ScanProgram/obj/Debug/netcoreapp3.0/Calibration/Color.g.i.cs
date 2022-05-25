@@ -54,7 +54,7 @@ namespace ScanProgram.Calibration {
                 return;
             }
             _contentLoaded = true;
-            System.Uri resourceLocater = new System.Uri("/ScanProgram;component/calibration/color.xaml", System.UriKind.Relative);
+            System.Uri resourceLocater = new System.Uri("/ScanProgram;V1.0.0.0;component/calibration/color.xaml", System.UriKind.Relative);
             
             #line 1 "..\..\..\..\Calibration\Color.xaml"
             System.Windows.Application.LoadComponent(this, resourceLocater);

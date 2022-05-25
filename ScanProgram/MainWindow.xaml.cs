@@ -10,7 +10,7 @@ using System.Drawing;
 
 using System.Windows.Media.Imaging;
 using System.Windows.Interop;
-
+using OpenCvSharp;
 using System.IO;
 
 

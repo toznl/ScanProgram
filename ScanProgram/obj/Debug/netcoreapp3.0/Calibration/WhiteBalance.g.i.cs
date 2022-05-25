@@ -54,7 +54,7 @@ namespace ScanProgram.Calibration {
                 return;
             }
             _contentLoaded = true;
-            System.Uri resourceLocater = new System.Uri("/ScanProgram;component/calibration/whitebalance.xaml", System.UriKind.Relative);
+            System.Uri resourceLocater = new System.Uri("/ScanProgram;V1.0.0.0;component/calibration/whitebalance.xaml", System.UriKind.Relative);
             
             #line 1 "..\..\..\..\Calibration\WhiteBalance.xaml"
             System.Windows.Application.LoadComponent(this, resourceLocater);

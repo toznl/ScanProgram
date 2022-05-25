@@ -70,7 +70,7 @@ namespace ScanProgram {
                 return;
             }
             _contentLoaded = true;
-            System.Uri resourceLocater = new System.Uri("/ScanProgram;component/artadd.xaml", System.UriKind.Relative);
+            System.Uri resourceLocater = new System.Uri("/ScanProgram;V1.0.0.0;component/artadd.xaml", System.UriKind.Relative);
             
             #line 1 "..\..\..\ArtAdd.xaml"
             System.Windows.Application.LoadComponent(this, resourceLocater);

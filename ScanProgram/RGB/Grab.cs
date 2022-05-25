@@ -10,6 +10,9 @@ using System.Windows.Forms;
 using System.Drawing.Imaging;
 using DALSA.SaperaLT.SapClassBasic;
 
+using OpenCvSharp;
+
+
 
 namespace ScanProgram
 {
@@ -23,8 +26,9 @@ namespace ScanProgram
         SapView view = null;
         SapProcessing m_pro = null;
         SapColorConversion m_conv;
+        Mat colorConvGrab = new Mat();
+        Mat rawConvGrab = new Mat();
         public Image img = null;
-
         // Create camera index parameter
         [Description("The index of the camera from which to acquire images.")]
         public int Index { get; set; }
@@ -177,22 +181,40 @@ namespace ScanProgram
             int weight = buffer.Width; //4096
             int pixd = buffer.PixelDepth; //8
 
-            
+
             // Read pictures from memory and convert them into bitmap Formats, creating palettes, printing to PictureBox
             PixelFormat pf = PixelFormat.Format8bppIndexed;
             Bitmap bmp = new Bitmap(weight, height, buffer.Pitch, pf, addr);
-            ColorPalette m_grayPalette;
-            using (Bitmap tempbmp = new Bitmap(1, 1, PixelFormat.Format8bppIndexed))
-            {
-                m_grayPalette = tempbmp.Palette;
-            }
-            for (int i = 0; i <= 255; i++)
-            {
-                m_grayPalette.Entries[i] = Color.FromArgb(i, i, i);
-            }
+            bmp.SetResolution(height, weight);
+            BitmapData bmpData = new BitmapData();
 
-            bmp.Palette = m_grayPalette;
+            bmpData = bmp.LockBits(new Rectangle(0, 0, weight, height), System.Drawing.Imaging.ImageLockMode.WriteOnly, PixelFormat.Format8bppIndexed);
 
+            ColorPalette palette = bmp.Palette;
+            for (int i = 0; i < 256; i++)
+                palette.Entries[i] = Color.FromArgb(i, i, i);
+            bmp.Palette = palette;
+
+           
+
+            bmp.UnlockBits(bmpData);
+
+            //using (Bitmap tempbmp = new Bitmap(1, 1, pf))
+            //{
+            //    m_grayPalette = tempbmp.Palette;
+            //}
+            //for (int i = 0; i <= 255; i++)
+            //{
+            //    m_grayPalette.Entries[i] = Color.FromArgb(i, i, i);
+            //}
+
+            //bmp.Palette = m_grayPalette;
+            //opencv
+            rawConvGrab = OpenCvSharp.Extensions.BitmapConverter.ToMat(bmp);
+
+            Cv2.CvtColor(rawConvGrab, colorConvGrab, ColorConversionCodes.BayerRG2RGB_EA);
+            bmp = OpenCvSharp.Extensions.BitmapConverter.ToBitmap(colorConvGrab);
+            //bmp = Imagefrom
             img = (Image)bmp;
         }
 
