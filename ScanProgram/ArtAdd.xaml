@@ -6,9 +6,50 @@
         xmlns:local="clr-namespace:ScanProgram"
         mc:Ignorable="d"
         Title="ArtAdd" Height="450" Width="800">
-    <Grid>
+    <Grid Margin="0,0,10,-101">
         <Button x:Name="Json_Create" Content="파일정보저장" HorizontalAlignment="Left" Margin="675,374,0,0" VerticalAlignment="Top" Height="30" Width="80" Click="Create_Button_Click"/>
         <Button x:Name="Json_FilePath" Content="파일경로" HorizontalAlignment="Left" Margin="580,374,0,0" VerticalAlignment="Top" Height="30" Width="80" Click="Path_Button_Click"/>
+        <GroupBox Header="작품정보" BorderBrush="Black" Margin="10,0,540,306"/>
+        <GroupBox Header="기기정보" Margin="285,0,35,186" BorderBrush="Black"/>
+        <TextBox x:Name="Info_art_name" HorizontalAlignment="Left" Margin="100,21,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="120"/>
+        <TextBox x:Name="Info_art_author" HorizontalAlignment="Left" Margin="100,41,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="120"/>
+        <TextBox x:Name="Info_art_type" HorizontalAlignment="Left" Margin="100,61,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="120"/>
+        <TextBox x:Name="Info_art_era" HorizontalAlignment="Left" Margin="100,81,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="120"/>
+        <TextBox x:Name="Info_art_size" HorizontalAlignment="Left" Margin="100,101,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="120"/>
+        <TextBox x:Name="Info_art_width" HorizontalAlignment="Left" Margin="100,121,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="120"/>
+        <TextBox x:Name="Info_art_height" HorizontalAlignment="Left" Margin="100,141,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="120"/>
+        <TextBox x:Name="Info_art_memo" HorizontalAlignment="Left" Margin="100,161,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="120"/>
+        <TextBox x:Name="Info_device_camera_type" HorizontalAlignment="Left" Margin="420,21,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="120"/>
+        <TextBox x:Name="Info_device_camera_model" HorizontalAlignment="Left" Margin="420,41,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="120"/>
+        <TextBox x:Name="Info_device_camera_max_resolution" HorizontalAlignment="Left" Margin="420,61,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="120"/>
+        <TextBox x:Name="Info_device_camera_manufact" HorizontalAlignment="Left" Margin="420,81,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="120"/>
+        <TextBox x:Name="Info_device_camera_lens_model" HorizontalAlignment="Left" Margin="420,101,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="120"/>
+        <TextBox x:Name="Info_device_camera_lens_manufact" HorizontalAlignment="Left" Margin="420,121,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="120"/>
+        <TextBox x:Name="Info_device_camera_filter" HorizontalAlignment="Left" Margin="420,141,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="120"/>
+        <TextBox x:Name="Info_device_camera_filter_manufact" HorizontalAlignment="Left" Margin="420,161,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="120"/>
+        <TextBox x:Name="Info_device_light_type" HorizontalAlignment="Left" Margin="420,181,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="120"/>
+        <TextBox x:Name="Info_device_light_intensity" HorizontalAlignment="Left" Margin="420,201,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="120"/>
+
+        <TextBlock HorizontalAlignment="Left" Margin="24,22,0,0" TextWrapping="Wrap" Text="작품명" VerticalAlignment="Top"/>
+        <TextBlock HorizontalAlignment="Left" Margin="24,42,0,0" TextWrapping="Wrap" Text="작가" VerticalAlignment="Top"/>
+        <TextBlock HorizontalAlignment="Left" Margin="24,62,0,0" TextWrapping="Wrap" Text="그림종류" VerticalAlignment="Top"/>
+        <TextBlock HorizontalAlignment="Left" Margin="24,82,0,0" TextWrapping="Wrap" Text="작품시기" VerticalAlignment="Top"/>
+        <TextBlock HorizontalAlignment="Left" Margin="24,102,0,0" TextWrapping="Wrap" Text="미술품호수" VerticalAlignment="Top"/>
+        <TextBlock HorizontalAlignment="Left" Margin="24,122,0,0" TextWrapping="Wrap" Text="가로크기(cm)" VerticalAlignment="Top"/>
+        <TextBlock HorizontalAlignment="Left" Margin="24,142,0,0" TextWrapping="Wrap" Text="세로크기(cm)" VerticalAlignment="Top"/>
+        <TextBlock HorizontalAlignment="Left" Margin="24,162,0,0" TextWrapping="Wrap" Text="메모" VerticalAlignment="Top"/>
+        
+        <TextBlock HorizontalAlignment="Left" Margin="300,22,0,0" TextWrapping="Wrap" Text="카메라타입" VerticalAlignment="Top"/>
+        <TextBlock HorizontalAlignment="Left" Margin="300,42,0,0" TextWrapping="Wrap" Text="카메라모델" VerticalAlignment="Top"/>
+        <TextBlock HorizontalAlignment="Left" Margin="300,62,0,0" TextWrapping="Wrap" Text="카메라최대해상도" VerticalAlignment="Top"/>
+        <TextBlock HorizontalAlignment="Left" Margin="300,82,0,0" TextWrapping="Wrap" Text="카메라제조업체" VerticalAlignment="Top"/>
+        <TextBlock HorizontalAlignment="Left" Margin="300,102,0,0" TextWrapping="Wrap" Text="카메라렌즈모델" VerticalAlignment="Top"/>
+        <TextBlock HorizontalAlignment="Left" Margin="300,122,0,0" TextWrapping="Wrap" Text="카메라렌즈제조업체" VerticalAlignment="Top"/>
+        <TextBlock HorizontalAlignment="Left" Margin="300,142,0,0" TextWrapping="Wrap" Text="카메라필터" VerticalAlignment="Top"/>
+        <TextBlock HorizontalAlignment="Left" Margin="300,162,0,0" TextWrapping="Wrap" Text="카메라필터제조업체" VerticalAlignment="Top"/>
+        <TextBlock HorizontalAlignment="Left" Margin="300,182,0,0" TextWrapping="Wrap" Text="조명타입" VerticalAlignment="Top"/>
+        <TextBlock HorizontalAlignment="Left" Margin="300,202,0,0" TextWrapping="Wrap" Text="조명강도" VerticalAlignment="Top"/>
+
 
     </Grid>
 </Window>

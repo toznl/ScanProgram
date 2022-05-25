@@ -1,0 +1,261 @@
+{
+  "runtimeTarget": {
+    "name": ".NETCoreApp,Version=v3.1",
+    "signature": ""
+  },
+  "compilationOptions": {},
+  "targets": {
+    ".NETCoreApp,Version=v3.1": {
+      "ScanProgram/1.0.0": {
+        "dependencies": {
+          "Newtonsoft.Json": "13.0.1",
+          "OpenCvSharp4.Extensions": "4.5.5.20211231",
+          "OpenCvSharp4.Windows": "4.5.5.20211231",
+          "DALSA.SaperaLT.SapClassBasic": "8.51.1.2023",
+          "scanSnapDll": "1.0.8174.29669"
+        },
+        "runtime": {
+          "ScanProgram.dll": {}
+        }
+      },
+      "Microsoft.NETCore.Platforms/5.0.0": {},
+      "Microsoft.Win32.SystemEvents/5.0.0": {
+        "dependencies": {
+          "Microsoft.NETCore.Platforms": "5.0.0"
+        },
+        "runtime": {
+          "lib/netstandard2.0/Microsoft.Win32.SystemEvents.dll": {
+            "assemblyVersion": "5.0.0.0",
+            "fileVersion": "5.0.20.51904"
+          }
+        },
+        "runtimeTargets": {
+          "runtimes/win/lib/netcoreapp3.0/Microsoft.Win32.SystemEvents.dll": {
+            "rid": "win",
+            "assetType": "runtime",
+            "assemblyVersion": "5.0.0.0",
+            "fileVersion": "5.0.20.51904"
+          }
+        }
+      },
+      "Newtonsoft.Json/13.0.1": {
+        "runtime": {
+          "lib/netstandard2.0/Newtonsoft.Json.dll": {
+            "assemblyVersion": "13.0.0.0",
+            "fileVersion": "13.0.1.25517"
+          }
+        }
+      },
+      "OpenCvSharp4/4.5.5.20211231": {
+        "dependencies": {
+          "System.Memory": "4.5.4",
+          "System.Runtime.CompilerServices.Unsafe": "6.0.0"
+        },
+        "runtime": {
+          "lib/netcoreapp3.1/OpenCvSharp.dll": {
+            "assemblyVersion": "1.0.0.0",
+            "fileVersion": "1.0.0.0"
+          }
+        }
+      },
+      "OpenCvSharp4.Extensions/4.5.5.20211231": {
+        "dependencies": {
+          "OpenCvSharp4": "4.5.5.20211231",
+          "System.Drawing.Common": "5.0.3"
+        },
+        "runtime": {
+          "lib/netcoreapp3.1/OpenCvSharp.Extensions.dll": {
+            "assemblyVersion": "1.0.0.0",
+            "fileVersion": "1.0.0.0"
+          }
+        }
+      },
+      "OpenCvSharp4.runtime.win/4.5.5.20211231": {
+        "runtimeTargets": {
+          "runtimes/win-x64/native/OpenCvSharpExtern.dll": {
+            "rid": "win-x64",
+            "assetType": "native",
+            "fileVersion": "0.0.0.0"
+          },
+          "runtimes/win-x64/native/opencv_videoio_ffmpeg455_64.dll": {
+            "rid": "win-x64",
+            "assetType": "native",
+            "fileVersion": "2021.12.0.0"
+          },
+          "runtimes/win-x86/native/OpenCvSharpExtern.dll": {
+            "rid": "win-x86",
+            "assetType": "native",
+            "fileVersion": "0.0.0.0"
+          },
+          "runtimes/win-x86/native/opencv_videoio_ffmpeg455.dll": {
+            "rid": "win-x86",
+            "assetType": "native",
+            "fileVersion": "2021.12.0.0"
+          }
+        }
+      },
+      "OpenCvSharp4.Windows/4.5.5.20211231": {
+        "dependencies": {
+          "OpenCvSharp4": "4.5.5.20211231",
+          "OpenCvSharp4.WpfExtensions": "4.5.5.20211231",
+          "OpenCvSharp4.runtime.win": "4.5.5.20211231"
+        }
+      },
+      "OpenCvSharp4.WpfExtensions/4.5.5.20211231": {
+        "dependencies": {
+          "OpenCvSharp4": "4.5.5.20211231"
+        },
+        "runtime": {
+          "lib/netcoreapp3.1/OpenCvSharp.WpfExtensions.dll": {
+            "assemblyVersion": "1.0.0.0",
+            "fileVersion": "1.0.0.0"
+          }
+        }
+      },
+      "System.Drawing.Common/5.0.3": {
+        "dependencies": {
+          "Microsoft.Win32.SystemEvents": "5.0.0"
+        },
+        "runtime": {
+          "lib/netcoreapp3.0/System.Drawing.Common.dll": {
+            "assemblyVersion": "5.0.0.2",
+            "fileVersion": "5.0.1221.52207"
+          }
+        },
+        "runtimeTargets": {
+          "runtimes/unix/lib/netcoreapp3.0/System.Drawing.Common.dll": {
+            "rid": "unix",
+            "assetType": "runtime",
+            "assemblyVersion": "5.0.0.2",
+            "fileVersion": "5.0.1221.52207"
+          },
+          "runtimes/win/lib/netcoreapp3.0/System.Drawing.Common.dll": {
+            "rid": "win",
+            "assetType": "runtime",
+            "assemblyVersion": "5.0.0.2",
+            "fileVersion": "5.0.1221.52207"
+          }
+        }
+      },
+      "System.Memory/4.5.4": {},
+      "System.Runtime.CompilerServices.Unsafe/6.0.0": {
+        "runtime": {
+          "lib/netcoreapp3.1/System.Runtime.CompilerServices.Unsafe.dll": {
+            "assemblyVersion": "6.0.0.0",
+            "fileVersion": "6.0.21.52210"
+          }
+        }
+      },
+      "DALSA.SaperaLT.SapClassBasic/8.51.1.2023": {
+        "runtime": {
+          "DALSA.SaperaLT.SapClassBasic.dll": {
+            "assemblyVersion": "8.51.1.2023",
+            "fileVersion": "8.51.1.2023"
+          }
+        }
+      },
+      "scanSnapDll/1.0.8174.29669": {
+        "runtime": {
+          "scanSnapDll.dll": {
+            "assemblyVersion": "1.0.8174.29669",
+            "fileVersion": "0.0.0.0"
+          }
+        }
+      }
+    }
+  },
+  "libraries": {
+    "ScanProgram/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "Microsoft.NETCore.Platforms/5.0.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-VyPlqzH2wavqquTcYpkIIAQ6WdenuKoFN0BdYBbCWsclXacSOHNQn66Gt4z5NBqEYW0FAPm5rlvki9ZiCij5xQ==",
+      "path": "microsoft.netcore.platforms/5.0.0",
+      "hashPath": "microsoft.netcore.platforms.5.0.0.nupkg.sha512"
+    },
+    "Microsoft.Win32.SystemEvents/5.0.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-Bh6blKG8VAKvXiLe2L+sEsn62nc1Ij34MrNxepD2OCrS5cpCwQa9MeLyhVQPQ/R4Wlzwuy6wMK8hLb11QPDRsQ==",
+      "path": "microsoft.win32.systemevents/5.0.0",
+      "hashPath": "microsoft.win32.systemevents.5.0.0.nupkg.sha512"
+    },
+    "Newtonsoft.Json/13.0.1": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-ppPFpBcvxdsfUonNcvITKqLl3bqxWbDCZIzDWHzjpdAHRFfZe0Dw9HmA0+za13IdyrgJwpkDTDA9fHaxOrt20A==",
+      "path": "newtonsoft.json/13.0.1",
+      "hashPath": "newtonsoft.json.13.0.1.nupkg.sha512"
+    },
+    "OpenCvSharp4/4.5.5.20211231": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-if3zWvwJHo4FAupCdrv+B1PN+50MP7OdQHQSiy5Am9/fGepvEzNxbamd3Hk0akKHnLtzsHa5icGta4Vr4lGLQw==",
+      "path": "opencvsharp4/4.5.5.20211231",
+      "hashPath": "opencvsharp4.4.5.5.20211231.nupkg.sha512"
+    },
+    "OpenCvSharp4.Extensions/4.5.5.20211231": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-xJS9qELWTxiVJoYTYKYzEobvMGoyC0c4qYpzt+PbLsK8CS1jI+OHcBNTJ25MqaoAru9QBC8Y7wtAXXb5nq4Zyg==",
+      "path": "opencvsharp4.extensions/4.5.5.20211231",
+      "hashPath": "opencvsharp4.extensions.4.5.5.20211231.nupkg.sha512"
+    },
+    "OpenCvSharp4.runtime.win/4.5.5.20211231": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-hywJLVuHQTHxroPTYWPhj59VIpoPTGoKJYyvHWWs0hnqPLPemnPCWZLJtdehdpf00U6l1QgvARJMFqc3RtSXGQ==",
+      "path": "opencvsharp4.runtime.win/4.5.5.20211231",
+      "hashPath": "opencvsharp4.runtime.win.4.5.5.20211231.nupkg.sha512"
+    },
+    "OpenCvSharp4.Windows/4.5.5.20211231": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-Se42Zsv8v/Afr8WvtDBCNy4hHsuMNBmdg67y4ANkI+sQUuPN3UGyFo8trsy3L+sqsF/cglBIfTX6MBp871OZpg==",
+      "path": "opencvsharp4.windows/4.5.5.20211231",
+      "hashPath": "opencvsharp4.windows.4.5.5.20211231.nupkg.sha512"
+    },
+    "OpenCvSharp4.WpfExtensions/4.5.5.20211231": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-zIiNWygafSV80IENnMNFKWQvOTTQ9ZK2pP48n8FAFR/gCOkYOBkZ2kSi+QFm0JTQwys9yKvCxJhxAtBp+3Xfwg==",
+      "path": "opencvsharp4.wpfextensions/4.5.5.20211231",
+      "hashPath": "opencvsharp4.wpfextensions.4.5.5.20211231.nupkg.sha512"
+    },
+    "System.Drawing.Common/5.0.3": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-rEQZuslijqdsO0pkJn7LtGBaMc//YVA8de0meGihkg9oLPaN+w+/Pb5d71lgp0YjPoKgBKNMvdq0IPnoW4PEng==",
+      "path": "system.drawing.common/5.0.3",
+      "hashPath": "system.drawing.common.5.0.3.nupkg.sha512"
+    },
+    "System.Memory/4.5.4": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-1MbJTHS1lZ4bS4FmsJjnuGJOu88ZzTT2rLvrhW7Ygic+pC0NWA+3hgAen0HRdsocuQXCkUTdFn9yHJJhsijDXw==",
+      "path": "system.memory/4.5.4",
+      "hashPath": "system.memory.4.5.4.nupkg.sha512"
+    },
+    "System.Runtime.CompilerServices.Unsafe/6.0.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-/iUeP3tq1S0XdNNoMz5C9twLSrM/TH+qElHkXWaPvuNOt+99G75NrV0OS2EqHx5wMN7popYjpc8oTjC1y16DLg==",
+      "path": "system.runtime.compilerservices.unsafe/6.0.0",
+      "hashPath": "system.runtime.compilerservices.unsafe.6.0.0.nupkg.sha512"
+    },
+    "DALSA.SaperaLT.SapClassBasic/8.51.1.2023": {
+      "type": "reference",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "scanSnapDll/1.0.8174.29669": {
+      "type": "reference",
+      "serviceable": false,
+      "sha512": ""
+    }
+  }
+}

@@ -452,11 +452,12 @@ namespace ScanProgram
         };
         #endregion
         BitmapImage bitmapImage = new BitmapImage();
-
         MemoryStream memory = new MemoryStream();
+      
+
         void calibration_Click(object sender, RoutedEventArgs e)
         {
-
+            
         }
         public UInt32 IndexCal(UInt32 Index)
         {
@@ -521,10 +522,11 @@ namespace ScanProgram
         private void art_Add_Click(object sender, RoutedEventArgs e)
         {
             ScanProgram.ArtAdd artAddWindow = new ScanProgram.ArtAdd();
-
+            
             artAddWindow.Show();
             artAddWindow.Top = this.Top + (this.ActualHeight - artAddWindow.Height) / 2;
             artAddWindow.Left = this.Left + (this.ActualWidth - artAddWindow.Width) / 2;
+            
             log.AppendText("ArtAdd Windows Opened\r");
         }
 

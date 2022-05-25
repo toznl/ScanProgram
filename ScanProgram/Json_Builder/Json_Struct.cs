@@ -1,54 +1,107 @@
-﻿namespace ScanProgram
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace ScanProgram
 {
-
-    public struct art_info
+    class art_Info
     {
-        public string name;
-        public string author;
-        public string type;
-        public string era;
-        public string size;
-        public double width;
-        public double height;
-        public string memo;
+        public art_Info()
+        {
+            name = String.Empty;
+            author = String.Empty;
+            type = String.Empty;
+            era = String.Empty;
+            size = String.Empty;
+            width = Double.NaN;
+            height = Double.NaN;
+            memo = String.Empty;
+        }
+
+        public static string name;
+        public static string author;
+        public static string type;
+        public static string era;
+        public static string size;
+        public static double width;
+        public static double height;
+        public static string memo;
     }
-
-    public struct device_info
+    class device_info
     {
-        public string camera_type;
-        public string camera_model;
-        public string camera_max_resolution;
-        public string camera_manufact;
-        public string camera_lens_model;
-        public string camera_lens_manufact;
-        public string camera_filter;
-        public string camera_filter_manufact;
-        public string light_type;
-        public string light_intensity;
+        public device_info()
+        {
+            camera_type = String.Empty;
+            camera_model = String.Empty;
+            camera_max_resolution = String.Empty;
+            camera_manufact = String.Empty;
+            camera_lens_model = String.Empty;
+            camera_lens_manufact = String.Empty;
+            camera_filter = String.Empty;
+            camera_filter_manufact = String.Empty;
+            light_type = String.Empty;
+            light_intensity = String.Empty;
+            image_file_type = String.Empty;
+            image_file_path = String.Empty;
+            image_file_currentcount = String.Empty;
+            image_file_maxcount = String.Empty;
+            image_resolution = String.Empty;
+            image_size = String.Empty;
+            image_date = String.Empty;
+            image_time = String.Empty;
+            image_partition = String.Empty;
+            calibration_status_color = String.Empty;
+            calibration_chart_name_color = String.Empty;
+            calibration_status_lens = String.Empty;
+            calibration_chart_name_lens = String.Empty;
+            calibration_chart_model_lens = String.Empty;
+            calibration_status_vigntte = String.Empty;
+            calibration_chart_name_vigntte = String.Empty;
+            calibration_status_wb = String.Empty;
+            calibration_chart_name_wb = String.Empty;
+            calibration_chart_model_wb = String.Empty;
+            memo = String.Empty;
+
+        }
+        public static string camera_type;
+        public static string camera_model;
+        public static string camera_max_resolution;
+        public static string camera_manufact;
+        public static string camera_lens_model;
+        public static string camera_lens_manufact;
+        public static string camera_filter;
+        public static string camera_filter_manufact;
+        public static string light_type;
+        public static string light_intensity;
         //public string light_controller_model;
-        public string image_file_type;
-        public string image_file_path;
-        public string image_file_currentcount;
-        public string image_file_maxcount;
-        public string image_resolution;
-        public string image_size;
-        public string image_date;
-        public string image_time;
-        public string image_partition; //A,B,C,D구역
-        public string calibration_status_color;
-        public string calibration_chart_name_color;
-        public string calibration_chart_model_color;
-        public string calibration_status_lens;
-        public string calibration_chart_name_lens;
-        public string calibration_chart_model_lens;
-        public string calibration_status_vigntte;
-        public string calibration_chart_name_vigntte;
-        public string calibration_chart_model_vigntte;
-        public string calibration_status_wb;
-        public string calibration_chart_name_wb;
-        public string calibration_chart_model_wb;
-        public string memo;
+        public static string image_file_type;
+        public static string image_file_path;
+        public static string image_file_currentcount;
+        public static string image_file_maxcount;
+        public static string image_resolution;
+        public static string image_size;
+        public static string image_date;
+        public static string image_time;
+        public static string image_partition; //A,B,C,D구역
+        public static string calibration_status_color;
+        public static string calibration_chart_name_color;
+        public static string calibration_chart_model_color;
+        public static string calibration_status_lens;
+        public static string calibration_chart_name_lens;
+        public static string calibration_chart_model_lens;
+        public static string calibration_status_vigntte;
+        public static string calibration_chart_name_vigntte;
+        public static string calibration_chart_model_vigntte;
+        public static string calibration_status_wb;
+        public static string calibration_chart_name_wb;
+        public static string calibration_chart_model_wb;
+        public static string memo;
 
     }
-
 }
+
+
+
+

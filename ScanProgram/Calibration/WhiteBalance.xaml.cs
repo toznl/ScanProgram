@@ -20,6 +20,8 @@ namespace ScanProgram.Calibration
         public WhiteBalance()
         {
             InitializeComponent();
+           
         }
+        
     }
 }
