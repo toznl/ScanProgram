@@ -7,8 +7,8 @@
         mc:Ignorable="d"
         Title="ArtAdd" Height="450" Width="800">
     <Grid Margin="0,0,10,-101">
-        <Button x:Name="Json_Create" Content="파일정보저장" HorizontalAlignment="Left" Margin="675,374,0,0" VerticalAlignment="Top" Height="30" Width="80" Click="Create_Button_Click"/>
-        <Button x:Name="Json_FilePath" Content="파일경로" HorizontalAlignment="Left" Margin="580,374,0,0" VerticalAlignment="Top" Height="30" Width="80" Click="Path_Button_Click"/>
+        <Button x:Name="Json_Create" Content="파일정보저장" HorizontalAlignment="Left" Margin="675,374,0,0" VerticalAlignment="Top" Height="30" Width="80" Click="Save_Button_Click"/>
+        <Button x:Name="Json_FilePath" Content="파일열기" HorizontalAlignment="Left" Margin="580,374,0,0" VerticalAlignment="Top" Height="30" Width="80" Click="Path_Button_Click"/>
         <GroupBox Header="작품정보" BorderBrush="Black" Margin="10,0,540,306"/>
         <GroupBox Header="기기정보" Margin="285,0,35,186" BorderBrush="Black"/>
         <TextBox x:Name="Info_art_name" HorizontalAlignment="Left" Margin="100,21,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="120"/>
@@ -38,7 +38,7 @@
         <TextBlock HorizontalAlignment="Left" Margin="24,122,0,0" TextWrapping="Wrap" Text="가로크기(cm)" VerticalAlignment="Top"/>
         <TextBlock HorizontalAlignment="Left" Margin="24,142,0,0" TextWrapping="Wrap" Text="세로크기(cm)" VerticalAlignment="Top"/>
         <TextBlock HorizontalAlignment="Left" Margin="24,162,0,0" TextWrapping="Wrap" Text="메모" VerticalAlignment="Top"/>
-        
+
         <TextBlock HorizontalAlignment="Left" Margin="300,22,0,0" TextWrapping="Wrap" Text="카메라타입" VerticalAlignment="Top"/>
         <TextBlock HorizontalAlignment="Left" Margin="300,42,0,0" TextWrapping="Wrap" Text="카메라모델" VerticalAlignment="Top"/>
         <TextBlock HorizontalAlignment="Left" Margin="300,62,0,0" TextWrapping="Wrap" Text="카메라최대해상도" VerticalAlignment="Top"/>
@@ -49,6 +49,7 @@
         <TextBlock HorizontalAlignment="Left" Margin="300,162,0,0" TextWrapping="Wrap" Text="카메라필터제조업체" VerticalAlignment="Top"/>
         <TextBlock HorizontalAlignment="Left" Margin="300,182,0,0" TextWrapping="Wrap" Text="조명타입" VerticalAlignment="Top"/>
         <TextBlock HorizontalAlignment="Left" Margin="300,202,0,0" TextWrapping="Wrap" Text="조명강도" VerticalAlignment="Top"/>
+        <Button x:Name="Json_FilePath_Copy" Content="새파일" HorizontalAlignment="Left" Margin="480,374,0,0" VerticalAlignment="Top" Height="30" Width="80" Click="Create_Button_Click"/>
 
 
     </Grid>

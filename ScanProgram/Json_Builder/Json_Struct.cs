@@ -6,6 +6,27 @@ using System.Threading.Tasks;
 
 namespace ScanProgram
 {
+    class image_file_info
+    {
+        public image_file_info()
+        {
+            file_path = String.Empty;
+            file_rgb_raw_path = String.Empty;
+            file_rgb_wb_path = String.Empty;
+            file_rgb_vignetting_path = String.Empty;
+            file_uv_raw_path= String.Empty;
+            file_uv_vignetting_path= String.Empty;
+        }
+        public static string file_path;
+        public static string file_rgb_raw_path;
+        public static string file_rgb_wb_path;
+        public static string file_rgb_vignetting_path;
+        public static string file_uv_raw_path;
+        public static string file_uv_vignetting_path;
+
+
+
+    }
     class art_Info
     {
         public art_Info()
@@ -15,8 +36,8 @@ namespace ScanProgram
             type = String.Empty;
             era = String.Empty;
             size = String.Empty;
-            width = Double.NaN;
-            height = Double.NaN;
+            width = String.Empty;
+            height = String.Empty;
             memo = String.Empty;
         }
 
@@ -25,8 +46,8 @@ namespace ScanProgram
         public static string type;
         public static string era;
         public static string size;
-        public static double width;
-        public static double height;
+        public static string width;
+        public static string height;
         public static string memo;
     }
     class device_info
