@@ -21,12 +21,23 @@ namespace ScanProgram
     public partial class ArtAdd : Window
     {
         public static string path;
-        
+
         public ArtAdd()
         {
             InitializeComponent();
         }
-
+        string jsonStr = "{
+                            'ART_INFO':{
+                                            'NAME' : "",
+                                            'AUTHOR':"",
+                                            'TYPE':"",
+                                            'ERA':"",
+                                            'SIZE':"",
+                                            'WIDTH':"",
+                                            'HEIGHT':"",
+                                            'MEMO':""
+                                        }
+                            }"";
         private void Create_Button_Click(object sender, RoutedEventArgs e)
         {
             string fileName = "";
@@ -61,10 +72,10 @@ namespace ScanProgram
                 {
                     File.Create(path);
                 }
-                
+
             }
-             
-            
+
+
         }
         private void CreateJson()
         {
@@ -81,7 +92,7 @@ namespace ScanProgram
             {
 
             }
-            
+
         }
         private void WrtieJson()
         {
@@ -93,46 +104,50 @@ namespace ScanProgram
                     InputJson(path);
                 }
             }
-            
+
         }
 
         private void InputJson(string path)
         {
             //사용자 정보 배열로 선언
-
-            JObject dbSpec = new JObject(
-                new JProperty("NAME", Convert.ToString(Info_art_name.Text)),
-                new JProperty( "AUTHOR", Convert.ToString(Info_art_author.Text)),
-                new JProperty("TYPE", Convert.ToString(Info_art_type.Text)),
-                new JProperty( "ERA", Convert.ToString(Info_art_era.Text)),
-                new JProperty( "SIZE", Convert.ToString(Info_art_size.Text)),
-                new JProperty( "WIDTH", Convert.ToString(Info_art_width.Text)),
-                new JProperty( "HEIGHT", Convert.ToString(Info_art_height.Text)),
-                new JProperty( "MEMO", Convert.ToString(Info_art_memo.Text))
-                );
+            JObject json = JObject.Parse(jsonStr);
 
 
-            File.WriteAllText(path, dbSpec.ToString());
+            json["ARTINFO"]["NAME"] = Convert.ToString(Info_art_name.Text);
+            //JObject dbSpec = new JObject(
+            //    new JProperty("ARTINFO","NAME", ),
+            //    new JProperty("ARTINFO", "AUTHOR", Convert.ToString(Info_art_author.Text)),
+            //    new JProperty("ARTINFO", "TYPE", Convert.ToString(Info_art_type.Text)),
+            //    new JProperty("ARTINFO", "ERA", Convert.ToString(Info_art_era.Text)),
+            //    new JProperty("ARTINFO", "SIZE", Convert.ToString(Info_art_size.Text)),
+            //    new JProperty("ARTINFO", "WIDTH", Convert.ToString(Info_art_width.Text)),
+            //    new JProperty("ARTINFO", "HEIGHT", Convert.ToString(Info_art_height.Text)),
+            //    new JProperty("ARTINFO", "MEMO", Convert.ToString(Info_art_memo.Text))
+            //    );
+
+
+            //File.WriteAllText(path, dbSpec.ToString());
         }
 
         private void ReadJson()
         {
+            
             if (path != null)
             {
                 //// Json 파일 읽기
                 using (StreamReader file = File.OpenText(path))
                 using (JsonTextReader reader = new JsonTextReader(file))
                 {
-                    JObject json = (JObject)JToken.ReadFrom(reader);
+                    JObject json = JObject.Parse(jsonStr);
 
-                    art_Info.name = (string)json["NAME"].ToString();
-                    art_Info.author = (string)json["AUTHOR"].ToString();
-                    art_Info.type = (string)json["TYPE"].ToString();
-                    art_Info.era = (string)json["ERA"].ToString();
-                    art_Info.size = (string)json["SIZE"].ToString();
-                    art_Info.width = (string)json["WIDTH"].ToString();
-                    art_Info.height = (string)json["HEIGHT"].ToString();
-                    art_Info.memo = (string)json["MEMO"].ToString();
+                    art_Info.name = (string)json["ARTINFO"]["NAME"].ToString();
+                    art_Info.author = (string)json["ARTINFO"]["AUTHOR"].ToString();
+                    art_Info.type = (string)json["ARTINFO"]["TYPE"].ToString();
+                    art_Info.era = (string)json["ARTINFO"]["ERA"].ToString();
+                    art_Info.size = (string)json["ARTINFO"]["SIZE"].ToString();
+                    art_Info.width = (string)json["ARTINFO"]["WIDTH"].ToString();
+                    art_Info.height = (string)json["ARTINFO"]["HEIGHT"].ToString();
+                    art_Info.memo = (string)json["ARTINFO"]["MEMO"].ToString();
 
                     Info_art_name.Text = art_Info.name;
                     Info_art_author.Text = art_Info.author;
@@ -145,13 +160,13 @@ namespace ScanProgram
 
                 }
             }
-            
-            
+
+
         }
 
         private void Save_Button_Click(object sender, RoutedEventArgs e)
         {
-            
+
             InputJson(path);
         }
     }

@@ -6,7 +6,7 @@
         xmlns:cpb="clr-namespace:CircularProgressBarApp"        
         xmlns:local="clr-namespace:ScanProgram"
         mc:Ignorable="d"
-        Title="ScanUI" Height="695" Width="881" ResizeMode="NoResize" WindowStyle="ToolWindow" WindowStartupLocation="CenterScreen">
+        Title="ScanUI -KITECH Robotics Research and Development Department" Height="695" Width="881" ResizeMode="NoResize" WindowStyle="ToolWindow" WindowStartupLocation="CenterScreen">
 
     <Window.Resources>
         <ResourceDictionary>

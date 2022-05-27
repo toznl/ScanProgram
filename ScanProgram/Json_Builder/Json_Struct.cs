@@ -38,6 +38,7 @@ namespace ScanProgram
             size = String.Empty;
             width = String.Empty;
             height = String.Empty;
+            frame = String.Empty;
             memo = String.Empty;
         }
 
@@ -48,6 +49,7 @@ namespace ScanProgram
         public static string size;
         public static string width;
         public static string height;
+        public static string frame;
         public static string memo;
     }
     class device_info
@@ -64,25 +66,33 @@ namespace ScanProgram
             camera_filter_manufact = String.Empty;
             light_type = String.Empty;
             light_intensity = String.Empty;
+
             image_file_type = String.Empty;
             image_file_path = String.Empty;
-            image_file_currentcount = String.Empty;
-            image_file_maxcount = String.Empty;
             image_resolution = String.Empty;
             image_size = String.Empty;
             image_date = String.Empty;
             image_time = String.Empty;
+            image_count_total = String.Empty;
+            image_count_vertical = String.Empty;
+            image_count_horizontal = String.Empty;
             image_partition = String.Empty;
+            
+
             calibration_status_color = String.Empty;
             calibration_chart_name_color = String.Empty;
+            calibration_chart_model_color = String.Empty;
             calibration_status_lens = String.Empty;
             calibration_chart_name_lens = String.Empty;
             calibration_chart_model_lens = String.Empty;
             calibration_status_vigntte = String.Empty;
             calibration_chart_name_vigntte = String.Empty;
+            calibration_chart_model_vigntte = String.Empty;
             calibration_status_wb = String.Empty;
             calibration_chart_name_wb = String.Empty;
             calibration_chart_model_wb = String.Empty;
+            memo = string.Empty;
+            
             memo = String.Empty;
 
         }
@@ -96,16 +106,18 @@ namespace ScanProgram
         public static string camera_filter_manufact;
         public static string light_type;
         public static string light_intensity;
-        //public string light_controller_model;
+
         public static string image_file_type;
         public static string image_file_path;
-        public static string image_file_currentcount;
-        public static string image_file_maxcount;
         public static string image_resolution;
         public static string image_size;
         public static string image_date;
         public static string image_time;
+        public static string image_count_horizontal;
+        public static string image_count_vertical;
+        public static string image_count_total;
         public static string image_partition; //A,B,C,D구역
+
         public static string calibration_status_color;
         public static string calibration_chart_name_color;
         public static string calibration_chart_model_color;
@@ -119,7 +131,6 @@ namespace ScanProgram
         public static string calibration_chart_name_wb;
         public static string calibration_chart_model_wb;
         public static string memo;
-
     }
 }
 

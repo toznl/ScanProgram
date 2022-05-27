@@ -968,8 +968,6 @@ namespace ScanProgram
             {
                 if (cap.img != null)
                 {
-                    cap.img.Save(memory, ImageFormat.Png);
-
                     using (MemoryStream memory = new MemoryStream())
                     {
                         cap.img.Save(memory, System.Drawing.Imaging.ImageFormat.Bmp);
