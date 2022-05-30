@@ -21,23 +21,12 @@ namespace ScanProgram
     public partial class ArtAdd : Window
     {
         public static string path;
-
+        String jsonStr;
         public ArtAdd()
         {
             InitializeComponent();
         }
-        string jsonStr = "{
-                            'ART_INFO':{
-                                            'NAME' : "",
-                                            'AUTHOR':"",
-                                            'TYPE':"",
-                                            'ERA':"",
-                                            'SIZE':"",
-                                            'WIDTH':"",
-                                            'HEIGHT':"",
-                                            'MEMO':""
-                                        }
-                            }"";
+
         private void Create_Button_Click(object sender, RoutedEventArgs e)
         {
             string fileName = "";
@@ -56,6 +45,128 @@ namespace ScanProgram
             CreateJson();
         }
 
+        public class jsonROOT
+        {
+            public List<json_Art_Info> json_AI;
+            public List<json_Device_Info> json_DI;
+            public List<json_Calibration_Info> json_CI;
+            public List<json_File_Info> json_FI;
+
+        }
+
+        public class json_Art_Info
+        {
+            public String json_Art_Info_NAME;
+            public String json_Art_Info_AUTHOR;
+            public String json_Art_Info_TYPE;
+            public String json_Art_Info_ERA;
+            public String json_Art_Info_SIZE;
+            public String json_Art_Info_WIDTH;
+            public String json_Art_Info_HEIGHT;
+            public String json_Art_Info_FRAME;
+            public String json_Art_Info_MEMO;
+        }
+        public class json_Device_Info
+        {
+            public String json_Device_Info_CAMERA_TYPE;
+            public String json_Device_Info_CAMERA_MODEL;
+            public String json_Device_Info_CAMERA_MAX_RESOLUTION;
+            public String json_Device_Info_CAMERA_MANUFACT;
+            public String json_Device_Info_CAMERA_LENS_MODEL;
+            public String json_Device_Info_CAMERA_LENS_MANUFACT;
+            public String json_Device_Info_CAMERA_FILTER;
+            public String json_Device_Info_CAMERA_FILTER_MANUFACT;
+            public String json_Device_Info_LIGHT_TYPE;
+            public String json_Device_Info_LIGHT_INTENSITY;
+        }
+        public class json_Calibration_Info
+        {
+            public String json_Calibration_Info_STATUS_COLOR;
+            public String json_Calibration_Info_CHART_NAME_COLOR;
+            public String json_Calibration_Info_CHART_MODEL_COLOR;
+            public String json_Calibration_Info_STATUS_LENS;
+            public String json_Calibration_Info_CHART_NAME_LENS;
+            public String json_Calibration_Info_CHART_MODEL_LENS;
+            public String json_Calibration_Info_STATUS_VIGNETTE;
+            public String json_Calibration_Info_CHART_NAME_VIGNETTE;
+            public String json_Calibration_Info_CHART_MODEL_VIGNETTE;
+            public String json_Calibration_Info_STATUS_WB;
+            public String json_Calibration_Info_CHART_NAME_WB;
+            public String json_Calibration_Info_CHART_MODEL_WB;
+            public String json_Calibration_Info_MEMO;
+
+        }
+        public class json_File_Info
+        {
+            public String json_File_Info_TYPE;
+            public String json_File_Info_PATH;
+            public String json_File_Info_RESOLUTION;
+            public String json_File_Info_SIZE;
+            public String json_File_Info_DATE;
+            public String json_File_Info_TIME;
+            public String json_File_Info_COUNT_HORIZONTAL;
+            public String json_File_Info_COUNT_VERTICAL;
+            public String json_File_Info_COUNT_TOTAL;
+            public String json_File_Info_PARTITION;
+        }
+
+        string json = "" +
+            "{ " +
+            "  'ART_INFO': [ " +
+            "               { 'NAME': '이삭 줍는 여인들', " +
+            "                 'AUTHOR': '장프랑수아 밀레', " +
+            "                 'TYPE': '유화', " +
+            "                 'ERA': '1857년도', " +
+            "                 'SIZE': '50호', " +
+            "                 'WIDTH': '84', " +
+            "                 'HEIGHT': '112', " +
+            "                 'FRAME': '유', " +
+            "                 'MEMO': '테스트용 그림', " +
+            "               }, " +
+            "             ] " +
+            "  'DEVICE_INFO': [ " +
+            "               { 'CAMERA_TYPE': 'RGB', " +
+            "                 'CAMERA_MODEL': 'Nano-C4020', " +
+            "                 'CAMERA_MAX_RESOLUTION': '4112 x 3008', " +
+            "                 'CAMERA_MANUFACT': 'Teledyne', " +
+            "                 'CAMERA_LENS_MODEL': 'C VIS-NIR', " +
+            "                 'CAMERA_LENS_MANUFACT': 'Edmund', " +
+            "                 'CAMERA_FILTER': 'N/A', " +
+            "                 'CAMERA_FILTER_MANUFACT': 'Edmund', " +
+            "                 'LIGHT_TYPE': 'LED', " +
+            "                 'LIGHT_INTENSITY': 'N/A', " +
+            "               }, " +
+            "             ] " +
+            "  'CALIBRATION_INFO': [ " +
+            "               { 'STATUS_COLOR': 'N/A', " +
+            "                 'CHART_NAME_COLOR': '', " +
+            "                 'CHART_MODEL_COLOR': '', " +
+            "                 'STATUS_LENS': 'N/A', " +
+            "                 'CHART_NAME_LENS': '', " +
+            "                 'CHART_MODEL_LENS': '', " +
+            "                 'STATUS_VIGNETTE': 'N/A', " +
+            "                 'CHART_NAME_VIGNETTE': '', " +
+            "                 'CHART_MODEL_VIGNETTE': '', " +
+            "                 'STATUS_WB': 'N/A', " +
+            "                 'CHART_NAME_WB': '', " +
+            "                 'CHART_MODEL_WB': '', " +
+            "                 'MEMO': '', " +
+            "               }, " +
+            "             ] " +
+            "  'FILE_INFO': [ " +
+            "               { 'TYPE': '.tiff', " +
+            "                 'PATH': 'C:\\ART1', " +
+            "                 'RESOLUTION': '4112 x 3008', " +
+            "                 'SIZE': '35.4MB', " +
+            "                 'DATE': '2022/05/27', " +
+            "                 'TIME': '15:00', " +
+            "                 'COUNT_HORIZONTAL': '9', " +
+            "                 'COUNT_VERTICAL': '9', " +
+            "                 'COUNT_TOTAL': '81', " +
+            "                 'PARTITON': 'N/A', " +
+            "               }, " +
+            "             ] " +
+            "}";
         private void Path_Button_Click(object sender, RoutedEventArgs e)
         {
             OpenFileDialog dlgOpenFile = new OpenFileDialog();
@@ -110,23 +221,21 @@ namespace ScanProgram
         private void InputJson(string path)
         {
             //사용자 정보 배열로 선언
-            JObject json = JObject.Parse(jsonStr);
-
-
-            json["ARTINFO"]["NAME"] = Convert.ToString(Info_art_name.Text);
-            //JObject dbSpec = new JObject(
-            //    new JProperty("ARTINFO","NAME", ),
-            //    new JProperty("ARTINFO", "AUTHOR", Convert.ToString(Info_art_author.Text)),
-            //    new JProperty("ARTINFO", "TYPE", Convert.ToString(Info_art_type.Text)),
-            //    new JProperty("ARTINFO", "ERA", Convert.ToString(Info_art_era.Text)),
-            //    new JProperty("ARTINFO", "SIZE", Convert.ToString(Info_art_size.Text)),
-            //    new JProperty("ARTINFO", "WIDTH", Convert.ToString(Info_art_width.Text)),
-            //    new JProperty("ARTINFO", "HEIGHT", Convert.ToString(Info_art_height.Text)),
-            //    new JProperty("ARTINFO", "MEMO", Convert.ToString(Info_art_memo.Text))
+            JObject jObject = JObject.Parse(json);
+            jObject["ARTINFO"][0]["NAME"][0] = Convert.ToString(Info_art_name.Text);
+            //JObject dbSpec = new JObjec t(
+            //    new JProperty("NAME", Convert.ToString(Info_art_name.Text)),
+            //    new JProperty("AUTHOR", Convert.ToString(Info_art_author.Text)),
+            //    new JProperty("TYPE", Convert.ToString(Info_art_type.Text)),
+            //    new JProperty("ERA", Convert.ToString(Info_art_era.Text)),
+            //    new JProperty("SIZE", Convert.ToString(Info_art_size.Text)),
+            //    new JProperty("WIDTH", Convert.ToString(Info_art_width.Text)),
+            //    new JProperty("HEIGHT", Convert.ToString(Info_art_height.Text)),
+            //    new JProperty("MEMO", Convert.ToString(Info_art_memo.Text))
             //    );
 
 
-            //File.WriteAllText(path, dbSpec.ToString());
+            File.WriteAllText(path, jObject.ToString());
         }
 
         private void ReadJson()
