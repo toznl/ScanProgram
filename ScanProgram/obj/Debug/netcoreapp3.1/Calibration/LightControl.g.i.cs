@@ -54,7 +54,7 @@ namespace ScanProgram.Calibration {
                 return;
             }
             _contentLoaded = true;
-            System.Uri resourceLocater = new System.Uri("/ScanProgram;component/calibration/lightcontrol.xaml", System.UriKind.Relative);
+            System.Uri resourceLocater = new System.Uri("/ScanProgram;V1.0.0.0;component/calibration/lightcontrol.xaml", System.UriKind.Relative);
             
             #line 1 "..\..\..\..\Calibration\LightControl.xaml"
             System.Windows.Application.LoadComponent(this, resourceLocater);

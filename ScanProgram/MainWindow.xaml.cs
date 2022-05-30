@@ -30,27 +30,15 @@ namespace ScanProgram
     public partial class MainWindow : System.Windows.Window
     {
         #region Thread
-        private DispatcherTimer kernelTimer = new DispatcherTimer();
-        private DispatcherTimer cur_Position = new DispatcherTimer();
-        private DispatcherTimer snap_pic = new DispatcherTimer();
-        private DispatcherTimer grab_pic = new DispatcherTimer();
-        public System.Threading.Timer grabTimer;
-        public int grab_Init_Counter = 0;
-        public int camera_Mode;
-        public string fileinfo_header;
-        public string fileinfo_filepath;
-
-        public float final_Start_X;
-        public float final_Start_Y;
-        public float final_Finish_X;
-        public float final_Finish_Y;
-
-
-        public int CameraMod;
-        private System.ComponentModel.Container components = null;
+        private DispatcherTimer kernelTimer = new DispatcherTimer(); //RobotTimer
+        private DispatcherTimer cur_Position = new DispatcherTimer(); //Current Position Timer
+        private DispatcherTimer snap_pic = new DispatcherTimer(); //Snap Picture Timer
+        private DispatcherTimer grab_pic = new DispatcherTimer(); //Grab Picture Timer
         [DllImport("kernel32.dll", SetLastError = true)]
         static extern UInt32 WaitForSingleObject(IntPtr hHandle, UInt32 dwMilliseconds);
 
+        #endregion
+        #region UV Parameters
         PCO_Description pcoDescr;
         PCO_Storage pcoStorage;
         PCO_Image pcoImage;
@@ -66,14 +54,7 @@ namespace ScanProgram
         int bufwidth = 0, bufheight = 0;
         byte[] imagedata;
         short bufnr = -1;
-
-
-
-        SaperaCapture cap;
-        SaperaCapture_Nir cap_nir;
-
-
-        #endregion 
+        #endregion
         #region RobotVariables
         UInt16 ProcState = 0;
         UInt32 MaxAxis = 0;
@@ -451,19 +432,23 @@ namespace ScanProgram
             public static extern int PCO_EnableDialogCam(IntPtr hCamDialog, bool bEnable);
         };
         #endregion
+        #region Parameters
+        public string fileinfo_header;
+        public string fileinfo_filepath;
+        public float final_Start_X;
+        public float final_Start_Y;
+        public float final_Finish_X;
+        public float final_Finish_Y;
         BitmapImage bitmapImage = new BitmapImage();
         MemoryStream memory = new MemoryStream();
-      
-
-        void calibration_Click(object sender, RoutedEventArgs e)
-        {
-            
-        }
+        public int CameraMod;
+        SaperaCapture cap;
+        #endregion
+        #region RobotState&Motions
         public UInt32 IndexCal(UInt32 Index)
         {
             return Index * MaxAxis;
         }
-        #region RobotState&Motions
         public enum MXP_KernelState
         {
             Idle = 0,
@@ -509,27 +494,38 @@ namespace ScanProgram
         }
         #endregion
 
-        public MainWindow()
+        
+        #region RobotInit
+        private void power_Robot_Click(object sender, RoutedEventArgs e)
         {
-            InitializeComponent();
+            cur_Position.Tick += new EventHandler(GetCurrentPosition);
+            cur_Position.Interval = TimeSpan.FromMilliseconds(0.01);
+
+            MXP.MXP_POWER_OUT Out = new MXP.MXP_POWER_OUT { };
+
+            for (UInt32 i = 0; i < MaxAxis; i++)
+            {
+                Motion_Function.MXP_MC_Power(i, IndexCal((UInt32)MXP_MotionBlockIndex.mcPower) + i, 1, false, Out);
+            }
+
+            log.AppendText("Robot_Servo_On\r");
+
+            cur_Position.Start();
         }
-        private void emergencyStop_Click(object sender, RoutedEventArgs e)
+        //Zero Setting
+        private void zeroSetting_Click(object sender, RoutedEventArgs e)
         {
-            ProcState = (UInt16)MXP_KernelState.Close;
-            log.AppendText("Emergency Stop\r");
+            MXP.MXP_HOME_OUT Out = new MXP.MXP_HOME_OUT { };
+
+            for (UInt32 i = 0; i < MaxAxis; i++)
+            {
+                Motion_Function.MXP_MC_Home(i, IndexCal((UInt32)MXP_MotionBlockIndex.mcHome) + i, MXP.MXP_BUFFERMODE_ENUM.MXP_ABORTING, false, Out);
+            }
+
+            log.AppendText("Homing Completed\r");
         }
 
-        private void art_Add_Click(object sender, RoutedEventArgs e)
-        {
-            ScanProgram.ArtAdd artAddWindow = new ScanProgram.ArtAdd();
-            
-            artAddWindow.Show();
-            artAddWindow.Top = this.Top + (this.ActualHeight - artAddWindow.Height) / 2;
-            artAddWindow.Left = this.Left + (this.ActualWidth - artAddWindow.Width) / 2;
-            
-            log.AppendText("ArtAdd Windows Opened\r");
-        }
-
+        //Zero Return
         private void zeroReturn_Click(object sender, RoutedEventArgs e)
         {
             MXP.MXP_MOVEABSOLUTE_IN x = new MXP.MXP_MOVEABSOLUTE_IN { };
@@ -571,19 +567,6 @@ namespace ScanProgram
             log.AppendText("Zero Return\r");
 
         }
-
-        private void zeroSetting_Click(object sender, RoutedEventArgs e)
-        {
-            MXP.MXP_HOME_OUT Out = new MXP.MXP_HOME_OUT { };
-
-            for (UInt32 i = 0; i < MaxAxis; i++)
-            {
-                Motion_Function.MXP_MC_Home(i, IndexCal((UInt32)MXP_MotionBlockIndex.mcHome) + i, MXP.MXP_BUFFERMODE_ENUM.MXP_ABORTING, false, Out);
-            }
-
-            log.AppendText("Homing Completed\r");
-        }
-
         private void connect_device_Click(object sender, RoutedEventArgs e)
         {
 
@@ -593,21 +576,126 @@ namespace ScanProgram
             ProcState = (UInt16)MXP_KernelState.Init;
             kernelTimer.Start();
         }
-        private void power_Robot_Click(object sender, RoutedEventArgs e)
+        #endregion
+        #region 3Dmove Arrow
+        private void move_CameraUp_Click(object sender, RoutedEventArgs e)
         {
-            cur_Position.Tick += new EventHandler(GetCurrentPosition);
-            cur_Position.Interval = TimeSpan.FromMilliseconds(0.01);
+            MXP.MXP_MOVERELATIVE_IN x = new MXP.MXP_MOVERELATIVE_IN { };
+            MXP.MXP_MOVERELATIVE_OUT y = new MXP.MXP_MOVERELATIVE_OUT { };
 
-            MXP.MXP_POWER_OUT Out = new MXP.MXP_POWER_OUT { };
+            Motion_Function.MXP_MC_MoveRelative(2,
+                                    2,
+                                    Convert.ToSingle(100),
+                                    -Convert.ToSingle(align_Z_Manual.Text),
+                                    Convert.ToSingle(50),
+                                    Convert.ToSingle(50),
+                                    Convert.ToSingle(500),
+                                    MXP.MXP_BUFFERMODE_ENUM.MXP_ABORTING,
+                                    false, y);
+        }
 
-            for (UInt32 i = 0; i < MaxAxis; i++)
-            {
-                Motion_Function.MXP_MC_Power(i, IndexCal((UInt32)MXP_MotionBlockIndex.mcPower) + i, 1, false, Out);
-            }
+        private void move_CameraDown_Click(object sender, RoutedEventArgs e)
+        {
+            MXP.MXP_MOVERELATIVE_IN x = new MXP.MXP_MOVERELATIVE_IN { };
+            MXP.MXP_MOVERELATIVE_OUT y = new MXP.MXP_MOVERELATIVE_OUT { };
 
-            log.AppendText("Robot_Servo_On\r");
+            Motion_Function.MXP_MC_MoveRelative(2,
+                                    2,
+                                    Convert.ToSingle(100),
+                                    Convert.ToSingle(align_Z_Manual.Text),
+                                    Convert.ToSingle(50),
+                                    Convert.ToSingle(50),
+                                    Convert.ToSingle(500),
+                                    MXP.MXP_BUFFERMODE_ENUM.MXP_ABORTING,
+                                    false, y);
+        }
 
-            cur_Position.Start();
+        private void move_up_Click(object sender, RoutedEventArgs e)
+        {
+            MXP.MXP_MOVERELATIVE_IN x = new MXP.MXP_MOVERELATIVE_IN { };
+            MXP.MXP_MOVERELATIVE_OUT y = new MXP.MXP_MOVERELATIVE_OUT { };
+
+            Motion_Function.MXP_MC_MoveRelative(1,
+                                    1,
+                                    Convert.ToSingle(100),
+                                    Convert.ToSingle(align_Y_Manual.Text),
+                                    Convert.ToSingle(50),
+                                    Convert.ToSingle(50),
+                                    Convert.ToSingle(500),
+                                    MXP.MXP_BUFFERMODE_ENUM.MXP_ABORTING,
+                                    false, y);
+        }
+
+        private void move_down_Click(object sender, RoutedEventArgs e)
+        {
+            MXP.MXP_MOVERELATIVE_IN x = new MXP.MXP_MOVERELATIVE_IN { };
+            MXP.MXP_MOVERELATIVE_OUT y = new MXP.MXP_MOVERELATIVE_OUT { };
+
+            Motion_Function.MXP_MC_MoveRelative(1,
+                                    1,
+                                    Convert.ToSingle(100),
+                                    -Convert.ToSingle(align_Y_Manual.Text),
+                                    Convert.ToSingle(50),
+                                    Convert.ToSingle(50),
+                                    Convert.ToSingle(500),
+                                    MXP.MXP_BUFFERMODE_ENUM.MXP_ABORTING,
+                                    false, y);
+        }
+
+        private void move_left_Click(object sender, RoutedEventArgs e)
+        {
+            MXP.MXP_MOVERELATIVE_IN x = new MXP.MXP_MOVERELATIVE_IN { };
+            MXP.MXP_MOVERELATIVE_OUT y = new MXP.MXP_MOVERELATIVE_OUT { };
+
+            Motion_Function.MXP_MC_MoveRelative(0,
+                                    0,
+                                    Convert.ToSingle(100),
+                                    -Convert.ToSingle(align_X_Manual.Text),
+                                    Convert.ToSingle(50),
+                                    Convert.ToSingle(50),
+                                    Convert.ToSingle(500),
+                                    MXP.MXP_BUFFERMODE_ENUM.MXP_ABORTING,
+                                    false, y);
+        }
+
+        private void move_right_Click(object sender, RoutedEventArgs e)
+        {
+            MXP.MXP_MOVERELATIVE_IN x = new MXP.MXP_MOVERELATIVE_IN { };
+            MXP.MXP_MOVERELATIVE_OUT y = new MXP.MXP_MOVERELATIVE_OUT { };
+
+            Motion_Function.MXP_MC_MoveRelative(0,
+                                    0,
+                                    Convert.ToSingle(100),
+                                    Convert.ToSingle(align_X_Manual.Text),
+                                    Convert.ToSingle(50),
+                                    Convert.ToSingle(50),
+                                    Convert.ToSingle(500),
+                                    MXP.MXP_BUFFERMODE_ENUM.MXP_ABORTING,
+                                    false, y);
+        }
+        #endregion
+        #region Json_Info
+        private void art_Add_Click(object sender, RoutedEventArgs e)
+        {
+            ScanProgram.ArtAdd artAddWindow = new ScanProgram.ArtAdd();
+
+            artAddWindow.Show();
+            artAddWindow.Top = this.Top + (this.ActualHeight - artAddWindow.Height) / 2;
+            artAddWindow.Left = this.Left + (this.ActualWidth - artAddWindow.Width) / 2;
+
+            log.AppendText("ArtAdd Windows Opened\r");
+        }
+        #endregion
+        public MainWindow()
+        {
+            InitializeComponent();
+
+        }
+
+        private void emergencyStop_Click(object sender, RoutedEventArgs e)
+        {
+            ProcState = (UInt16)MXP_KernelState.Close;
+            log.AppendText("Emergency Stop\r");
         }
         public void GetCurrentPosition(object sender, EventArgs e)
         {
@@ -622,7 +710,6 @@ namespace ScanProgram
                 }));
 
         }
-
         private void KernelTimer_Tick(object sender, EventArgs e)
         {
             switch (ProcState)
@@ -750,75 +837,10 @@ namespace ScanProgram
                     }
             }
         }
-        #region 2Dmove Arrow
-        private void move_up_Click(object sender, RoutedEventArgs e)
-        {
-            MXP.MXP_MOVERELATIVE_IN x = new MXP.MXP_MOVERELATIVE_IN { };
-            MXP.MXP_MOVERELATIVE_OUT y = new MXP.MXP_MOVERELATIVE_OUT { };
-
-            Motion_Function.MXP_MC_MoveRelative(1,
-                                    1,
-                                    Convert.ToSingle(100),
-                                    Convert.ToSingle(align_Y_Manual.Text),
-                                    Convert.ToSingle(50),
-                                    Convert.ToSingle(50),
-                                    Convert.ToSingle(500),
-                                    MXP.MXP_BUFFERMODE_ENUM.MXP_ABORTING,
-                                    false, y);
-        }
-
-        private void move_down_Click(object sender, RoutedEventArgs e)
-        {
-            MXP.MXP_MOVERELATIVE_IN x = new MXP.MXP_MOVERELATIVE_IN { };
-            MXP.MXP_MOVERELATIVE_OUT y = new MXP.MXP_MOVERELATIVE_OUT { };
-
-            Motion_Function.MXP_MC_MoveRelative(1,
-                                    1,
-                                    Convert.ToSingle(100),
-                                    -Convert.ToSingle(align_Y_Manual.Text),
-                                    Convert.ToSingle(50),
-                                    Convert.ToSingle(50),
-                                    Convert.ToSingle(500),
-                                    MXP.MXP_BUFFERMODE_ENUM.MXP_ABORTING,
-                                    false, y);
-        }
-
-        private void move_left_Click(object sender, RoutedEventArgs e)
-        {
-            MXP.MXP_MOVERELATIVE_IN x = new MXP.MXP_MOVERELATIVE_IN { };
-            MXP.MXP_MOVERELATIVE_OUT y = new MXP.MXP_MOVERELATIVE_OUT { };
-
-            Motion_Function.MXP_MC_MoveRelative(0,
-                                    0,
-                                    Convert.ToSingle(100),
-                                    -Convert.ToSingle(align_X_Manual.Text),
-                                    Convert.ToSingle(50),
-                                    Convert.ToSingle(50),
-                                    Convert.ToSingle(500),
-                                    MXP.MXP_BUFFERMODE_ENUM.MXP_ABORTING,
-                                    false, y);
-        }
-
-        private void move_right_Click(object sender, RoutedEventArgs e)
-        {
-            MXP.MXP_MOVERELATIVE_IN x = new MXP.MXP_MOVERELATIVE_IN { };
-            MXP.MXP_MOVERELATIVE_OUT y = new MXP.MXP_MOVERELATIVE_OUT { };
-
-            Motion_Function.MXP_MC_MoveRelative(0,
-                                    0,
-                                    Convert.ToSingle(100),
-                                    Convert.ToSingle(align_X_Manual.Text),
-                                    Convert.ToSingle(50),
-                                    Convert.ToSingle(50),
-                                    Convert.ToSingle(500),
-                                    MXP.MXP_BUFFERMODE_ENUM.MXP_ABORTING,
-                                    false, y);
-        }
-        #endregion
         public void auto_capture_method(object sender, EventArgs e)
         {
             fileinfo_header = "ART4";
-            
+
             int CountX = 1;
             int CountY = 1;
             MXP.MXP_MOVEABSOLUTE_OUT y = new MXP.MXP_MOVEABSOLUTE_OUT { };
@@ -881,12 +903,12 @@ namespace ScanProgram
                     if (CameraMod == 1)
                     {
                         cap.Snap(CountY, CountX, fileinfo_header);
-                       
+
                     }
                     else if (CameraMod == 3)
                     {
                         snapUV(CountY, CountX, fileinfo_header);
-                       
+
 
                     }
                     CountX++;
@@ -916,40 +938,7 @@ namespace ScanProgram
 
             grab_pic.Start();
         }
-
-   
-        private void move_CameraUp_Click(object sender, RoutedEventArgs e)
-        {
-            MXP.MXP_MOVERELATIVE_IN x = new MXP.MXP_MOVERELATIVE_IN { };
-            MXP.MXP_MOVERELATIVE_OUT y = new MXP.MXP_MOVERELATIVE_OUT { };
-
-            Motion_Function.MXP_MC_MoveRelative(2,
-                                    2,
-                                    Convert.ToSingle(100),
-                                    -Convert.ToSingle(align_Z_Manual.Text),
-                                    Convert.ToSingle(50),
-                                    Convert.ToSingle(50),
-                                    Convert.ToSingle(500),
-                                    MXP.MXP_BUFFERMODE_ENUM.MXP_ABORTING,
-                                    false, y);
-        }
-
-        private void move_CameraDown_Click(object sender, RoutedEventArgs e)
-        {
-            MXP.MXP_MOVERELATIVE_IN x = new MXP.MXP_MOVERELATIVE_IN { };
-            MXP.MXP_MOVERELATIVE_OUT y = new MXP.MXP_MOVERELATIVE_OUT { };
-
-            Motion_Function.MXP_MC_MoveRelative(2,
-                                    2,
-                                    Convert.ToSingle(100),
-                                    Convert.ToSingle(align_Z_Manual.Text),
-                                    Convert.ToSingle(50),
-                                    Convert.ToSingle(50),
-                                    Convert.ToSingle(500),
-                                    MXP.MXP_BUFFERMODE_ENUM.MXP_ABORTING,
-                                    false, y);
-        }
-
+        #region Grab Method For Cameras
         private void grabRGB(object sender, EventArgs e)
         {
             try
@@ -975,7 +964,6 @@ namespace ScanProgram
                 log.AppendText(ex.ToString());
             }
         }
-
         private void grabUV(object sender, EventArgs e)
         {
             int err = 0;
@@ -1094,7 +1082,7 @@ namespace ScanProgram
             System.Runtime.InteropServices.Marshal.Copy(imagedata, 0, pixelStartAddress, imagedata.Length);
 
             //[uv image save]
-            
+
             //
 
             imagebmp.UnlockBits(picData);
@@ -1112,6 +1100,8 @@ namespace ScanProgram
             }
 
         }
+        #endregion
+        #region Snap Method For Cameras
         private void snapUV(int ii, int xx, string y)
         {
             int err = 0;
@@ -1231,10 +1221,10 @@ namespace ScanProgram
             System.Runtime.InteropServices.Marshal.Copy(imagedata, 0, pixelStartAddress, imagedata.Length);
 
             //[uv image save]
-            imagebmp.Save(fileName+".tiff",ImageFormat.Tiff);
+            imagebmp.Save(fileName + ".tiff", ImageFormat.Tiff);
             //
 
-   
+
 
         }
         private void Camera_Connect_Button_Click(object sender, RoutedEventArgs e)
@@ -1404,12 +1394,14 @@ namespace ScanProgram
 
             log.AppendText(CameraMod.ToString());
         }
-
         private void Camera_Disconnect_Button_Click(object sender, RoutedEventArgs e)
         {
             if (CameraMod == 1)
             {
-                //cap.Kill_Object();
+                cap.DestroyObjects();
+                cap.DisposeObjects();
+                snap_pic.Stop();
+                view_box.Source=null;
             }
             else if (CameraMod == 3)
             {
@@ -1420,6 +1412,7 @@ namespace ScanProgram
             Radio_Camera_UV_Camera.IsEnabled = true;
 
         }
+        #endregion
         private void Setupconvert()
         {
             pcoDescr = new PCO_Description();
@@ -1463,145 +1456,145 @@ namespace ScanProgram
             PCO_ConvertStructures.PCO_Convert pcoConvertlocal = (PCO_ConvertStructures.PCO_Convert)Marshal.PtrToStructure(debugIntPtr, typeof(PCO_ConvertStructures.PCO_Convert));
 
         }
-       
+
         private void UV_Camera_Grab(object sender, RoutedEventArgs e)
         {
-            
 
-                int err = 0;
-                int size;
-                System.IntPtr evhandle;
-                Bitmap imagebmp;
-                UIntPtr buf;
-                bool bauto = true;              // set this to true to get auto min max
-                UInt16 width = 0;
-                UInt16 height = 0;
-                UInt16 widthmax = 0;
-                UInt16 heightmax = 0;
-                int ishift = 16 - pcoDescr.wDynResDESC;
-                int ipadd = width / 4;
-                int iconvertcol = pcoDescr.wColorPatternDESC / 0x1000;
-                int max;
-                int min;
-                int ival;
-                ipadd *= 4;
-                ipadd = width - ipadd;
 
-                err = PCO_SDK_LibWrapper.PCO_GetSizes(cameraHandle, ref width, ref height, ref widthmax, ref heightmax);
-                size = width * height * 2;
+            int err = 0;
+            int size;
+            System.IntPtr evhandle;
+            Bitmap imagebmp;
+            UIntPtr buf;
+            bool bauto = true;              // set this to true to get auto min max
+            UInt16 width = 0;
+            UInt16 height = 0;
+            UInt16 widthmax = 0;
+            UInt16 heightmax = 0;
+            int ishift = 16 - pcoDescr.wDynResDESC;
+            int ipadd = width / 4;
+            int iconvertcol = pcoDescr.wColorPatternDESC / 0x1000;
+            int max;
+            int min;
+            int ival;
+            ipadd *= 4;
+            ipadd = width - ipadd;
 
-                buf = UIntPtr.Zero;
-                evhandle = IntPtr.Zero;
-                if ((bufwidth != width) || (bufheight != height))
+            err = PCO_SDK_LibWrapper.PCO_GetSizes(cameraHandle, ref width, ref height, ref widthmax, ref heightmax);
+            size = width * height * 2;
+
+            buf = UIntPtr.Zero;
+            evhandle = IntPtr.Zero;
+            if ((bufwidth != width) || (bufheight != height))
+            {
+                if (bufnr != -1)
                 {
-                    if (bufnr != -1)
-                    {
-                        PCO_SDK_LibWrapper.PCO_FreeBuffer(cameraHandle, bufnr);
-                    }
-                    bufnr = -1;
-                    imagedata = new byte[(width + ipadd) * height * 3];
-
-                    err = PCO_SDK_LibWrapper.PCO_AllocateBuffer(cameraHandle, ref bufnr, size, ref buf, ref evhandle);
-                    if (err == 0)
-                    {
-                        bufwidth = width;
-                        bufheight = height;
-                    }
+                    PCO_SDK_LibWrapper.PCO_FreeBuffer(cameraHandle, bufnr);
                 }
-                else
-                    err = PCO_SDK_LibWrapper.PCO_GetBuffer(cameraHandle, bufnr, ref buf, ref evhandle);
+                bufnr = -1;
+                imagedata = new byte[(width + ipadd) * height * 3];
 
-                //Mandatory for Cameralink and GigE. Don't care for all other interfaces, so leave it intact here.
-
-                err = PCO_SDK_LibWrapper.PCO_AddBufferEx(cameraHandle, 0, 0, bufnr, (UInt16)width, (UInt16)height, (UInt16)pcoDescr.wDynResDESC);
-
-                // There are two possibilities to synch. with the camera. Either by polling or by event.
-                // To use polling uncomment the Polling Block and comment the Event Block
-                // Begin Polling Block
-                // UInt32 dwStatusDll = 0, dwStatusDrv = 0;
-                // do
-                // {
-                //   err = PCO_SDK_LibWrapper.PCO_GetBufferStatus(cameraHandle, bufnr, ref dwStatusDll, ref dwStatusDrv);
-                // } while ((dwStatusDll & 0x8000) == 0);
-                // End Polling Block
-
-                //// Begin Event Block
-                //bool bImageIsOk = false;
-                //uint res = WaitForSingleObject(evhandle, 3000);
-                //if (res == 0)
-                //{
-                //    bImageIsOk = true;
-                //}
-                //if (!bImageIsOk)
-                //    return;
-                // End Event Block
-
-                unsafe
+                err = PCO_SDK_LibWrapper.PCO_AllocateBuffer(cameraHandle, ref bufnr, size, ref buf, ref evhandle);
+                if (err == 0)
                 {
-                    Int16* bufi = (Int16*)buf.ToPointer();
-                    max = 1500;
-                    min = 100;
-                    for (int i = 10 * width; i < height * width; i++)
-                    {
-                        if (bufi[i] > max)
-                            max = bufi[i];
-                        if (bufi[i] < min)
-                            min = bufi[i];
-                    }
-                    max >>= ishift;
-                    min >>= ishift;
-                    if (max <= min)
-                        max = min + 1;
+                    bufwidth = width;
+                    bufheight = height;
                 }
-                PCO_Convert_LibWrapper.PCO_Convert16TOCOL(convertHandle, 0, iconvertcol, width, height,
-                    buf, imagedata);
+            }
+            else
+                err = PCO_SDK_LibWrapper.PCO_GetBuffer(cameraHandle, bufnr, ref buf, ref evhandle);
 
-                if ((convertDialog != IntPtr.Zero) && (convertHandle != IntPtr.Zero))
+            //Mandatory for Cameralink and GigE. Don't care for all other interfaces, so leave it intact here.
+
+            err = PCO_SDK_LibWrapper.PCO_AddBufferEx(cameraHandle, 0, 0, bufnr, (UInt16)width, (UInt16)height, (UInt16)pcoDescr.wDynResDESC);
+
+            // There are two possibilities to synch. with the camera. Either by polling or by event.
+            // To use polling uncomment the Polling Block and comment the Event Block
+            // Begin Polling Block
+            // UInt32 dwStatusDll = 0, dwStatusDrv = 0;
+            // do
+            // {
+            //   err = PCO_SDK_LibWrapper.PCO_GetBufferStatus(cameraHandle, bufnr, ref dwStatusDll, ref dwStatusDrv);
+            // } while ((dwStatusDll & 0x8000) == 0);
+            // End Polling Block
+
+            //// Begin Event Block
+            //bool bImageIsOk = false;
+            //uint res = WaitForSingleObject(evhandle, 3000);
+            //if (res == 0)
+            //{
+            //    bImageIsOk = true;
+            //}
+            //if (!bImageIsOk)
+            //    return;
+            // End Event Block
+
+            unsafe
+            {
+                Int16* bufi = (Int16*)buf.ToPointer();
+                max = 1500;
+                min = 100;
+                for (int i = 10 * width; i < height * width; i++)
                 {
-                    PCO_Convert_LibWrapper.PCO_SetDataToDialog(convertDialog, width, height, buf, imagedata);
+                    if (bufi[i] > max)
+                        max = bufi[i];
+                    if (bufi[i] < min)
+                        min = bufi[i];
                 }
+                max >>= ishift;
+                min >>= ishift;
+                if (max <= min)
+                    max = min + 1;
+            }
+            PCO_Convert_LibWrapper.PCO_Convert16TOCOL(convertHandle, 0, iconvertcol, width, height,
+                buf, imagedata);
 
-                if (bauto)
-                {
-                    PCO_ConvertStructures.PCO_Display strDisplay = new PCO_ConvertStructures.PCO_Display(1);
+            if ((convertDialog != IntPtr.Zero) && (convertHandle != IntPtr.Zero))
+            {
+                PCO_Convert_LibWrapper.PCO_SetDataToDialog(convertDialog, width, height, buf, imagedata);
+            }
 
-                    strDisplay.wSize = (ushort)Marshal.SizeOf(typeof(PCO_ConvertStructures.PCO_Display));
+            if (bauto)
+            {
+                PCO_ConvertStructures.PCO_Display strDisplay = new PCO_ConvertStructures.PCO_Display(1);
 
-                    err = PCO_Convert_LibWrapper.PCO_ConvertGetDisplay(convertHandle, ref strDisplay);
-                    strDisplay.iScale_min = min;
-                    strDisplay.iScale_max = max;
+                strDisplay.wSize = (ushort)Marshal.SizeOf(typeof(PCO_ConvertStructures.PCO_Display));
 
-                    err = PCO_Convert_LibWrapper.PCO_ConvertSetDisplay(convertHandle, ref strDisplay);
-                    err = PCO_Convert_LibWrapper.PCO_SetConvertDialog(convertDialog, convertHandle);
-                }
+                err = PCO_Convert_LibWrapper.PCO_ConvertGetDisplay(convertHandle, ref strDisplay);
+                strDisplay.iScale_min = min;
+                strDisplay.iScale_max = max;
 
-                imagebmp = new Bitmap(width, height, PixelFormat.Format24bppRgb);
-                Rectangle dimension = new Rectangle(0, 0, imagebmp.Width, imagebmp.Height);
-                BitmapData picData = imagebmp.LockBits(dimension, ImageLockMode.ReadWrite, PixelFormat.Format24bppRgb);
-                IntPtr pixelStartAddress = picData.Scan0;
+                err = PCO_Convert_LibWrapper.PCO_ConvertSetDisplay(convertHandle, ref strDisplay);
+                err = PCO_Convert_LibWrapper.PCO_SetConvertDialog(convertDialog, convertHandle);
+            }
 
-                //Copy the pixel data into the bitmap structure
-                System.Runtime.InteropServices.Marshal.Copy(imagedata, 0, pixelStartAddress, imagedata.Length);
+            imagebmp = new Bitmap(width, height, PixelFormat.Format24bppRgb);
+            Rectangle dimension = new Rectangle(0, 0, imagebmp.Width, imagebmp.Height);
+            BitmapData picData = imagebmp.LockBits(dimension, ImageLockMode.ReadWrite, PixelFormat.Format24bppRgb);
+            IntPtr pixelStartAddress = picData.Scan0;
 
-                //[uv image save]
-                imagebmp.Save("c:\\test\\button.bmp", System.Drawing.Imaging.ImageFormat.Bmp);
-                //
+            //Copy the pixel data into the bitmap structure
+            System.Runtime.InteropServices.Marshal.Copy(imagedata, 0, pixelStartAddress, imagedata.Length);
 
-                imagebmp.UnlockBits(picData);
+            //[uv image save]
+            imagebmp.Save("c:\\test\\button.bmp", System.Drawing.Imaging.ImageFormat.Bmp);
+            //
 
-                using (MemoryStream memory = new MemoryStream())
-                {
-                    imagebmp.Save(memory, System.Drawing.Imaging.ImageFormat.Bmp);
-                    memory.Position = 0;
-                    BitmapImage bitmapImage = new BitmapImage();
-                    bitmapImage.BeginInit();
-                    bitmapImage.StreamSource = memory;
-                    bitmapImage.CacheOption = BitmapCacheOption.OnLoad;
-                    bitmapImage.EndInit();
-                    view_box.Source = bitmapImage;
-                }
+            imagebmp.UnlockBits(picData);
 
-            
+            using (MemoryStream memory = new MemoryStream())
+            {
+                imagebmp.Save(memory, System.Drawing.Imaging.ImageFormat.Bmp);
+                memory.Position = 0;
+                BitmapImage bitmapImage = new BitmapImage();
+                bitmapImage.BeginInit();
+                bitmapImage.StreamSource = memory;
+                bitmapImage.CacheOption = BitmapCacheOption.OnLoad;
+                bitmapImage.EndInit();
+                view_box.Source = bitmapImage;
+            }
+
+
 
 
         }
@@ -1684,16 +1677,20 @@ namespace ScanProgram
             log.AppendText("Set Current Position to EndPoint\r");
         }
 
+        private void button_cali_Vignette_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
         private void Camera_Grab_Button_Click(object sender, RoutedEventArgs e)
         {
             if (CameraMod == 1)
             {
-                cap.Snap(1, 1, "xx");
+
             }
             if (CameraMod == 3)
             {
                 snap_pic.Tick += new EventHandler(grabUV);
-               
             }
         }
 

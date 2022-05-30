@@ -10,11 +10,11 @@ none
 false
 TRACE;DEBUG;NETCOREAPP;NETCOREAPP3_1;
 C:\Users\ever\Desktop\ScanProgram\ScanProgram\App.xaml
-723286033
+8-1272939772
 
-23391218657
-205505908730
-ArtAdd.xaml;Calibration\Color.xaml;Calibration\Lens.xaml;Calibration\LightControl.xaml;Calibration\WhiteBalance.xaml;MainWindow.xaml;styles.xaml;
+241426511109
+205-662855821
+ArtAdd.xaml;Calibration\Color.xaml;Calibration\Lens.xaml;Calibration\LightControl.xaml;Calibration\Vignette.xaml;Calibration\WhiteBalance.xaml;MainWindow.xaml;styles.xaml;
 
-True
+False
 

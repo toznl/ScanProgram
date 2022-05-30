@@ -118,7 +118,7 @@ namespace ScanProgram
         readonly object captureLock = new object();
 
         // Function used for destroying and disposing of sapera class objects
-        private void DestroyObjects()
+        public void DestroyObjects()
         {
             if (transfer != null && transfer.Initialized)
                 transfer.Destroy();
@@ -133,7 +133,7 @@ namespace ScanProgram
             if (device != null && device.Initialized)
                 device.Destroy();
         }
-        private void DisposeObjects()
+        public void DisposeObjects()
         {
             if (transfer != null && transfer.Initialized)
             { transfer.Dispose(); transfer = null; }
@@ -355,7 +355,7 @@ namespace ScanProgram
             m_conv.OutputBuffer.Save(fileName + ".tif", "-format tif");
             log.AppendText(serverName);
         }
-
+            
         public void Grab()
         {
 
