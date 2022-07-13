@@ -19,7 +19,7 @@ namespace ScanProgram
     public class SaperaCapture : MainWindow
     {
         string serverName = "";
-        SapLocation location = null;
+        public SapLocation location = null;
         SapAcqDevice device = null;
         SapTransfer transfer = null;
         SapBuffer buffer = null;
@@ -233,7 +233,6 @@ namespace ScanProgram
             {
                 return;
             }
-            log.AppendText(serverName);
             // Find server location
             location = new SapLocation(serverName, 0);
             // Find device

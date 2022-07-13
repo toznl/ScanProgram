@@ -12,7 +12,8 @@ using System.Windows.Media.Imaging;
 using System.Windows.Interop;
 using OpenCvSharp;
 using System.IO;
-
+using System.IO.Ports;
+using System.Windows.Documents;
 
 using PCOConvertStructures;
 using PCOConvertDll;
@@ -29,6 +30,10 @@ namespace ScanProgram
 
     public partial class MainWindow : System.Windows.Window
     {
+        int bytesreceived = 0;
+        byte[] inputdata = new byte[65535];
+        SerialPort Serial_Uart = new SerialPort();
+
         #region Thread
         private DispatcherTimer kernelTimer = new DispatcherTimer(); //RobotTimer
         private DispatcherTimer cur_Position = new DispatcherTimer(); //Current Position Timer
@@ -62,8 +67,17 @@ namespace ScanProgram
         string ActPositionX;
         string ActPositionY;
         string ActPositionZ;
-
-
+        string Robot_Status;
+        float MAX_X = 480;
+        float MAX_Y = 730;
+        float MAX_Z = 220;
+        float JoyStick_Speed = 0;
+        float positionX;
+        float positionY;
+        int CountX = 1;
+        int CountY = 1;
+        int Auto_Zero = 0;
+        int capture_Lock = 1;
         #endregion
         #region PCO_Struct_Import
         [StructLayout(LayoutKind.Sequential)]
@@ -443,6 +457,7 @@ namespace ScanProgram
         MemoryStream memory = new MemoryStream();
         public int CameraMod;
         SaperaCapture cap;
+        SaperaCapture_Nir cap_nir;
         #endregion
         #region RobotState&Motions
         public UInt32 IndexCal(UInt32 Index)
@@ -494,7 +509,7 @@ namespace ScanProgram
         }
         #endregion
 
-        
+
         #region RobotInit
         private void power_Robot_Click(object sender, RoutedEventArgs e)
         {
@@ -508,7 +523,10 @@ namespace ScanProgram
                 Motion_Function.MXP_MC_Power(i, IndexCal((UInt32)MXP_MotionBlockIndex.mcPower) + i, 1, false, Out);
             }
 
+
             log.AppendText("Robot_Servo_On\r");
+            log.ScrollToEnd();
+
 
             cur_Position.Start();
         }
@@ -516,13 +534,19 @@ namespace ScanProgram
         private void zeroSetting_Click(object sender, RoutedEventArgs e)
         {
             MXP.MXP_HOME_OUT Out = new MXP.MXP_HOME_OUT { };
-
+            log.AppendText("Homing\r");
+            log.ScrollToEnd();
             for (UInt32 i = 0; i < MaxAxis; i++)
             {
                 Motion_Function.MXP_MC_Home(i, IndexCal((UInt32)MXP_MotionBlockIndex.mcHome) + i, MXP.MXP_BUFFERMODE_ENUM.MXP_ABORTING, false, Out);
             }
+            offset_X.Text = "0";
+            offset_Y.Text = "0";
+            offset_Z.Text = "0";
 
             log.AppendText("Homing Completed\r");
+            log.ScrollToEnd();
+
         }
 
         //Zero Return
@@ -531,8 +555,8 @@ namespace ScanProgram
             MXP.MXP_MOVEABSOLUTE_IN x = new MXP.MXP_MOVEABSOLUTE_IN { };
             MXP.MXP_MOVEABSOLUTE_OUT y = new MXP.MXP_MOVEABSOLUTE_OUT { };
 
-            Motion_Function.MXP_MC_MoveAbsolute(0,
-                                     0,
+            Motion_Function.MXP_MC_MoveAbsolute(2,
+                                     2,
                                      Convert.ToSingle(100),
                                      Convert.ToSingle(offset_X.Text),
                                      Convert.ToSingle(50),
@@ -542,8 +566,8 @@ namespace ScanProgram
                                      MXP.MXP_DIRECTION_ENUM.MXP_POSITIVE_DIRECTION,
                                      false, y);
 
-            Motion_Function.MXP_MC_MoveAbsolute(1,
-                           1,
+            Motion_Function.MXP_MC_MoveAbsolute(0,
+                           0,
                            Convert.ToSingle(100),
                            Convert.ToSingle(offset_Y.Text),
                            Convert.ToSingle(50),
@@ -553,8 +577,8 @@ namespace ScanProgram
                            MXP.MXP_DIRECTION_ENUM.MXP_POSITIVE_DIRECTION,
                            false, y);
 
-            Motion_Function.MXP_MC_MoveAbsolute(2,
-                          2,
+            Motion_Function.MXP_MC_MoveAbsolute(1,
+                          1,
                           Convert.ToSingle(100),
                           Convert.ToSingle(offset_Z.Text),
                           Convert.ToSingle(50),
@@ -565,6 +589,8 @@ namespace ScanProgram
                           false, y);
 
             log.AppendText("Zero Return\r");
+            log.ScrollToEnd();
+
 
         }
         private void connect_device_Click(object sender, RoutedEventArgs e)
@@ -575,6 +601,8 @@ namespace ScanProgram
 
             ProcState = (UInt16)MXP_KernelState.Init;
             kernelTimer.Start();
+            Robot_Status = Convert.ToString(Motion_Function.MXP_MC_ReadAxisStatus(2));
+
         }
         #endregion
         #region 3Dmove Arrow
@@ -583,10 +611,10 @@ namespace ScanProgram
             MXP.MXP_MOVERELATIVE_IN x = new MXP.MXP_MOVERELATIVE_IN { };
             MXP.MXP_MOVERELATIVE_OUT y = new MXP.MXP_MOVERELATIVE_OUT { };
 
-            Motion_Function.MXP_MC_MoveRelative(2,
-                                    2,
+            Motion_Function.MXP_MC_MoveRelative(1,
+                                    1,
                                     Convert.ToSingle(100),
-                                    -Convert.ToSingle(align_Z_Manual.Text),
+                                    Convert.ToSingle(align_Z_Manual.Text),
                                     Convert.ToSingle(50),
                                     Convert.ToSingle(50),
                                     Convert.ToSingle(500),
@@ -599,10 +627,10 @@ namespace ScanProgram
             MXP.MXP_MOVERELATIVE_IN x = new MXP.MXP_MOVERELATIVE_IN { };
             MXP.MXP_MOVERELATIVE_OUT y = new MXP.MXP_MOVERELATIVE_OUT { };
 
-            Motion_Function.MXP_MC_MoveRelative(2,
-                                    2,
+            Motion_Function.MXP_MC_MoveRelative(1,
+                                    1,
                                     Convert.ToSingle(100),
-                                    Convert.ToSingle(align_Z_Manual.Text),
+                                    -Convert.ToSingle(align_Z_Manual.Text),
                                     Convert.ToSingle(50),
                                     Convert.ToSingle(50),
                                     Convert.ToSingle(500),
@@ -615,8 +643,8 @@ namespace ScanProgram
             MXP.MXP_MOVERELATIVE_IN x = new MXP.MXP_MOVERELATIVE_IN { };
             MXP.MXP_MOVERELATIVE_OUT y = new MXP.MXP_MOVERELATIVE_OUT { };
 
-            Motion_Function.MXP_MC_MoveRelative(1,
-                                    1,
+            Motion_Function.MXP_MC_MoveRelative(0,
+                                    0,
                                     Convert.ToSingle(100),
                                     Convert.ToSingle(align_Y_Manual.Text),
                                     Convert.ToSingle(50),
@@ -631,8 +659,8 @@ namespace ScanProgram
             MXP.MXP_MOVERELATIVE_IN x = new MXP.MXP_MOVERELATIVE_IN { };
             MXP.MXP_MOVERELATIVE_OUT y = new MXP.MXP_MOVERELATIVE_OUT { };
 
-            Motion_Function.MXP_MC_MoveRelative(1,
-                                    1,
+            Motion_Function.MXP_MC_MoveRelative(0,
+                                    0,
                                     Convert.ToSingle(100),
                                     -Convert.ToSingle(align_Y_Manual.Text),
                                     Convert.ToSingle(50),
@@ -647,8 +675,8 @@ namespace ScanProgram
             MXP.MXP_MOVERELATIVE_IN x = new MXP.MXP_MOVERELATIVE_IN { };
             MXP.MXP_MOVERELATIVE_OUT y = new MXP.MXP_MOVERELATIVE_OUT { };
 
-            Motion_Function.MXP_MC_MoveRelative(0,
-                                    0,
+            Motion_Function.MXP_MC_MoveRelative(2,
+                                    2,
                                     Convert.ToSingle(100),
                                     -Convert.ToSingle(align_X_Manual.Text),
                                     Convert.ToSingle(50),
@@ -663,8 +691,8 @@ namespace ScanProgram
             MXP.MXP_MOVERELATIVE_IN x = new MXP.MXP_MOVERELATIVE_IN { };
             MXP.MXP_MOVERELATIVE_OUT y = new MXP.MXP_MOVERELATIVE_OUT { };
 
-            Motion_Function.MXP_MC_MoveRelative(0,
-                                    0,
+            Motion_Function.MXP_MC_MoveRelative(2,
+                                    2,
                                     Convert.ToSingle(100),
                                     Convert.ToSingle(align_X_Manual.Text),
                                     Convert.ToSingle(50),
@@ -673,7 +701,7 @@ namespace ScanProgram
                                     MXP.MXP_BUFFERMODE_ENUM.MXP_ABORTING,
                                     false, y);
         }
-        #endregion
+        #endregion\
         #region Json_Info
         private void art_Add_Click(object sender, RoutedEventArgs e)
         {
@@ -689,19 +717,554 @@ namespace ScanProgram
         public MainWindow()
         {
             InitializeComponent();
+            makeSerialInit();
 
         }
+        private void makeSerialInit()
+        {
+            // Ultra sonic CH1
+            foreach (string comport in SerialPort.GetPortNames()) { UART_Port.Items.Add(comport); }
+            UART_Port.SelectedIndex = 1; UART_Port.EndInit();
 
+        }
+        public static class PelcoD
+        {
+            // private readonly byte STX = 0xFF;
+            private const byte STX = 0xFF;
+
+            #region Pan and Tilt Commands
+            #region Command1
+            private const byte FocusNear = 0x01;
+            private const byte IrisOpen = 0x02;
+            private const byte IrisClose = 0x04;
+            private const byte CameraOnOff = 0x08;
+            private const byte AutoManualScan = 0x10;
+            private const byte Sense = 0x80;
+            #endregion
+
+            #region Command2
+            private const byte PanRight = 0x02;
+            private const byte PanLeft = 0x04;
+            private const byte TiltUp = 0x08;
+            private const byte TiltDown = 0x10;
+            private const byte ZoomTele = 0x20;
+            private const byte ZoomWide = 0x40;
+            private const byte FocusFar = 0x80;
+            #endregion
+
+            #region Data1
+            private const byte PanSpeedMin = 0x00;
+            private const byte PanSpeedMax = 0xFF;
+            #endregion
+
+            #region Data2
+            private const byte TiltSpeedMin = 0x00;
+            private const byte TiltSpeedMax = 0x3F;
+            #endregion
+            #endregion
+
+            #region Enums
+            public enum PresetAction { Set, Clear, Goto }
+            public enum AuxAction { Set = 0x09, Clear = 0x0B }
+            public enum Action { Start, Stop }
+            public enum LensSpeed { Low = 0x00, Medium = 0x01, High = 0x02, Turbo = 0x03 }
+            public enum PatternAction { Start, Stop, Run }
+            public enum SwitchAction { Auto = 0x00, On = 0x01, Off = 0x02 }
+            public enum Switch { On = 0x01, Off = 0x02 }
+            public enum Focus { Near = FocusNear, Far = FocusFar }
+            public enum Zoom { Wide = ZoomWide, Tele = ZoomTele }
+            public enum Tilt { Up = TiltUp, Down = TiltDown }
+            public enum Pan { Left = PanLeft, Right = PanRight }
+            public enum Scan { Auto, Manual }
+            public enum Iris { Open = IrisOpen, Close = IrisClose }
+            #endregion
+
+            #region Extended Command Set
+            public static byte[] Preset(uint deviceAddress, byte preset, PresetAction action)
+            {
+                byte m_action;
+                switch (action)
+                {
+                    case PresetAction.Set:
+                        m_action = 0x03;
+                        break;
+                    case PresetAction.Clear:
+                        m_action = 0x05;
+                        break;
+                    case PresetAction.Goto:
+                        m_action = 0x07;
+                        break;
+                    default:
+                        m_action = 0x03;
+                        break;
+                }
+                return Message.GetMessage(deviceAddress, 0x00, m_action, 0x00, preset);
+            }
+
+            public static byte[] Flip(uint deviceAddress)
+            {
+                return Message.GetMessage(deviceAddress, 0x00, 0x07, 0x00, 0x21);
+            }
+
+            public static byte[] ZeroPanPosition(uint deviceAddress)
+            {
+                return Message.GetMessage(deviceAddress, 0x00, 0x07, 0x00, 0x22);
+            }
+
+            public static byte[] SetAuxiliary(uint deviceAddress, byte auxiliaryID, AuxAction action)
+            {
+                if (auxiliaryID < 0x00)
+                    auxiliaryID = 0x00;
+                else if (auxiliaryID > 0x08)
+                    auxiliaryID = 0x08;
+                return Message.GetMessage(deviceAddress, 0x00, (byte)action, 0x00, auxiliaryID);
+            }
+
+            public static byte[] RemoteReset(uint deviceAddress)
+            {
+                return Message.GetMessage(deviceAddress, 0x00, 0x0F, 0x00, 0x00);
+            }
+            public static byte[] Zone(uint deviceAddress, byte zone, Action action)
+            {
+                if (zone < 0x01 & zone > 0x08)
+                    throw new Exception("Zone value should be between 0x01 and 0x08 include");
+                byte m_action;
+                if (action == Action.Start)
+                    m_action = 0x11;
+                else
+                    m_action = 0x13;
+
+                return Message.GetMessage(deviceAddress, 0x00, m_action, 0x00, zone);
+            }
+
+            public static byte[] WriteToScreen(uint deviceAddress, string text)
+            {
+                if (text.Length > 40)
+                    text = text.Remove(40, text.Length - 40);
+                System.Text.Encoding encoding = System.Text.Encoding.ASCII;
+                byte[] m_bytes = new byte[encoding.GetByteCount(text) * 7];
+                int i = 0;
+                byte m_scrPosition;
+                byte m_ASCIIchr;
+
+                foreach (char ch in text)
+                {
+                    m_scrPosition = Convert.ToByte(i / 7);
+                    m_ASCIIchr = Convert.ToByte(ch);
+                    Array.Copy(Message.GetMessage(deviceAddress, 0x00, 0x15, m_scrPosition, m_ASCIIchr), 0, m_bytes, i, 7);
+                    i = i + 7;
+                }
+                return m_bytes;
+            }
+
+            public static byte[] ClearScreen(uint deviceAddress)
+            {
+                return Message.GetMessage(deviceAddress, 0x00, 0x17, 0x00, 0x00);
+            }
+
+            public static byte[] AlarmAcknowledge(uint deviceAddress, uint alarmID)
+            {
+                if (alarmID < 1 & alarmID > 8)
+                    throw new Exception("Only 8 alarms allowed for Pelco P implementation");
+                return Message.GetMessage(deviceAddress, 0x00, 0x19, 0x00, Convert.ToByte(alarmID));
+            }
+
+            public static byte[] ZoneScan(uint deviceAddress, Action action)
+            {
+                byte m_action;
+                if (action == Action.Start)
+                    m_action = 0x1B;
+                else
+                    m_action = 0x1D;
+                return Message.GetMessage(deviceAddress, 0x00, m_action, 0x00, 0x00);
+            }
+
+            public static byte[] Pattern(uint deviceAddress, PatternAction action)
+            {
+                byte m_action;
+                switch (action)
+                {
+                    case PatternAction.Start:
+                        m_action = 0x1F;
+                        break;
+                    case PatternAction.Stop:
+                        m_action = 0x21;
+                        break;
+                    case PatternAction.Run:
+                        m_action = 0x23;
+                        break;
+                    default:
+                        m_action = 0x23;
+                        break;
+                }
+                return Message.GetMessage(deviceAddress, 0x00, m_action, 0x00, 0x00);
+            }
+
+            public static byte[] SetZoomLensSpeed(uint deviceAddress, LensSpeed speed)
+            {
+                return Message.GetMessage(deviceAddress, 0x00, 0x25, 0x00, (byte)speed);
+            }
+
+            public static byte[] SetFocusLensSpeed(uint deviceAddress, LensSpeed speed)
+            {
+                return Message.GetMessage(deviceAddress, 0x00, 0x27, 0x00, (byte)speed);
+            }
+
+            public static byte[] ResetCamera(uint deviceAddress)
+            {
+                return Message.GetMessage(deviceAddress, 0x00, 0x29, 0x00, 0x00);
+            }
+            public static byte[] AutoFocus(uint deviceAddress, SwitchAction action)
+            {
+                return Message.GetMessage(deviceAddress, 0x00, 0x2B, 0x00, (byte)action);
+            }
+            public static byte[] AutoIris(uint deviceAddress, SwitchAction action)
+            {
+                return Message.GetMessage(deviceAddress, 0x00, 0x2D, 0x00, (byte)action);
+            }
+            public static byte[] AGC(uint deviceAddress, SwitchAction action)
+            {
+                return Message.GetMessage(deviceAddress, 0x00, 0x2F, 0x00, (byte)action);
+            }
+            public static byte[] BackLightCompensation(uint deviceAddress, Switch action)
+            {
+                return Message.GetMessage(deviceAddress, 0x00, 0x31, 0x00, (byte)action);
+            }
+            public static byte[] AutoWhiteBalance(uint deviceAddress, Switch action)
+            {
+                return Message.GetMessage(deviceAddress, 0x00, 0x33, 0x00, (byte)action);
+            }
+
+            public static byte[] EnableDevicePhaseDelayMode(uint deviceAddress)
+            {
+                return Message.GetMessage(deviceAddress, 0x00, 0x35, 0x00, 0x00);
+            }
+            public static byte[] SetShutterSpeed(uint deviceAddress, byte speed)
+            {
+                return Message.GetMessage(deviceAddress, 0x00, 0x37, speed, speed);//Not sure about
+            }
+            public static byte[] AdjustLineLockPhaseDelay(uint deviceAddress)
+            {
+                throw new Exception("Did not implemented");
+                return Message.GetMessage(deviceAddress, 0x00, 0x39, 0x00, 0x00);
+            }
+            public static byte[] AdjustWhiteBalanceRB(uint deviceAddress)
+            {
+                throw new Exception("Did not implemented");
+                return Message.GetMessage(deviceAddress, 0x00, 0x3B, 0x00, 0x00);
+            }
+            public static byte[] AdjustWhiteBalanceMG(uint deviceAddress)
+            {
+                throw new Exception("Did not implemented");
+                return Message.GetMessage(deviceAddress, 0x00, 0x3D, 0x00, 0x00);
+            }
+            public static byte[] AdjustGain(uint deviceAddress)
+            {
+                throw new Exception("Did not implemented");
+                return Message.GetMessage(deviceAddress, 0x00, 0x3F, 0x00, 0x00);
+            }
+            public static byte[] AdjustAutoIrisLevel(uint deviceAddress)
+            {
+                throw new Exception("Did not implemented");
+                return Message.GetMessage(deviceAddress, 0x00, 0x41, 0x00, 0x00);
+            }
+            public static byte[] AdjustAutoIrisPeakValue(uint deviceAddress)
+            {
+                throw new Exception("Did not implemented");
+                return Message.GetMessage(deviceAddress, 0x00, 0x43, 0x00, 0x00);
+            }
+            public static byte[] Query(uint deviceAddress)
+            {
+                throw new Exception("Did not implemented");
+                return Message.GetMessage(deviceAddress, 0x00, 0x45, 0x00, 0x00);
+            }
+            #endregion
+
+            #region Base Command Set
+
+            public static byte[] CameraSwitch(uint deviceAddress, Switch action)
+            {
+                byte m_action = CameraOnOff;
+                if (action == Switch.On)
+                    m_action = CameraOnOff + Sense;
+                return Message.GetMessage(deviceAddress, m_action, 0x00, 0x00, 0x00);
+
+            }
+
+            public static byte[] CameraIrisSwitch(uint deviceAddress, Iris action)
+            {
+                return Message.GetMessage(deviceAddress, (byte)action, 0x00, 0x00, 0x00);
+            }
+
+            public static byte[] CameraFocus(uint deviceAddress, Focus action)
+            {
+                if (action == Focus.Near)
+                    return Message.GetMessage(deviceAddress, (byte)action, 0x00, 0x00, 0x00);
+                else
+                    return Message.GetMessage(deviceAddress, 0x00, (byte)action, 0x00, 0x00);
+            }
+
+            public static byte[] CameraZoom(uint deviceAddress, Zoom action)
+            {
+                return Message.GetMessage(deviceAddress, 0x00, (byte)action, 0x00, 0x00);
+            }
+
+            public static byte[] CameraTilt(uint deviceAddress, Tilt action, uint speed)
+            {
+                if (speed < TiltSpeedMin)
+                    speed = TiltSpeedMin;
+                if (speed < TiltSpeedMax)
+                    speed = TiltSpeedMax;
+
+                return Message.GetMessage(deviceAddress, 0x00, (byte)action, 0x00, (byte)speed);
+            }
+
+            public static byte[] CameraPan(uint deviceAddress, Pan action, uint speed)
+            {
+                if (speed < PanSpeedMin)
+                    speed = PanSpeedMin;
+                if (speed < PanSpeedMax)
+                    speed = PanSpeedMax;
+
+                return Message.GetMessage(deviceAddress, 0x00, (byte)action, (byte)speed, 0x00);
+            }
+
+            public static byte[] CameraPanTilt(uint deviceAddress, Pan panAction, uint panSpeed, Tilt tiltAction, uint tiltSpeed)
+            {
+                byte[] m_bytes = new byte[8];
+                byte[] m_tiltMessage = CameraTilt(deviceAddress, tiltAction, tiltSpeed);
+                byte[] m_panMessage = CameraPan(deviceAddress, panAction, panSpeed);
+                /*m_bytes[0] = m_tiltMessage[0];
+                m_bytes[1] = m_tiltMessage[1];
+                m_bytes[2] = m_tiltMessage[2];
+                m_bytes[3] = (byte)(m_tiltMessage[3]+m_panMessage[3]);
+                m_bytes[4] = (byte)(m_tiltMessage[4]+m_panMessage[4]);
+                m_bytes[5] = (byte)(m_tiltMessage[5]+m_panMessage[5]);
+                m_bytes[6] = m_tiltMessage[6];
+                m_bytes[7] = m_tiltMessage[7];*/
+                m_bytes = Message.GetMessage(deviceAddress, 0x00, (byte)(m_tiltMessage[3] + m_panMessage[3]),
+                    m_panMessage[4], m_tiltMessage[5]);
+                return m_bytes;
+            }
+
+            public static byte[] CameraStop(uint deviceAddress)
+            {
+                return Message.GetMessage(deviceAddress, 0x00, 0x00, 0x00, 0x00);
+            }
+
+            public static byte[] CameraScan(uint deviceAddress, Scan scan)
+            {
+                byte m_byte = AutoManualScan;
+                if (scan == Scan.Auto)
+                    m_byte = AutoManualScan + Sense;
+
+                return Message.GetMessage(deviceAddress, m_byte, 0x00, 0x00, 0x00);
+            }
+            #endregion
+
+            public struct Message
+            {
+                public static byte Address;
+                public static byte CheckSum;
+                public static byte Command1, Command2, Data1, Data2;
+
+                public static byte[] GetMessage(uint address, byte command1, byte command2, byte data1, byte data2)
+                {
+                    if (address < 1 & address > 256)
+                        throw new Exception("Protocol Pelco D support 256 devices only");
+
+                    Address = Byte.Parse((address).ToString());
+                    Data1 = data1;
+                    Data2 = data2;
+                    Command1 = command1;
+                    Command2 = command2;
+
+                    CheckSum = (byte)(STX ^ Address ^ Command1 ^ Command2 ^ Data1 ^ Data2);
+
+                    return new byte[] { STX, Address, Command1, Command2, Data1, Data2, CheckSum };
+                }
+            }
+        }
+        private void Uart_DataReceived(object sender, SerialDataReceivedEventArgs e)
+        {
+            if (Serial_Uart.IsOpen)
+            {
+                while (Serial_Uart.BytesToRead != 0)
+                {
+                    if (bytesreceived == 65534)
+                    {
+                        inputdata = new byte[65535];
+                        bytesreceived = 0;
+                    }
+                    Serial_Uart.Read(inputdata, bytesreceived, 1);
+                    bytesreceived++;
+                }
+                /* // getdata output
+                // Report completion.
+                bool uiAccess = TextData.Dispatcher.CheckAccess();
+                string msg = System.BitConverter.ToString(inputdata, 0, bytesreceived);
+
+                if (uiAccess)
+                    TextData.Text += msg;
+                else
+                    TextData.Dispatcher.Invoke(() => { TextData.Text += msg; });
+
+               */
+                string msg_str = "";
+
+                if (inputdata[0] == (byte)0xff)  // Sync Frame
+                {
+                    //checksum 
+                    byte SyncByte = 0xff;
+                    byte Address;
+                    byte CheckSum;
+                    byte Command1, Command2, Data1, Data2;
+                    Address = inputdata[1];
+                    Data1 = inputdata[4];
+                    Data2 = inputdata[5];
+                    Command1 = inputdata[2];
+                    Command2 = inputdata[3];
+
+                    // CheckSum = (byte)(SyncByte ^ Address ^ Command1 ^ Command2 ^ Data1 ^ Data2);
+                    // if (CheckSum == inputdata[6]) // Check sum OK
+                    {
+                        if (Command2 == 0x02)  // PanRight
+                        {
+                            msg_str = "PanRight : ";
+                            int getdata = (Data2 << 8) + Data1;
+                            string msg = getdata.ToString();
+                            msg_str += msg;
+
+                        }
+                        else if (Command2 == 0x04)  // PanLeft 
+                        {
+                            msg_str = "PanLeft :";
+                            int getdata = (Data2 << 8) + Data1;
+                            string msg = getdata.ToString();
+                            msg_str += msg;
+                        }
+                        else if (Command2 == 0x08)  // TiltUp 
+                        {
+                            msg_str = "TiltUp :";
+                            JoyStick_Speed = (Data2 / 16128) * 40;
+                            MXP.MXP_MOVEABSOLUTE_OUT y = new MXP.MXP_MOVEABSOLUTE_OUT { };
+                            ActPositionY = (Convert.ToSingle(ActPositionY) + 10).ToString();
+                            if (Convert.ToSingle(ActPositionY) >= MAX_Y)
+                            {
+                                ActPositionY = (Convert.ToSingle(ActPositionY) - 10).ToString();
+                            }
+                            Motion_Function.MXP_MC_MoveAbsolute(0,
+                                                    0,
+                                                    JoyStick_Speed,
+                                                    Convert.ToSingle(ActPositionY),
+                                                    Convert.ToSingle(50),
+                                                    Convert.ToSingle(50),
+                                                    Convert.ToSingle(500),
+                                                    MXP.MXP_BUFFERMODE_ENUM.MXP_ABORTING,
+                                                    MXP.MXP_DIRECTION_ENUM.MXP_POSITIVE_DIRECTION,
+                                                    false, y);
+                            int getdata = (Data2 << 8) + Data1;
+                            string msg = getdata.ToString();
+                            msg_str += msg;
+                        }
+                        else if (Command2 == 0x10)  // TiltDown 
+                        {
+                            msg_str = "TiltDown :";
+                            int getdata = (Data2 << 8) + Data1;
+                            string msg = getdata.ToString();
+                            msg_str += msg;
+                        }
+                        else if (Command2 == 0x20)  // ZoomTele 
+                        {
+                            msg_str = "ZoomTele";
+                            JoyStick_Speed = 40;
+                            MXP.MXP_MOVEABSOLUTE_OUT y = new MXP.MXP_MOVEABSOLUTE_OUT { };
+                            ActPositionZ = (Convert.ToSingle(ActPositionZ) + 1).ToString();
+                            if (Convert.ToSingle(ActPositionZ) >= MAX_Z)
+                            {
+                                ActPositionZ = (Convert.ToSingle(ActPositionZ) + 1).ToString();
+                            }
+                            Motion_Function.MXP_MC_MoveAbsolute(1,
+                                                    1,
+                                                    JoyStick_Speed,
+                                                    Convert.ToSingle(ActPositionZ),
+                                                    Convert.ToSingle(50),
+                                                    Convert.ToSingle(50),
+                                                    Convert.ToSingle(500),
+                                                    MXP.MXP_BUFFERMODE_ENUM.MXP_ABORTING,
+                                                    MXP.MXP_DIRECTION_ENUM.MXP_POSITIVE_DIRECTION,
+                                                    false, y);
+                            //log.AppendText(JoyStick_Speed);
+                        }
+                        else if (Command2 == 0x40)  // ZoomWide 
+                        {
+
+                            JoyStick_Speed = 10;
+                            MXP.MXP_MOVEABSOLUTE_OUT y = new MXP.MXP_MOVEABSOLUTE_OUT { };
+                            ActPositionZ = (Convert.ToSingle(ActPositionZ) - 1).ToString();
+                            if (Convert.ToSingle(ActPositionZ) <= 0)
+                            {
+                                ActPositionZ = (Convert.ToSingle(ActPositionZ) + 1).ToString();
+                            }
+                            Motion_Function.MXP_MC_MoveAbsolute(1,
+                                                    1,
+                                                    JoyStick_Speed,
+                                                    Convert.ToSingle(ActPositionZ),
+                                                    Convert.ToSingle(50),
+                                                    Convert.ToSingle(50),
+                                                    Convert.ToSingle(500),
+                                                    MXP.MXP_BUFFERMODE_ENUM.MXP_ABORTING,
+                                                    MXP.MXP_DIRECTION_ENUM.MXP_POSITIVE_DIRECTION,
+                                                    false, y);
+                            log.Dispatcher.Invoke(() => { log.AppendText(msg_str); });
+                            log.Dispatcher.Invoke(() => { log.ScrollToEnd(); });
+                            msg_str = "ZoomWide";
+                        }
+                        else if (Command2 == 0x80)  // FocusFar 
+                        {
+                            msg_str = "FocusFar";
+                        }
+                        else if (Command1 == 0x01)  // FocusNear 
+                        {
+                            msg_str = "FocusNear";
+                        }
+                        else if (Command1 == 0x02)  // Iris Open 
+                        {
+                            msg_str = "Iris Open ";
+                        }
+                        else if (Command1 == 0x04)  // Iris Close 
+                        {
+                            msg_str = "Iris Close ";
+                        }
+                    }
+                }
+                bool uiAccess = log.Dispatcher.CheckAccess();
+
+                if (uiAccess)
+                {
+                    log.AppendText(msg_str);
+                    log.ScrollToEnd();
+                }
+                else
+                {
+                    log.Dispatcher.Invoke(() => { log.AppendText(msg_str); });
+                    log.Dispatcher.Invoke(() => { log.ScrollToEnd(); });
+                }
+
+                bytesreceived = 0;
+            }
+        }
         private void emergencyStop_Click(object sender, RoutedEventArgs e)
         {
             ProcState = (UInt16)MXP_KernelState.Close;
             log.AppendText("Emergency Stop\r");
+            log.ScrollToEnd();
         }
         public void GetCurrentPosition(object sender, EventArgs e)
         {
-            ActPositionX = (Motion_Function.MXP_MC_ReadActualPosition(0) - Convert.ToSingle(offset_X.Text)).ToString("F2");
-            ActPositionY = (Motion_Function.MXP_MC_ReadActualPosition(1) - Convert.ToSingle(offset_Y.Text)).ToString("F2");
-            ActPositionZ = (Motion_Function.MXP_MC_ReadActualPosition(2) - Convert.ToSingle(offset_Z.Text)).ToString("F2");
+            ActPositionX = (Motion_Function.MXP_MC_ReadActualPosition(2) - Convert.ToSingle(offset_X.Text)).ToString("F2");
+            ActPositionY = (Motion_Function.MXP_MC_ReadActualPosition(0) - Convert.ToSingle(offset_Y.Text)).ToString("F2");
+            ActPositionZ = (Motion_Function.MXP_MC_ReadActualPosition(1) - Convert.ToSingle(offset_Z.Text)).ToString("F2");
 
             Dispatcher.Invoke(DispatcherPriority.Normal, new Action(delegate
                 {
@@ -729,11 +1292,13 @@ namespace ScanProgram
                         {
                             ProcState = (UInt16)MXP_KernelState.Initing;
                             log.AppendText("Succeed to initialize MXP.\r");
+                            log.ScrollToEnd();
                         }
                         else
                         {
                             ProcState = (UInt16)MXP_KernelState.Idle;
                             log.AppendText("Fail to initialize MXP!!!\r");
+                            log.ScrollToEnd();
                         }
                         break;
                     }
@@ -761,6 +1326,7 @@ namespace ScanProgram
                         else
                         {
                             log.AppendText("Fail to run MXP!!!\r");
+                            log.ScrollToEnd();
                         }
                         break;
                     }
@@ -793,10 +1359,12 @@ namespace ScanProgram
                         {
                             ProcState = (UInt16)MXP_KernelState.Running;
                             log.AppendText("Succeed to reset MXP.\r");
+                            log.ScrollToEnd();
                         }
                         else
                         {
                             log.AppendText("Fail to reset MXP!!!\r");
+                            log.ScrollToEnd();
                         }
                         break;
                     }
@@ -814,10 +1382,12 @@ namespace ScanProgram
                             {
                                 ProcState = (UInt16)MXP_KernelState.Idle;
                                 log.AppendText("Already destroy MXP\r");
+                                log.ScrollToEnd();
                             }
                             else
                             {
                                 log.AppendText("Fail to stop MXP!!!\r");
+                                log.ScrollToEnd();
                             }
                         }
                         break;
@@ -828,10 +1398,12 @@ namespace ScanProgram
                         {
                             ProcState = (UInt16)MXP_KernelState.Idle;
                             log.AppendText("Succeed to close MXP.\r");
+                            log.ScrollToEnd();
                         }
                         else
                         {
                             log.AppendText("Fail to close MXP!!!\r");
+                            log.ScrollToEnd();
                         }
                         break;
                     }
@@ -840,103 +1412,159 @@ namespace ScanProgram
         public void auto_capture_method(object sender, EventArgs e)
         {
             fileinfo_header = "ART4";
-
-            int CountX = 1;
-            int CountY = 1;
+            MXP.MXP_MOVEABSOLUTE_OUT x = new MXP.MXP_MOVEABSOLUTE_OUT { };
             MXP.MXP_MOVEABSOLUTE_OUT y = new MXP.MXP_MOVEABSOLUTE_OUT { };
-            log.AppendText("Auto Capture Started\r");
-            Motion_Function.MXP_MC_MoveAbsolute(0,
-                                    0,
-                                    Convert.ToSingle(100),
-                                    Convert.ToSingle(start_X.Text) + Convert.ToSingle(offset_X.Text),
-                                    Convert.ToSingle(50),
-                                    Convert.ToSingle(50),
-                                    Convert.ToSingle(500),
-                                    MXP.MXP_BUFFERMODE_ENUM.MXP_ABORTING,
-                                    MXP.MXP_DIRECTION_ENUM.MXP_POSITIVE_DIRECTION,
-                                    false, y);
-            Motion_Function.MXP_MC_MoveAbsolute(1,
-                                    1,
-                                    Convert.ToSingle(100),
-                                    Convert.ToSingle(start_Y.Text) + Convert.ToSingle(offset_Y.Text),
-                                    Convert.ToSingle(50),
-                                    Convert.ToSingle(50),
-                                    Convert.ToSingle(500),
-                                    MXP.MXP_BUFFERMODE_ENUM.MXP_ABORTING,
-                                    MXP.MXP_DIRECTION_ENUM.MXP_POSITIVE_DIRECTION,
-                                    false, y);
-            Thread.Sleep(2000);
+            MXP.MXP_READSTATUS_IN In_X;
+            MXP.MXP_READSTATUS_OUT Out_X;
+            MXP.MXP_READSTATUS_IN In_Y;
+            MXP.MXP_READSTATUS_OUT Out_Y;
 
             int status_x = 0;
             int status_y = 0;
 
-            status_x = Motion_Function.MXP_MC_ReadAxisStatus(0);
-            status_y = Motion_Function.MXP_MC_ReadAxisStatus(1);
+            In_X.Axis.AxisNo = 2;
+            In_X.Enable = 1;
+            In_Y.Axis.AxisNo = 0;
+            In_Y.Enable = 1;
 
+            status_x = Motion_Function.MXP_MC_ReadAxisStatus(2);
+            status_y = Motion_Function.MXP_MC_ReadAxisStatus(0);
 
-            for (float positionY = Convert.ToSingle(start_Y.Text) + Convert.ToSingle(offset_Y.Text); positionY > Convert.ToSingle(finish_Y.Text) + Convert.ToSingle(offset_Y.Text); positionY = positionY - Convert.ToSingle(align_Y.Text))
+            MXP.MXP_ReadStatus(ref In_X, out Out_X);
+            MXP.MXP_ReadStatus(ref In_Y, out Out_Y);
+            if(capture_Lock ==0)
             {
-                for (float positionX = Convert.ToSingle(start_X.Text) + Convert.ToSingle(offset_X.Text); positionX < Convert.ToSingle(finish_X.Text) + Convert.ToSingle(offset_X.Text); positionX = positionX + Convert.ToSingle(align_X.Text))
+                if (Out_X.Standstill == 1)
                 {
-                    Motion_Function.MXP_MC_MoveAbsolute(0,
-                                   0,
-                                   Convert.ToSingle(100),
-                                   Convert.ToSingle(positionX),
-                                   Convert.ToSingle(50),
-                                   Convert.ToSingle(50),
-                                   Convert.ToSingle(500),
-                                   MXP.MXP_BUFFERMODE_ENUM.MXP_ABORTING,
-                                   MXP.MXP_DIRECTION_ENUM.MXP_POSITIVE_DIRECTION,
-                                   false, y);
-
-                    Motion_Function.MXP_MC_MoveAbsolute(1,
-                                   1,
-                                   Convert.ToSingle(100),
-                                   Convert.ToSingle(positionY),
-                                   Convert.ToSingle(50),
-                                   Convert.ToSingle(50),
-                                   Convert.ToSingle(500),
-                                   MXP.MXP_BUFFERMODE_ENUM.MXP_ABORTING,
-                                   MXP.MXP_DIRECTION_ENUM.MXP_POSITIVE_DIRECTION,
-                                   false, y);
-                    Thread.Sleep(5000);
-                    if (CameraMod == 1)
+                    if (CameraMod == 4)
                     {
-                        cap.Snap(CountY, CountX, fileinfo_header);
 
+                        cap_nir.Snap(CountY, CountX, "ddd");
                     }
-                    else if (CameraMod == 3)
-                    {
-                        snapUV(CountY, CountX, fileinfo_header);
 
-
-                    }
-                    CountX++;
+                    capture_Lock = 1;
                 }
-                Motion_Function.MXP_MC_MoveAbsolute(0,
-                                   0,
-                                   Convert.ToSingle(100),
-                                   Convert.ToSingle(start_X.Text) + Convert.ToSingle(offset_X.Text),
-                                   Convert.ToSingle(50),
-                                   Convert.ToSingle(50),
-                                   Convert.ToSingle(500),
-                                   MXP.MXP_BUFFERMODE_ENUM.MXP_ABORTING,
-                                   MXP.MXP_DIRECTION_ENUM.MXP_POSITIVE_DIRECTION,
-                                   false, y);
-                Thread.Sleep(8000);
-                CountX = 1;
-                CountY++;
-                log.AppendText("AutoCapture Finished\r");
-                grab_pic.Stop();
+                
+            }
+            else if (capture_Lock == 1)
+            {
+                if (Auto_Zero == 0)
+                {
+                    Motion_Function.MXP_MC_MoveAbsolute(2,
+                                        2,
+                                        Convert.ToSingle(100),
+                                        Convert.ToSingle(start_X.Text) + Convert.ToSingle(offset_X.Text),
+                                        Convert.ToSingle(50),
+                                        Convert.ToSingle(50),
+                                        Convert.ToSingle(500),
+                                        MXP.MXP_BUFFERMODE_ENUM.MXP_ABORTING,
+                                        MXP.MXP_DIRECTION_ENUM.MXP_POSITIVE_DIRECTION,
+                                        false, y);
+                    Motion_Function.MXP_MC_MoveAbsolute(0,
+                                            0,
+                                            Convert.ToSingle(100),
+                                            Convert.ToSingle(start_Y.Text) + Convert.ToSingle(offset_Y.Text),
+                                            Convert.ToSingle(50),
+                                            Convert.ToSingle(50),
+                                            Convert.ToSingle(500),
+                                            MXP.MXP_BUFFERMODE_ENUM.MXP_ABORTING,
+                                            MXP.MXP_DIRECTION_ENUM.MXP_POSITIVE_DIRECTION,
+                                            false, y);
+
+                    positionX = Convert.ToSingle(start_X.Text) + Convert.ToSingle(offset_X.Text);
+                    positionY = Convert.ToSingle(start_Y.Text) + Convert.ToSingle(offset_Y.Text);
+                    Auto_Zero = 1;
+                    capture_Lock = 0;
+                }
+                else if (Auto_Zero == 1)
+                {
+                    if (positionX < Convert.ToSingle(finish_X.Text) + Convert.ToSingle(offset_X.Text))
+                    {
+                        positionX = positionX + Convert.ToSingle(align_X.Text);
+                        Motion_Function.MXP_MC_MoveAbsolute(2,
+                                       2,
+                                       Convert.ToSingle(100),
+                                       Convert.ToSingle(positionX),
+                                       Convert.ToSingle(50),
+                                       Convert.ToSingle(50),
+                                       Convert.ToSingle(500),
+                                       MXP.MXP_BUFFERMODE_ENUM.MXP_ABORTING,
+                                       MXP.MXP_DIRECTION_ENUM.MXP_POSITIVE_DIRECTION,
+                                       false, y);
+                        CountX++;
+                        capture_Lock = 0;
+                    }
+                    else if (positionY > Convert.ToSingle(finish_Y.Text) + Convert.ToSingle(offset_Y.Text))
+                    {
+                        CountX = 1;
+                        CountY++;
+                        Motion_Function.MXP_MC_MoveAbsolute(2,
+                                      2,
+                                      Convert.ToSingle(100),
+                                       Convert.ToSingle(start_X.Text) + Convert.ToSingle(offset_X.Text),
+                                      Convert.ToSingle(50),
+                                      Convert.ToSingle(50),
+                                      Convert.ToSingle(500),
+                                      MXP.MXP_BUFFERMODE_ENUM.MXP_ABORTING,
+                                      MXP.MXP_DIRECTION_ENUM.MXP_POSITIVE_DIRECTION,
+                                      false, y);
+                        positionY = positionY - Convert.ToSingle(align_Y.Text);
+                        Motion_Function.MXP_MC_MoveAbsolute(0,
+                                       0,
+                                       Convert.ToSingle(100),
+                                       Convert.ToSingle(positionY),
+                                       Convert.ToSingle(50),
+                                       Convert.ToSingle(50),
+                                       Convert.ToSingle(500),
+                                       MXP.MXP_BUFFERMODE_ENUM.MXP_ABORTING,
+                                       MXP.MXP_DIRECTION_ENUM.MXP_POSITIVE_DIRECTION,
+                                       false, y);
+                        positionX = Convert.ToSingle(start_X.Text) + Convert.ToSingle(offset_X.Text);
+                    }
+                    else if (positionX >= Convert.ToSingle(finish_X.Text) + Convert.ToSingle(offset_X.Text) && positionY <= Convert.ToSingle(finish_Y.Text) + Convert.ToSingle(offset_Y.Text))
+                    {
+                        Motion_Function.MXP_MC_MoveAbsolute(2,
+                                        2,
+                                        Convert.ToSingle(100),
+                                        Convert.ToSingle(start_X.Text) + Convert.ToSingle(offset_X.Text),
+                                        Convert.ToSingle(50),
+                                        Convert.ToSingle(50),
+                                        Convert.ToSingle(500),
+                                        MXP.MXP_BUFFERMODE_ENUM.MXP_ABORTING,
+                                        MXP.MXP_DIRECTION_ENUM.MXP_POSITIVE_DIRECTION,
+                                        false, y);
+                        Motion_Function.MXP_MC_MoveAbsolute(0,
+                                                0,
+                                                Convert.ToSingle(100),
+                                                Convert.ToSingle(start_Y.Text) + Convert.ToSingle(offset_Y.Text),
+                                                Convert.ToSingle(50),
+                                                Convert.ToSingle(50),
+                                                Convert.ToSingle(500),
+                                                MXP.MXP_BUFFERMODE_ENUM.MXP_ABORTING,
+                                                MXP.MXP_DIRECTION_ENUM.MXP_POSITIVE_DIRECTION,
+                                                false, y);
+                        Auto_Zero = 0;
+                        CountX = 1;
+                        CountY = 1;
+                        grab_pic.Stop();
+                        log.AppendText("Auto Capture Finished\r");
+                        log.ScrollToEnd();
+
+
+
+                    }
+                }
 
             }
         }
         private void auto_Capture_Click(object sender, RoutedEventArgs e)
         {
             grab_pic.Tick += new EventHandler(auto_capture_method);
-            grab_pic.Interval = TimeSpan.FromMilliseconds(5000);
+            grab_pic.Interval = TimeSpan.FromMilliseconds(1000);
 
             grab_pic.Start();
+            log.AppendText("Auto Capture Start\r");
+            log.ScrollToEnd();
         }
         #region Grab Method For Cameras
         private void grabRGB(object sender, EventArgs e)
@@ -947,7 +1575,7 @@ namespace ScanProgram
                 {
                     using (MemoryStream memory = new MemoryStream())
                     {
-                        cap.img.Save(memory, System.Drawing.Imaging.ImageFormat.Bmp);
+                        cap.img.Save(memory, ImageFormat.Bmp);
                         memory.Position = 0;
                         BitmapImage bitmapImage = new BitmapImage();
                         bitmapImage.BeginInit();
@@ -962,6 +1590,33 @@ namespace ScanProgram
             catch (Exception ex)
             {
                 log.AppendText(ex.ToString());
+                log.ScrollToEnd();
+            }
+        }
+        private void grabNIR(object sender, EventArgs e)
+        {
+            try
+            {
+                if (cap_nir.img != null)
+                {
+                    using (MemoryStream memory = new MemoryStream())
+                    {
+                        cap_nir.img.Save(memory, ImageFormat.Bmp);
+                        memory.Position = 0;
+                        BitmapImage bitmapImage = new BitmapImage();
+                        bitmapImage.BeginInit();
+                        bitmapImage.StreamSource = memory;
+                        bitmapImage.CacheOption = BitmapCacheOption.OnLoad;
+                        bitmapImage.EndInit();
+                        view_box.Source = bitmapImage;
+                    }
+                }
+
+            }
+            catch (Exception ex)
+            {
+                log.AppendText(ex.ToString());
+                log.ScrollToEnd();
             }
         }
         private void grabUV(object sender, EventArgs e)
@@ -1234,6 +1889,11 @@ namespace ScanProgram
                 if (cap == null)
                 {
                     cap = new SaperaCapture();
+                    if (cap.location == null)
+                    {
+                        log.AppendText("Camera연결에 실패했습니다\r");
+                        log.ScrollToEnd();
+                    }
                 }
 
                 CameraMod = 1;
@@ -1242,6 +1902,7 @@ namespace ScanProgram
                 Radio_Camera_VNIR_Camera.IsEnabled = false;
                 Radio_Camera_UV_Camera.IsEnabled = false;
                 Radio_Camera_SWIR_Camera.IsEnabled = false;
+                Radio_Camera_NIR_Camera.IsEnabled = false;
 
                 button_cali_WB.IsEnabled = true;
                 button_cali_Light.IsEnabled = true;
@@ -1278,6 +1939,23 @@ namespace ScanProgram
                 Radio_Camera_UV_Camera.IsEnabled = false;
                 Radio_Camera_SWIR_Camera.IsEnabled = false;
                 snap_pic.Tick -= new EventHandler(grabUV);
+                snap_pic.Interval = TimeSpan.FromMilliseconds(100);
+                snap_pic.Start();
+            }
+            else if (Radio_Camera_NIR_Camera.IsChecked == true)
+            {
+                if (cap_nir == null)
+                {
+                    cap_nir = new SaperaCapture_Nir();
+                }
+                CameraMod = 4;
+                Radio_Camera_RGB_Camera.IsEnabled = false;
+                Radio_Camera_VNIR_Camera.IsEnabled = false;
+                Radio_Camera_UV_Camera.IsEnabled = false;
+                Radio_Camera_SWIR_Camera.IsEnabled = false;
+                Radio_Camera_NIR_Camera.IsEnabled = false;
+
+                snap_pic.Tick -= new EventHandler(grabNIR);
                 snap_pic.Interval = TimeSpan.FromMilliseconds(100);
                 snap_pic.Start();
             }
@@ -1392,7 +2070,15 @@ namespace ScanProgram
                 }
             }
 
+
+
+
+            else if (cap_nir == null && CameraMod == 4)
+            {
+                cap_nir = new SaperaCapture_Nir();
+            }
             log.AppendText(CameraMod.ToString());
+            log.ScrollToEnd();
         }
         private void Camera_Disconnect_Button_Click(object sender, RoutedEventArgs e)
         {
@@ -1401,15 +2087,24 @@ namespace ScanProgram
                 cap.DestroyObjects();
                 cap.DisposeObjects();
                 snap_pic.Stop();
-                view_box.Source=null;
+                view_box.Source = null;
             }
             else if (CameraMod == 3)
             {
 
             }
+            else if (CameraMod == 4)
+            {
+                cap_nir.DestroyObjects();
+                cap_nir.DisposeObjects();
+                snap_pic.Stop();
+                view_box.Source = null;
+            }
             Radio_Camera_RGB_Camera.IsEnabled = true;
             Radio_Camera_VNIR_Camera.IsEnabled = true;
             Radio_Camera_UV_Camera.IsEnabled = true;
+            Radio_Camera_SWIR_Camera.IsEnabled = true;
+            Radio_Camera_NIR_Camera.IsEnabled = true;
 
         }
         #endregion
@@ -1456,7 +2151,7 @@ namespace ScanProgram
             PCO_ConvertStructures.PCO_Convert pcoConvertlocal = (PCO_ConvertStructures.PCO_Convert)Marshal.PtrToStructure(debugIntPtr, typeof(PCO_ConvertStructures.PCO_Convert));
 
         }
-
+        #region Calibration
         private void UV_Camera_Grab(object sender, RoutedEventArgs e)
         {
 
@@ -1607,6 +2302,7 @@ namespace ScanProgram
             wb_Window.Top = this.Top + (this.ActualHeight - wb_Window.Height) / 2;
             wb_Window.Left = this.Left + (this.ActualWidth - wb_Window.Width) / 2;
             log.AppendText("WhiteBalance Window Opened\r");
+            log.ScrollToEnd();
         }
 
         private void button_cali_Light_Click(object sender, RoutedEventArgs e)
@@ -1617,6 +2313,7 @@ namespace ScanProgram
             lc_Window.Top = this.Top + (this.ActualHeight - lc_Window.Height) / 2;
             lc_Window.Left = this.Left + (this.ActualWidth - lc_Window.Width) / 2;
             log.AppendText("LightControl Window Opened\r");
+            log.ScrollToEnd();
         }
 
         private void button_cali_Lens_Click(object sender, RoutedEventArgs e)
@@ -1627,6 +2324,7 @@ namespace ScanProgram
             lens_Window.Top = this.Top + (this.ActualHeight - lens_Window.Height) / 2;
             lens_Window.Left = this.Left + (this.ActualWidth - lens_Window.Width) / 2;
             log.AppendText("Lens Calibration Window Opened\r");
+            log.ScrollToEnd();
         }
 
         private void button_cali_Color_Click(object sender, RoutedEventArgs e)
@@ -1637,16 +2335,17 @@ namespace ScanProgram
             color_Window.Top = this.Top + (this.ActualHeight - color_Window.Height) / 2;
             color_Window.Left = this.Left + (this.ActualWidth - color_Window.Width) / 2;
             log.AppendText("Lens Calibration Window Opened\r");
+            log.ScrollToEnd();
         }
-
+        #endregion
         private void setOffsetCurrentPos_Click(object sender, RoutedEventArgs e)
         {
-            offset_X.Text = Motion_Function.MXP_MC_ReadActualPosition(0).ToString("F2");
-            offset_Y.Text = Motion_Function.MXP_MC_ReadActualPosition(1).ToString("F2");
-            offset_Z.Text = Motion_Function.MXP_MC_ReadActualPosition(2).ToString("F2");
+            offset_X.Text = Motion_Function.MXP_MC_ReadActualPosition(2).ToString("F2");
+            offset_Y.Text = Motion_Function.MXP_MC_ReadActualPosition(0).ToString("F2");
+            offset_Z.Text = Motion_Function.MXP_MC_ReadActualPosition(1).ToString("F2");
 
             log.AppendText("Set Current Position to Offset\r");
-
+            log.ScrollToEnd();
         }
 
         private void home_Click(object sender, RoutedEventArgs e)
@@ -1661,25 +2360,48 @@ namespace ScanProgram
 
         private void setStartPoint_Click(object sender, RoutedEventArgs e)
         {
-            start_X.Text = (Motion_Function.MXP_MC_ReadActualPosition(0) - Convert.ToSingle(offset_X.Text)).ToString("F2");
-            start_Y.Text = (Motion_Function.MXP_MC_ReadActualPosition(1) - Convert.ToSingle(offset_Y.Text)).ToString("F2");
-            start_Z.Text = (Motion_Function.MXP_MC_ReadActualPosition(2) - Convert.ToSingle(offset_Z.Text)).ToString("F2");
+            start_X.Text = (Motion_Function.MXP_MC_ReadActualPosition(2) - Convert.ToSingle(offset_X.Text)).ToString("F2");
+            start_Y.Text = (Motion_Function.MXP_MC_ReadActualPosition(0) - Convert.ToSingle(offset_Y.Text)).ToString("F2");
+            start_Z.Text = (Motion_Function.MXP_MC_ReadActualPosition(1) - Convert.ToSingle(offset_Z.Text)).ToString("F2");
 
             log.AppendText("Set Current Position to StartPoint\r");
+            log.ScrollToEnd();
         }
 
         private void setEndPoint_Click(object sender, RoutedEventArgs e)
         {
-            finish_X.Text = (Motion_Function.MXP_MC_ReadActualPosition(0) - Convert.ToSingle(offset_X.Text)).ToString("F2");
-            finish_Y.Text = (Motion_Function.MXP_MC_ReadActualPosition(1) - Convert.ToSingle(offset_Y.Text)).ToString("F2");
-            finish_Z.Text = (Motion_Function.MXP_MC_ReadActualPosition(2) - Convert.ToSingle(offset_Z.Text)).ToString("F2");
+            finish_X.Text = (Motion_Function.MXP_MC_ReadActualPosition(2) - Convert.ToSingle(offset_X.Text)).ToString("F2");
+            finish_Y.Text = (Motion_Function.MXP_MC_ReadActualPosition(0) - Convert.ToSingle(offset_Y.Text)).ToString("F2");
+            finish_Z.Text = (Motion_Function.MXP_MC_ReadActualPosition(1) - Convert.ToSingle(offset_Z.Text)).ToString("F2");
 
             log.AppendText("Set Current Position to EndPoint\r");
+            log.ScrollToEnd();
+
         }
 
         private void button_cali_Vignette_Click(object sender, RoutedEventArgs e)
         {
 
+        }
+
+        private void JoyStickOpen_Click(object sender, RoutedEventArgs e)
+        {
+            Serial_Uart.PortName = UART_Port.Text;       // Port Name
+            Serial_Uart.BaudRate = (int)9600;
+
+            Serial_Uart.DataBits = (int)8;
+            Serial_Uart.Parity = Parity.None;
+            Serial_Uart.StopBits = StopBits.One;
+            Serial_Uart.Open();
+            if (Serial_Uart.IsOpen)
+            {
+                Serial_Uart.DataReceived += new System.IO.Ports.SerialDataReceivedEventHandler(Uart_DataReceived);
+            }
+
+            if (Serial_Uart.IsOpen)
+            {
+                //Serial_Uart.Close();
+            }
         }
 
         private void Camera_Grab_Button_Click(object sender, RoutedEventArgs e)
@@ -1688,9 +2410,13 @@ namespace ScanProgram
             {
 
             }
-            if (CameraMod == 3)
+            else if (CameraMod == 3)
             {
                 snap_pic.Tick += new EventHandler(grabUV);
+            }
+            else if (CameraMod == 4)
+            {
+
             }
         }
 

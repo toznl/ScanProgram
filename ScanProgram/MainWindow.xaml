@@ -16,6 +16,7 @@
     </Window.Resources>
 
     <Grid Margin="-21,-35,-30,-6" Background="#FFE4F1F7">
+
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="396*"/>
             <ColumnDefinition Width="461*"/>
@@ -28,7 +29,8 @@
             <GroupBox HorizontalAlignment="Left" Height="62" Header="Robot Init" Margin="10,0,0,0" VerticalAlignment="Top" Width="350"/>
             <GroupBox HorizontalAlignment="Left" Height="104" Header="Calibration" Margin="10,159,0,0" VerticalAlignment="Top" Width="350"/>
             <GroupBox HorizontalAlignment="Left" Height="104" Header="Camera Selection" Margin="10,58,0,0" VerticalAlignment="Top" Width="350"/>
-
+            <Label Content="UART" HorizontalAlignment="Left" Height="29" Margin="445,469,0,0" VerticalAlignment="Top" Width="54"/>
+            <ComboBox x:Name="UART_Port" HorizontalAlignment="Left" Margin="485,473,0,0" VerticalAlignment="Top" Width="82"/>
             <!--원점 이동, 원점 설정 버튼-->
             <Button Content="원점이동"  x:Name="zeroReturn" HorizontalAlignment="Left" Margin="19,0,0,0" VerticalAlignment="Center" Height="18" Width="65" FontSize="10" Click="zeroReturn_Click"/>
 
@@ -121,11 +123,10 @@
             <Button x:Name="Camera_Connect" Content="Connect" HorizontalAlignment="Left" Height="24" Margin="75,76,0,0" VerticalAlignment="Top" Width="65" Click="Camera_Connect_Button_Click"/>
             <Button x:Name="Camera_Grab" Content="Grab" HorizontalAlignment="Left" Height="24" Margin="75,102,0,0" VerticalAlignment="Top" Width="65" Click="Camera_Grab_Button_Click"/>
             <Button x:Name="Camera_Disconnect" Content="Disconnect" HorizontalAlignment="Left" Height="24" Margin="75,128,0,0" VerticalAlignment="Top" Width="65" Click="Camera_Disconnect_Button_Click"/>
-
-            <RadioButton GroupName="Radio_Camera" x:Name="Radio_Camera_RGB_Camera" Content="RGB" HorizontalAlignment="Left" Margin="19,85,0,0" VerticalAlignment="Top" />
-            <RadioButton GroupName="Radio_Camera" Content="VNIR" x:Name="Radio_Camera_VNIR_Camera" HorizontalAlignment="Left" Margin="19,114,0,0" VerticalAlignment="Top"/>
-            <RadioButton GroupName="Radio_Camera" Content="UV" x:Name="Radio_Camera_UV_Camera" HorizontalAlignment="Left" Margin="19,100,0,0" VerticalAlignment="Top"/>
-            <RadioButton GroupName="Radio_Camera" Content="SWIR" x:Name="Radio_Camera_SWIR_Camera" HorizontalAlignment="Left" Margin="19,129,0,0" VerticalAlignment="Top"/>
+            <RadioButton GroupName="Radio_Camera" x:Name="Radio_Camera_RGB_Camera" Content="RGB" HorizontalAlignment="Left" Margin="19,99,0,0" VerticalAlignment="Top" />
+            <RadioButton GroupName="Radio_Camera" Content="VNIR" x:Name="Radio_Camera_VNIR_Camera" HorizontalAlignment="Left" Margin="286,102,0,0" VerticalAlignment="Top"/>
+            <RadioButton GroupName="Radio_Camera" Content="UV" x:Name="Radio_Camera_UV_Camera" HorizontalAlignment="Left" Margin="286,85,0,0" VerticalAlignment="Top"/>
+            <RadioButton GroupName="Radio_Camera" Content="SWIR" x:Name="Radio_Camera_SWIR_Camera" HorizontalAlignment="Left" Margin="286,122,0,0" VerticalAlignment="Top"/>
             <TextBlock HorizontalAlignment="Left" Margin="269,0,0,0" Text="X" TextWrapping="Wrap" VerticalAlignment="Center" FontSize="10"/>
             <TextBlock HorizontalAlignment="Left" Margin="269,306,0,0" Text="Y" TextWrapping="Wrap" VerticalAlignment="Top" FontSize="10"/>
             <TextBlock HorizontalAlignment="Left" Margin="269,321,0,0" Text="Z" TextWrapping="Wrap" VerticalAlignment="Top" FontSize="10"/>
@@ -155,6 +156,8 @@
             <Button x:Name="setStartPoint" Content="현재포지션 시작" HorizontalAlignment="Left" Margin="568,394,0,0" VerticalAlignment="Top" Click="setStartPoint_Click"/>
             <Button x:Name="setEndPoint" Content="현재포지션 끝점" HorizontalAlignment="Left" Margin="568,419,0,0" VerticalAlignment="Top" Click="setEndPoint_Click"/>
             <Button x:Name="button_cali_Vignette" Content="컬러 보정" HorizontalAlignment="Left" Height="24" Margin="109,207,0,0" VerticalAlignment="Top" Width="82" IsEnabled="False" Click="button_cali_Vignette_Click" />
+            <Button Content="JoyStickOpen" HorizontalAlignment="Left" Margin="592,507,0,0" VerticalAlignment="Top" Click="JoyStickOpen_Click"/>
+            <RadioButton GroupName="Radio_Camera" Content="NIR" x:Name="Radio_Camera_NIR_Camera" HorizontalAlignment="Left" Margin="19,117,0,0" VerticalAlignment="Top"/>
 
 
 

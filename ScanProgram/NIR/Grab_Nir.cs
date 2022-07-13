@@ -2,7 +2,16 @@
 using System;
 using System.ComponentModel;
 using System.Threading;
+using System.Collections.Generic;
+using System.Data;
+using System.Drawing;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+using System.Drawing.Imaging;
 
+using OpenCvSharp;
 namespace ScanProgram
 {
     public class SaperaCapture_Nir : MainWindow
@@ -14,8 +23,9 @@ namespace ScanProgram
         SapTransfer transfer = null;
         SapView view = null;
         SapProcessing m_pro = null;
-
-
+        public Image img = null;
+        Mat colorConvGrab = new Mat();
+        Mat rawConvGrab = new Mat();
 
         // Create camera index parameter
         [Description("The index of the camera from which to acquire images.")]
@@ -106,7 +116,7 @@ namespace ScanProgram
         readonly object captureLock = new object();
 
         // Function used for destroying and disposing of sapera class objects
-        private void DestroyObjects()
+        public void DestroyObjects()
         {
             if (transfer != null && transfer.Initialized)
                 transfer.Destroy();
@@ -119,7 +129,7 @@ namespace ScanProgram
             if (device != null && device.Initialized)
                 device.Destroy();
         }
-        private void DisposeObjects()
+        public void DisposeObjects()
         {
             if (transfer != null && transfer.Initialized)
             { transfer.Dispose(); transfer = null; }
@@ -141,14 +151,67 @@ namespace ScanProgram
         // Callback function for when a frame is grabbed by the camera
         private void Xfer_XferNotify(object sender, SapXferNotifyEventArgs args)
         {
-            SaperaCapture_Nir demo = args.Context as SaperaCapture_Nir;
-            // If grabbing in trash buffer, do not display the image, update the
-            // appropriate number of frames on the status bar instead
-            if (args.Trash) { return; }
-            // Refresh view
+                SaperaCapture demo = args.Context as SaperaCapture;
+                // If grabbing in trash buffer, do not display the image, update the
+                // appropriate number of frames on the status bar instead
+                if (args.Trash) { return; }
+                // Refresh view
+                else
+                {
+                    m_pro.ExecuteNext();
+                }
+                // First, judge whether this frame is an abandoned frame. If so, return immediately and wait for the next frame (but this sentence sometimes) m_Xfer.Snap(n)It will cause frame loss, you can comment it out (try it)
+                if (args.Trash) return;
+
+                // obtain buffer As long as you know the address of the picture memory, you can actually have a variety of ways to get the picture (for example, convert to Bitmap)
+                IntPtr addr;
+                buffer.GetAddress(out addr);
+
+                // observation buffer Some attribute values of the picture in. The values in the comments after the statement are possible values
+                int count = buffer.Count; //2
+                SapFormat format = buffer.Format; //Uint8
+                double rate = buffer.FrameRate; //30.0,This value changes dynamically during continuous acquisition
+                int height = buffer.Height; //2800
+                int weight = buffer.Width; //4096
+                int pixd = buffer.PixelDepth; //8
+
+
+                // Read pictures from memory and convert them into bitmap Formats, creating palettes, printing to PictureBox
+                PixelFormat pf = PixelFormat.Format8bppIndexed;
+                Bitmap bmp = new Bitmap(weight, height, buffer.Pitch, pf, addr);
+                bmp.SetResolution(height, weight);
+                BitmapData bmpData = new BitmapData();
+
+                bmpData = bmp.LockBits(new Rectangle(0, 0, weight, height), System.Drawing.Imaging.ImageLockMode.WriteOnly, PixelFormat.Format8bppIndexed);
+
+            ColorPalette palette = bmp.Palette;
+            for (int i = 0; i < 256; i++)
+                palette.Entries[i] = Color.FromArgb(i, i, i);
+            bmp.Palette = palette;
+
+
+
+            bmp.UnlockBits(bmpData);
+
+            //using (Bitmap tempbmp = new Bitmap(1, 1, pf))
+            //{
+            //    m_grayPalette = tempbmp.Palette;
+            //}
+            //for (int i = 0; i <= 255; i++)
+            //{
+            //    m_grayPalette.Entries[i] = Color.FromArgb(i, i, i);
+            //}
+
+            //bmp.Palette = m_grayPalette;
+            //opencv
+            rawConvGrab = OpenCvSharp.Extensions.BitmapConverter.ToMat(bmp);
+
+            Cv2.CvtColor(rawConvGrab, colorConvGrab, ColorConversionCodes.BayerRG2RGB_VNG);
+            bmp = OpenCvSharp.Extensions.BitmapConverter.ToBitmap(colorConvGrab);
+            //bmp = Imagefrom
+            img = (Image)bmp;
 
         }
-
         public SaperaCapture_Nir()
         {
             // Get server count
@@ -158,10 +221,11 @@ namespace ScanProgram
             if (Index >= 0 && Index < serverCount - 1)
             {
                 // Find the name of the server
-                serverName = SapManager.GetServerName(Index + 2);
+                serverName = SapManager.GetServerName(Index + 1);
             }
             else
             {
+                log.AppendText("서버를 찾지 못했습니다");
                 return;
             }
 
@@ -170,7 +234,7 @@ namespace ScanProgram
             // Find device
             device = new SapAcqDevice(location, false);
             // Create buffer
-            buffer = new SapBufferWithTrash(1, device, SapBuffer.MemoryType.ScatterGather);
+            buffer = new SapBufferWithTrash(3, device, SapBuffer.MemoryType.ScatterGather);
             // Initialize transfer between device and buffer
             transfer = new SapAcqDeviceToBuf(device, buffer);
             m_pro = new SapMyProcessing(buffer);
@@ -265,8 +329,6 @@ namespace ScanProgram
 
 
             fileName = i.ToString() + "_" + x.ToString() + "_" + y;
-            log.AppendText(serverName + location.ToString());
-            Thread.Sleep(5000);
             buffer.Save(fileName + ".tif", "-format tif");
 
         }
