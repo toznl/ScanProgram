@@ -1087,6 +1087,7 @@ namespace ScanProgram
         }
         private void Uart_DataReceived(object sender, SerialDataReceivedEventArgs e)
         {
+
             if (Serial_Uart.IsOpen)
             {
                 while (Serial_Uart.BytesToRead != 0)
@@ -1118,12 +1119,14 @@ namespace ScanProgram
                     byte SyncByte = 0xff;
                     byte Address;
                     byte CheckSum;
+                    
                     byte Command1, Command2, Data1, Data2;
                     Address = inputdata[1];
                     Data1 = inputdata[4];
                     Data2 = inputdata[5];
                     Command1 = inputdata[2];
                     Command2 = inputdata[3];
+                    MXP.MXP_MOVEABSOLUTE_OUT y = new MXP.MXP_MOVEABSOLUTE_OUT { };
 
                     // CheckSum = (byte)(SyncByte ^ Address ^ Command1 ^ Command2 ^ Data1 ^ Data2);
                     // if (CheckSum == inputdata[6]) // Check sum OK
@@ -1133,6 +1136,25 @@ namespace ScanProgram
                             msg_str = "PanRight : ";
                             int getdata = (Data2 << 8) + Data1;
                             string msg = getdata.ToString();
+                            JoyStick_Speed = (Convert.ToSingle(msg)/63)*40 ;
+
+                            ActPositionX = (Convert.ToSingle(ActPositionX) + 10).ToString();
+                            if (Convert.ToSingle(ActPositionX) >= MAX_X)
+                            {
+                                ActPositionX = MAX_X.ToString();
+                            }
+
+                            Motion_Function.MXP_MC_MoveAbsolute(2,
+                                                    2,
+                                                    JoyStick_Speed,
+                                                    Convert.ToSingle(ActPositionX),
+                                                    Convert.ToSingle(50),
+                                                    Convert.ToSingle(50),
+                                                    Convert.ToSingle(500),
+                                                    MXP.MXP_BUFFERMODE_ENUM.MXP_ABORTING,
+                                                    MXP.MXP_DIRECTION_ENUM.MXP_POSITIVE_DIRECTION,
+                                                    false, y);
+                            
                             msg_str += msg;
 
                         }
@@ -1141,18 +1163,66 @@ namespace ScanProgram
                             msg_str = "PanLeft :";
                             int getdata = (Data2 << 8) + Data1;
                             string msg = getdata.ToString();
+                            JoyStick_Speed = (Convert.ToSingle(msg) / 63) * 40;
+
+                            ActPositionX = (Convert.ToSingle(ActPositionX) - 10).ToString();
+                            if (Convert.ToSingle(ActPositionX) <0)
+                            {
+                                Convert.ToSingle(0).ToString();
+                            }
+
+                            Motion_Function.MXP_MC_MoveAbsolute(2,
+                                                    2,
+                                                    JoyStick_Speed,
+                                                    Convert.ToSingle(ActPositionX),
+                                                    Convert.ToSingle(50),
+                                                    Convert.ToSingle(50),
+                                                    Convert.ToSingle(500),
+                                                    MXP.MXP_BUFFERMODE_ENUM.MXP_ABORTING,
+                                                    MXP.MXP_DIRECTION_ENUM.MXP_POSITIVE_DIRECTION,
+                                                    false, y);
+
                             msg_str += msg;
                         }
                         else if (Command2 == 0x08)  // TiltUp 
                         {
                             msg_str = "TiltUp :";
-                            JoyStick_Speed = (Data2 / 16128) * 40;
-                            MXP.MXP_MOVEABSOLUTE_OUT y = new MXP.MXP_MOVEABSOLUTE_OUT { };
+
+                            JoyStick_Speed = (Convert.ToSingle(Data2) / 63) * 40;
+                            
+
                             ActPositionY = (Convert.ToSingle(ActPositionY) + 10).ToString();
-                            if (Convert.ToSingle(ActPositionY) >= MAX_Y)
+                                if (Convert.ToSingle(ActPositionY) >= MAX_Y)
+                                {
+                                    ActPositionY = MAX_Y.ToString();
+                                }
+                                
+                                Motion_Function.MXP_MC_MoveAbsolute(0,
+                                                        0,
+                                                        JoyStick_Speed,
+                                                        Convert.ToSingle(ActPositionY),
+                                                        Convert.ToSingle(50),
+                                                        Convert.ToSingle(50),
+                                                        Convert.ToSingle(500),
+                                                        MXP.MXP_BUFFERMODE_ENUM.MXP_ABORTING,
+                                                        MXP.MXP_DIRECTION_ENUM.MXP_POSITIVE_DIRECTION,
+                                                        false, y);
+                                int getdata = (Data2 << 8) + Data1;
+                                string msg = getdata.ToString();
+                                msg_str += msg;
+                            
+                        }
+                        else if (Command2 == 0x10)  // TiltDown 
+                        {
+                            JoyStick_Speed = (Convert.ToSingle(Data2) / 63) * 40;
+
+
+                            ActPositionY = (Convert.ToSingle(ActPositionY) - 10).ToString();
+                            if (Convert.ToSingle(ActPositionY) < 0)
                             {
-                                ActPositionY = (Convert.ToSingle(ActPositionY) - 10).ToString();
+                                ActPositionY = Convert.ToSingle(0).ToString();
                             }
+
                             Motion_Function.MXP_MC_MoveAbsolute(0,
                                                     0,
                                                     JoyStick_Speed,
@@ -1167,18 +1237,11 @@ namespace ScanProgram
                             string msg = getdata.ToString();
                             msg_str += msg;
                         }
-                        else if (Command2 == 0x10)  // TiltDown 
-                        {
-                            msg_str = "TiltDown :";
-                            int getdata = (Data2 << 8) + Data1;
-                            string msg = getdata.ToString();
-                            msg_str += msg;
-                        }
                         else if (Command2 == 0x20)  // ZoomTele 
                         {
                             msg_str = "ZoomTele";
                             JoyStick_Speed = 40;
-                            MXP.MXP_MOVEABSOLUTE_OUT y = new MXP.MXP_MOVEABSOLUTE_OUT { };
+                            
                             ActPositionZ = (Convert.ToSingle(ActPositionZ) + 1).ToString();
                             if (Convert.ToSingle(ActPositionZ) >= MAX_Z)
                             {
@@ -1200,7 +1263,7 @@ namespace ScanProgram
                         {
 
                             JoyStick_Speed = 10;
-                            MXP.MXP_MOVEABSOLUTE_OUT y = new MXP.MXP_MOVEABSOLUTE_OUT { };
+                            
                             ActPositionZ = (Convert.ToSingle(ActPositionZ) - 1).ToString();
                             if (Convert.ToSingle(ActPositionZ) <= 0)
                             {
@@ -1236,18 +1299,21 @@ namespace ScanProgram
                         {
                             msg_str = "Iris Close ";
                         }
+                        
                     }
                 }
                 bool uiAccess = log.Dispatcher.CheckAccess();
-
+                
                 if (uiAccess)
                 {
-                    log.AppendText(msg_str);
+                     log.AppendText(msg_str+"\r");
+                    log.AppendText(JoyStick_Speed.ToString()+"\r");
                     log.ScrollToEnd();
                 }
                 else
                 {
-                    log.Dispatcher.Invoke(() => { log.AppendText(msg_str); });
+                    log.Dispatcher.Invoke(() => { log.AppendText(msg_str + "\r"); });
+                    log.Dispatcher.Invoke(() => { log.AppendText(JoyStick_Speed.ToString() + "\r"); });
                     log.Dispatcher.Invoke(() => { log.ScrollToEnd(); });
                 }
 
