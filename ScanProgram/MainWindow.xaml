@@ -130,9 +130,9 @@
             <Button x:Name="Camera_Grab" Content="Grab" HorizontalAlignment="Left" Height="24" Margin="75,102,0,0" VerticalAlignment="Top" Width="65" Click="Camera_Grab_Button_Click"/>
             <Button x:Name="Camera_Disconnect" Content="Disconnect" HorizontalAlignment="Left" Height="24" Margin="75,128,0,0" VerticalAlignment="Top" Width="65" Click="Camera_Disconnect_Button_Click"/>
             <RadioButton GroupName="Radio_Camera" x:Name="Radio_Camera_RGB_Camera" Content="RGB" HorizontalAlignment="Left" Margin="19,99,0,0" VerticalAlignment="Top" />
-            <RadioButton GroupName="Radio_Camera" Content="VNIR" x:Name="Radio_Camera_VNIR_Camera" HorizontalAlignment="Left" Margin="286,102,0,0" VerticalAlignment="Top"/>
-            <RadioButton GroupName="Radio_Camera" Content="UV" x:Name="Radio_Camera_UV_Camera" HorizontalAlignment="Left" Margin="286,85,0,0" VerticalAlignment="Top"/>
-            <RadioButton GroupName="Radio_Camera" Content="SWIR" x:Name="Radio_Camera_SWIR_Camera" HorizontalAlignment="Left" Margin="286,122,0,0" VerticalAlignment="Top"/>
+            <RadioButton GroupName="Radio_Camera" Content="VNIR" x:Name="Radio_Camera_VNIR_Camera" HorizontalAlignment="Left" Margin="286,102,0,0" VerticalAlignment="Top" IsEnabled="False"/>
+            <RadioButton GroupName="Radio_Camera" Content="UV" x:Name="Radio_Camera_UV_Camera" HorizontalAlignment="Left" Margin="286,85,0,0" VerticalAlignment="Top" IsEnabled="False"/>
+            <RadioButton GroupName="Radio_Camera" Content="SWIR" x:Name="Radio_Camera_SWIR_Camera" HorizontalAlignment="Left" Margin="286,122,0,0" VerticalAlignment="Top" IsEnabled="False"/>
             <TextBlock HorizontalAlignment="Left" Margin="269,0,0,0" Text="X" TextWrapping="Wrap" VerticalAlignment="Center" FontSize="10"/>
             <TextBlock HorizontalAlignment="Left" Margin="269,306,0,0" Text="Y" TextWrapping="Wrap" VerticalAlignment="Top" FontSize="10"/>
             <TextBlock HorizontalAlignment="Left" Margin="269,321,0,0" Text="Z" TextWrapping="Wrap" VerticalAlignment="Top" FontSize="10"/>

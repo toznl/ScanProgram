@@ -45,40 +45,6 @@ C:\Users\skyhand\SynologyDrive\01. 로봇그룹\2021 미술품과제\ScanProgram
 C:\Users\skyhand\SynologyDrive\01. 로봇그룹\2021 미술품과제\ScanProgram\ScanProgram\obj\Debug\netcoreapp3.1\FileSetting.baml
 C:\Users\skyhand\SynologyDrive\01. 로봇그룹\2021 미술품과제\ScanProgram\ScanProgram\obj\Debug\netcoreapp3.1\ArtAdd.g.cs
 C:\Users\skyhand\SynologyDrive\01. 로봇그룹\2021 미술품과제\ScanProgram\ScanProgram\obj\Debug\netcoreapp3.1\ArtAdd.baml
-C:\Users\user\Desktop\ScanProgram\ScanProgram\bin\Debug\netcoreapp3.1\ScanProgram.exe
-C:\Users\user\Desktop\ScanProgram\ScanProgram\bin\Debug\netcoreapp3.1\ScanProgram.deps.json
-C:\Users\user\Desktop\ScanProgram\ScanProgram\bin\Debug\netcoreapp3.1\ScanProgram.runtimeconfig.json
-C:\Users\user\Desktop\ScanProgram\ScanProgram\bin\Debug\netcoreapp3.1\ScanProgram.runtimeconfig.dev.json
-C:\Users\user\Desktop\ScanProgram\ScanProgram\bin\Debug\netcoreapp3.1\ScanProgram.dll
-C:\Users\user\Desktop\ScanProgram\ScanProgram\bin\Debug\netcoreapp3.1\ScanProgram.pdb
-C:\Users\user\Desktop\ScanProgram\ScanProgram\bin\Debug\netcoreapp3.1\Microsoft.Win32.SystemEvents.dll
-C:\Users\user\Desktop\ScanProgram\ScanProgram\bin\Debug\netcoreapp3.1\OpenCvSharp.Extensions.dll
-C:\Users\user\Desktop\ScanProgram\ScanProgram\bin\Debug\netcoreapp3.1\OpenCvSharp.dll
-C:\Users\user\Desktop\ScanProgram\ScanProgram\bin\Debug\netcoreapp3.1\System.Drawing.Common.dll
-C:\Users\user\Desktop\ScanProgram\ScanProgram\bin\Debug\netcoreapp3.1\System.Runtime.CompilerServices.Unsafe.dll
-C:\Users\user\Desktop\ScanProgram\ScanProgram\bin\Debug\netcoreapp3.1\runtimes\win\lib\netcoreapp3.0\Microsoft.Win32.SystemEvents.dll
-C:\Users\user\Desktop\ScanProgram\ScanProgram\bin\Debug\netcoreapp3.1\runtimes\unix\lib\netcoreapp3.0\System.Drawing.Common.dll
-C:\Users\user\Desktop\ScanProgram\ScanProgram\bin\Debug\netcoreapp3.1\runtimes\win\lib\netcoreapp3.0\System.Drawing.Common.dll
-C:\Users\user\Desktop\ScanProgram\ScanProgram\bin\Debug\netcoreapp3.1\DALSA.SaperaLT.SapClassBasic.dll
-C:\Users\user\Desktop\ScanProgram\ScanProgram\obj\Debug\netcoreapp3.1\ScanProgram.csproj.AssemblyReference.cache
-C:\Users\user\Desktop\ScanProgram\ScanProgram\obj\Debug\netcoreapp3.1\ArtAdd.g.cs
-C:\Users\user\Desktop\ScanProgram\ScanProgram\obj\Debug\netcoreapp3.1\MainWindow.g.cs
-C:\Users\user\Desktop\ScanProgram\ScanProgram\obj\Debug\netcoreapp3.1\App.g.cs
-C:\Users\user\Desktop\ScanProgram\ScanProgram\obj\Debug\netcoreapp3.1\ScanProgram_MarkupCompile.cache
-C:\Users\user\Desktop\ScanProgram\ScanProgram\obj\Debug\netcoreapp3.1\ScanProgram_MarkupCompile.lref
-C:\Users\user\Desktop\ScanProgram\ScanProgram\obj\Debug\netcoreapp3.1\App.baml
-C:\Users\user\Desktop\ScanProgram\ScanProgram\obj\Debug\netcoreapp3.1\ArtAdd.baml
-C:\Users\user\Desktop\ScanProgram\ScanProgram\obj\Debug\netcoreapp3.1\MainWindow.baml
-C:\Users\user\Desktop\ScanProgram\ScanProgram\obj\Debug\netcoreapp3.1\styles.baml
-C:\Users\user\Desktop\ScanProgram\ScanProgram\obj\Debug\netcoreapp3.1\ScanProgram.g.resources
-C:\Users\user\Desktop\ScanProgram\ScanProgram\obj\Debug\netcoreapp3.1\ScanProgram.AssemblyInfoInputs.cache
-C:\Users\user\Desktop\ScanProgram\ScanProgram\obj\Debug\netcoreapp3.1\ScanProgram.AssemblyInfo.cs
-C:\Users\user\Desktop\ScanProgram\ScanProgram\obj\Debug\netcoreapp3.1\ScanProgram.csproj.CoreCompileInputs.cache
-C:\Users\user\Desktop\ScanProgram\ScanProgram\obj\Debug\netcoreapp3.1\ScanProgram.csproj.CopyComplete
-C:\Users\user\Desktop\ScanProgram\ScanProgram\obj\Debug\netcoreapp3.1\ScanProgram.dll
-C:\Users\user\Desktop\ScanProgram\ScanProgram\obj\Debug\netcoreapp3.1\ScanProgram.pdb
-C:\Users\user\Desktop\ScanProgram\ScanProgram\obj\Debug\netcoreapp3.1\ScanProgram.genruntimeconfig.cache
-C:\Users\user\Desktop\ScanProgram\ScanProgram\obj\Debug\netcoreapp3.1\ScanProgram.GeneratedMSBuildEditorConfig.editorconfig
 E:\SynologyDrive_Kitech\01. 로봇그룹\2022 미술품과제\ScanProgram\ScanProgram\bin\Debug\netcoreapp3.1\ScanProgram.exe
 E:\SynologyDrive_Kitech\01. 로봇그룹\2022 미술품과제\ScanProgram\ScanProgram\bin\Debug\netcoreapp3.1\ScanProgram.deps.json
 E:\SynologyDrive_Kitech\01. 로봇그룹\2022 미술품과제\ScanProgram\ScanProgram\bin\Debug\netcoreapp3.1\ScanProgram.runtimeconfig.json
@@ -179,35 +145,3 @@ C:\Users\ever\Desktop\ScanProgram\ScanProgram\obj\Debug\netcoreapp3.1\ScanProgra
 C:\Users\ever\Desktop\ScanProgram\ScanProgram\obj\Debug\netcoreapp3.1\ScanProgram.dll
 C:\Users\ever\Desktop\ScanProgram\ScanProgram\obj\Debug\netcoreapp3.1\ScanProgram.pdb
 C:\Users\ever\Desktop\ScanProgram\ScanProgram\obj\Debug\netcoreapp3.1\ScanProgram.genruntimeconfig.cache
-C:\Users\user\Desktop\ScanProgram\ScanProgram\obj\Debug\netcoreapp3.1\Calibration\Color.g.cs
-C:\Users\user\Desktop\ScanProgram\ScanProgram\obj\Debug\netcoreapp3.1\Calibration\Lens.g.cs
-C:\Users\user\Desktop\ScanProgram\ScanProgram\obj\Debug\netcoreapp3.1\Calibration\LightControl.g.cs
-C:\Users\user\Desktop\ScanProgram\ScanProgram\obj\Debug\netcoreapp3.1\Calibration\Vignette.g.cs
-C:\Users\user\Desktop\ScanProgram\ScanProgram\obj\Debug\netcoreapp3.1\Calibration\WhiteBalance.g.cs
-C:\Users\user\Desktop\ScanProgram\ScanProgram\bin\Debug\netcoreapp3.1\Microsoft.Win32.Registry.dll
-C:\Users\user\Desktop\ScanProgram\ScanProgram\bin\Debug\netcoreapp3.1\Newtonsoft.Json.dll
-C:\Users\user\Desktop\ScanProgram\ScanProgram\bin\Debug\netcoreapp3.1\OpenCvSharp.WpfExtensions.dll
-C:\Users\user\Desktop\ScanProgram\ScanProgram\bin\Debug\netcoreapp3.1\System.IO.Ports.dll
-C:\Users\user\Desktop\ScanProgram\ScanProgram\bin\Debug\netcoreapp3.1\System.Security.AccessControl.dll
-C:\Users\user\Desktop\ScanProgram\ScanProgram\bin\Debug\netcoreapp3.1\System.Security.Principal.Windows.dll
-C:\Users\user\Desktop\ScanProgram\ScanProgram\bin\Debug\netcoreapp3.1\runtimes\win\lib\netstandard2.0\Microsoft.Win32.Registry.dll
-C:\Users\user\Desktop\ScanProgram\ScanProgram\bin\Debug\netcoreapp3.1\runtimes\win-x64\native\OpenCvSharpExtern.dll
-C:\Users\user\Desktop\ScanProgram\ScanProgram\bin\Debug\netcoreapp3.1\runtimes\win-x64\native\opencv_videoio_ffmpeg455_64.dll
-C:\Users\user\Desktop\ScanProgram\ScanProgram\bin\Debug\netcoreapp3.1\runtimes\win-x86\native\OpenCvSharpExtern.dll
-C:\Users\user\Desktop\ScanProgram\ScanProgram\bin\Debug\netcoreapp3.1\runtimes\win-x86\native\opencv_videoio_ffmpeg455.dll
-C:\Users\user\Desktop\ScanProgram\ScanProgram\bin\Debug\netcoreapp3.1\runtimes\linux-arm\native\libSystem.IO.Ports.Native.so
-C:\Users\user\Desktop\ScanProgram\ScanProgram\bin\Debug\netcoreapp3.1\runtimes\linux-arm64\native\libSystem.IO.Ports.Native.so
-C:\Users\user\Desktop\ScanProgram\ScanProgram\bin\Debug\netcoreapp3.1\runtimes\linux-x64\native\libSystem.IO.Ports.Native.so
-C:\Users\user\Desktop\ScanProgram\ScanProgram\bin\Debug\netcoreapp3.1\runtimes\osx-x64\native\libSystem.IO.Ports.Native.dylib
-C:\Users\user\Desktop\ScanProgram\ScanProgram\bin\Debug\netcoreapp3.1\runtimes\linux\lib\netstandard2.0\System.IO.Ports.dll
-C:\Users\user\Desktop\ScanProgram\ScanProgram\bin\Debug\netcoreapp3.1\runtimes\osx\lib\netstandard2.0\System.IO.Ports.dll
-C:\Users\user\Desktop\ScanProgram\ScanProgram\bin\Debug\netcoreapp3.1\runtimes\win\lib\netstandard2.0\System.IO.Ports.dll
-C:\Users\user\Desktop\ScanProgram\ScanProgram\bin\Debug\netcoreapp3.1\runtimes\win\lib\netcoreapp2.0\System.Security.AccessControl.dll
-C:\Users\user\Desktop\ScanProgram\ScanProgram\bin\Debug\netcoreapp3.1\runtimes\unix\lib\netcoreapp2.1\System.Security.Principal.Windows.dll
-C:\Users\user\Desktop\ScanProgram\ScanProgram\bin\Debug\netcoreapp3.1\runtimes\win\lib\netcoreapp2.1\System.Security.Principal.Windows.dll
-C:\Users\user\Desktop\ScanProgram\ScanProgram\bin\Debug\netcoreapp3.1\scanSnapDll.dll
-C:\Users\user\Desktop\ScanProgram\ScanProgram\obj\Debug\netcoreapp3.1\Calibration\Color.baml
-C:\Users\user\Desktop\ScanProgram\ScanProgram\obj\Debug\netcoreapp3.1\Calibration\Lens.baml
-C:\Users\user\Desktop\ScanProgram\ScanProgram\obj\Debug\netcoreapp3.1\Calibration\LightControl.baml
-C:\Users\user\Desktop\ScanProgram\ScanProgram\obj\Debug\netcoreapp3.1\Calibration\Vignette.baml
-C:\Users\user\Desktop\ScanProgram\ScanProgram\obj\Debug\netcoreapp3.1\Calibration\WhiteBalance.baml
