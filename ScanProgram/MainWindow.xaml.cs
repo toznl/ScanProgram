@@ -7,8 +7,11 @@ using System.Windows.Forms;
 using System.Windows.Threading;
 using System.Drawing.Imaging;
 using System.Drawing;
-
+using System.Windows.Input;
 using System.Windows.Media.Imaging;
+using System.Windows.Controls;
+
+
 using System.Windows.Interop;
 using OpenCvSharp;
 using System.IO;
@@ -33,6 +36,9 @@ namespace ScanProgram
         int bytesreceived = 0;
         byte[] inputdata = new byte[65535];
         SerialPort Serial_Uart = new SerialPort();
+
+        private System.Drawing.Point origin;
+        private System.Drawing.Point start;
 
         #region Thread
         private DispatcherTimer kernelTimer = new DispatcherTimer(); //RobotTimer
@@ -508,7 +514,16 @@ namespace ScanProgram
             mcDirectTorqueControl
         }
         #endregion
+        #region Drawing Canvas
+        static public int rect_Start_X;
+        static public int rect_End_X;
+        static public int rect_Start_Y;
+        static public int rect_End_Y;
+        private bool isDragging;
+        private bool isDrawing;
+        private System.Windows.Shapes.Rectangle rect;
 
+        #endregion
 
         #region RobotInit
         private void power_Robot_Click(object sender, RoutedEventArgs e)
@@ -718,7 +733,6 @@ namespace ScanProgram
         {
             InitializeComponent();
             makeSerialInit();
-
         }
         private void makeSerialInit()
         {
@@ -1085,6 +1099,8 @@ namespace ScanProgram
                 }
             }
         }
+
+
         private void Uart_DataReceived(object sender, SerialDataReceivedEventArgs e)
         {
 
@@ -1119,7 +1135,7 @@ namespace ScanProgram
                     byte SyncByte = 0xff;
                     byte Address;
                     byte CheckSum;
-                    
+
                     byte Command1, Command2, Data1, Data2;
                     Address = inputdata[1];
                     Data1 = inputdata[4];
@@ -1136,7 +1152,7 @@ namespace ScanProgram
                             msg_str = "PanRight : ";
                             int getdata = (Data2 << 8) + Data1;
                             string msg = getdata.ToString();
-                            JoyStick_Speed = (Convert.ToSingle(msg)/63)*40 ;
+                            JoyStick_Speed = (Convert.ToSingle(msg) / 63) * 40;
 
                             ActPositionX = (Convert.ToSingle(ActPositionX) + 10).ToString();
                             if (Convert.ToSingle(ActPositionX) >= MAX_X)
@@ -1154,7 +1170,7 @@ namespace ScanProgram
                                                     MXP.MXP_BUFFERMODE_ENUM.MXP_ABORTING,
                                                     MXP.MXP_DIRECTION_ENUM.MXP_POSITIVE_DIRECTION,
                                                     false, y);
-                            
+
                             msg_str += msg;
 
                         }
@@ -1166,7 +1182,7 @@ namespace ScanProgram
                             JoyStick_Speed = (Convert.ToSingle(msg) / 63) * 40;
 
                             ActPositionX = (Convert.ToSingle(ActPositionX) - 10).ToString();
-                            if (Convert.ToSingle(ActPositionX) <0)
+                            if (Convert.ToSingle(ActPositionX) < 0)
                             {
                                 Convert.ToSingle(0).ToString();
                             }
@@ -1189,28 +1205,28 @@ namespace ScanProgram
                             msg_str = "TiltUp :";
 
                             JoyStick_Speed = (Convert.ToSingle(Data2) / 63) * 40;
-                            
+
 
                             ActPositionY = (Convert.ToSingle(ActPositionY) + 10).ToString();
-                                if (Convert.ToSingle(ActPositionY) >= MAX_Y)
-                                {
-                                    ActPositionY = MAX_Y.ToString();
-                                }
-                                
-                                Motion_Function.MXP_MC_MoveAbsolute(0,
-                                                        0,
-                                                        JoyStick_Speed,
-                                                        Convert.ToSingle(ActPositionY),
-                                                        Convert.ToSingle(50),
-                                                        Convert.ToSingle(50),
-                                                        Convert.ToSingle(500),
-                                                        MXP.MXP_BUFFERMODE_ENUM.MXP_ABORTING,
-                                                        MXP.MXP_DIRECTION_ENUM.MXP_POSITIVE_DIRECTION,
-                                                        false, y);
-                                int getdata = (Data2 << 8) + Data1;
-                                string msg = getdata.ToString();
-                                msg_str += msg;
-                            
+                            if (Convert.ToSingle(ActPositionY) >= MAX_Y)
+                            {
+                                ActPositionY = MAX_Y.ToString();
+                            }
+
+                            Motion_Function.MXP_MC_MoveAbsolute(0,
+                                                    0,
+                                                    JoyStick_Speed,
+                                                    Convert.ToSingle(ActPositionY),
+                                                    Convert.ToSingle(50),
+                                                    Convert.ToSingle(50),
+                                                    Convert.ToSingle(500),
+                                                    MXP.MXP_BUFFERMODE_ENUM.MXP_ABORTING,
+                                                    MXP.MXP_DIRECTION_ENUM.MXP_POSITIVE_DIRECTION,
+                                                    false, y);
+                            int getdata = (Data2 << 8) + Data1;
+                            string msg = getdata.ToString();
+                            msg_str += msg;
+
                         }
                         else if (Command2 == 0x10)  // TiltDown 
                         {
@@ -1241,7 +1257,7 @@ namespace ScanProgram
                         {
                             msg_str = "ZoomTele";
                             JoyStick_Speed = 40;
-                            
+
                             ActPositionZ = (Convert.ToSingle(ActPositionZ) + 1).ToString();
                             if (Convert.ToSingle(ActPositionZ) >= MAX_Z)
                             {
@@ -1263,7 +1279,7 @@ namespace ScanProgram
                         {
 
                             JoyStick_Speed = 10;
-                            
+
                             ActPositionZ = (Convert.ToSingle(ActPositionZ) - 1).ToString();
                             if (Convert.ToSingle(ActPositionZ) <= 0)
                             {
@@ -1299,15 +1315,15 @@ namespace ScanProgram
                         {
                             msg_str = "Iris Close ";
                         }
-                        
+
                     }
                 }
                 bool uiAccess = log.Dispatcher.CheckAccess();
-                
+
                 if (uiAccess)
                 {
-                     log.AppendText(msg_str+"\r");
-                    log.AppendText(JoyStick_Speed.ToString()+"\r");
+                    log.AppendText(msg_str + "\r");
+                    log.AppendText(JoyStick_Speed.ToString() + "\r");
                     log.ScrollToEnd();
                 }
                 else
@@ -1498,11 +1514,16 @@ namespace ScanProgram
 
             MXP.MXP_ReadStatus(ref In_X, out Out_X);
             MXP.MXP_ReadStatus(ref In_Y, out Out_Y);
-            if(capture_Lock ==0)
+            if (capture_Lock == 0)
             {
                 if (Out_X.Standstill == 1)
                 {
-                    if (CameraMod == 4)
+                    if (CameraMod == 1)
+                    {
+
+                        cap.Snap(CountY, CountX, "test");
+                    }
+                    else if (CameraMod == 4)
                     {
 
                         cap_nir.Snap(CountY, CountX, "ddd");
@@ -1510,7 +1531,7 @@ namespace ScanProgram
 
                     capture_Lock = 1;
                 }
-                
+
             }
             else if (capture_Lock == 1)
             {
@@ -1648,7 +1669,7 @@ namespace ScanProgram
                         bitmapImage.StreamSource = memory;
                         bitmapImage.CacheOption = BitmapCacheOption.OnLoad;
                         bitmapImage.EndInit();
-                        view_box.Source = bitmapImage;
+                        view_box.ImageSource = bitmapImage;
                     }
                 }
 
@@ -1674,7 +1695,7 @@ namespace ScanProgram
                         bitmapImage.StreamSource = memory;
                         bitmapImage.CacheOption = BitmapCacheOption.OnLoad;
                         bitmapImage.EndInit();
-                        view_box.Source = bitmapImage;
+                        view_box.ImageSource = bitmapImage;
                     }
                 }
 
@@ -1817,7 +1838,7 @@ namespace ScanProgram
                 bitmapImage.StreamSource = memory;
                 bitmapImage.CacheOption = BitmapCacheOption.OnLoad;
                 bitmapImage.EndInit();
-                view_box.Source = bitmapImage;
+                view_box.ImageSource = bitmapImage;
             }
 
         }
@@ -2153,7 +2174,7 @@ namespace ScanProgram
                 cap.DestroyObjects();
                 cap.DisposeObjects();
                 snap_pic.Stop();
-                view_box.Source = null;
+                view_box.ImageSource = null;
             }
             else if (CameraMod == 3)
             {
@@ -2164,7 +2185,7 @@ namespace ScanProgram
                 cap_nir.DestroyObjects();
                 cap_nir.DisposeObjects();
                 snap_pic.Stop();
-                view_box.Source = null;
+                view_box.ImageSource = null;
             }
             Radio_Camera_RGB_Camera.IsEnabled = true;
             Radio_Camera_VNIR_Camera.IsEnabled = true;
@@ -2352,13 +2373,15 @@ namespace ScanProgram
                 bitmapImage.StreamSource = memory;
                 bitmapImage.CacheOption = BitmapCacheOption.OnLoad;
                 bitmapImage.EndInit();
-                view_box.Source = bitmapImage;
+                view_box.ImageSource = bitmapImage;
             }
 
 
 
 
         }
+
+      
 
         private void cali_WB_Click(object sender, RoutedEventArgs e)
         {
@@ -2470,11 +2493,121 @@ namespace ScanProgram
             }
         }
 
+        private void view_box_drawing_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            view_box_drawing.Children.Clear();
+            base.OnMouseLeftButtonDown(e);
+            
+            System.Windows.Point clickPos = e.GetPosition(this.view_box_drawing);
+
+            rect_Start_X = (int)clickPos.X;
+            rect_Start_Y = (int)clickPos.Y;
+            
+            if (this.isDragging)
+            {
+                
+                return;
+            }
+        }
+        private void view_box_drawing_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            view_box_drawing.Children.Clear();
+
+            System.Windows.Point clickPos = e.GetPosition(this.view_box_drawing);
+                rect_End_X = (int)clickPos.X;
+                rect_End_Y = (int)clickPos.Y;
+                this.rect = new System.Windows.Shapes.Rectangle();
+
+                this.rect.Stroke = System.Windows.Media.Brushes.AliceBlue;
+                this.rect.Fill = System.Windows.Media.Brushes.GreenYellow;
+                this.rect.Opacity = 0.5;
+                
+                if (rect_End_Y < rect_Start_Y)
+                {
+                    this.rect.Height = rect_Start_Y - rect_End_Y;
+                    Canvas.SetTop(this.rect, (int)clickPos.Y);
+
+                }
+                else if (rect_End_Y >= rect_Start_Y)
+                {
+                    this.rect.Height = rect_End_Y - rect_Start_Y;
+                    Canvas.SetTop(this.rect, rect_Start_Y);
+                }
+                if (rect_End_X < rect_Start_X)
+                {
+                    this.rect.Width = rect_Start_X - rect_End_X;
+                    Canvas.SetLeft(this.rect, rect_End_X);
+                }
+                else if (rect_End_X >= rect_Start_X)
+                {
+                    this.rect.Width = rect_End_X - rect_Start_X;
+                    Canvas.SetLeft(this.rect, rect_Start_X);
+                }
+
+            view_box_drawing.Children.Add(rect);
+            
+        }
+        private void view_box_drawing_MouseWheel(object sender, MouseWheelEventArgs e)
+        {
+
+        }
+
+        private void view_box_drawing_PreviewMouseMove(object sender, System.Windows.Input.MouseEventArgs e)
+        {
+            base.OnPreviewMouseMove(e);
+
+            System.Windows.Point clickPos = e.GetPosition(this.view_box_drawing);
+
+            if (Mouse.LeftButton == MouseButtonState.Pressed)
+
+            {
+                view_box_drawing.Children.Clear();
+                var pos = e.GetPosition(this);
+                this.rect = new System.Windows.Shapes.Rectangle();
+
+                this.rect.Stroke = System.Windows.Media.Brushes.Black;
+                this.rect.StrokeDashArray = new System.Windows.Media.DoubleCollection { 2, 2 };
+                this.rect.Fill = System.Windows.Media.Brushes.Black;
+                this.rect.Opacity = 0.25;
+                
+                if ((int)clickPos.Y < rect_Start_Y)
+                {
+                    this.rect.Height =  rect_Start_Y-(int)clickPos.Y;
+                    Canvas.SetTop(this.rect, (int)clickPos.Y);
+                    
+                }
+                else if ((int)clickPos.Y >= rect_Start_Y)
+                {
+                    this.rect.Height = (int)clickPos.Y - rect_Start_Y;
+                    Canvas.SetTop(this.rect, rect_Start_Y);
+                }
+                if ((int)clickPos.X < rect_Start_X)
+                {
+                    this.rect.Width =  rect_Start_X-(int)clickPos.X;
+                    Canvas.SetLeft(this.rect, (int)clickPos.X);
+                }
+                else if ((int)clickPos.X >= rect_Start_X)
+                {
+                    this.rect.Width = (int)clickPos.X - rect_Start_X;
+                    Canvas.SetLeft(this.rect, rect_Start_X);
+                }
+                
+                view_box_drawing.Children.Add(rect);
+
+            }
+        }
+
+        private void wb_button_Click(object sender, RoutedEventArgs e)
+        {
+            cap.WhiteValue();
+        }
+
         private void Camera_Grab_Button_Click(object sender, RoutedEventArgs e)
         {
             if (CameraMod == 1)
             {
-
+                cap.Snap(1, 1, "ddd");
+                cap.WhiteBalance();
             }
             else if (CameraMod == 3)
             {
@@ -2489,3 +2622,4 @@ namespace ScanProgram
 
     }
 }
+

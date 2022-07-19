@@ -1,4 +1,7 @@
-﻿using DALSA.SaperaLT.SapClassBasic;
+﻿using System;
+using System.Collections.Generic;
+using System.Text;
+using DALSA.SaperaLT.SapClassBasic;
 
 namespace ScanProgram
 {
@@ -11,6 +14,7 @@ namespace ScanProgram
           : base(pBuffers)
         {
             base.ProcessingDoneEnable = true;
+           
             m_ColorConv = pColorConv;
         }
         public SapMyProcessing(SapBuffer pBuffers)

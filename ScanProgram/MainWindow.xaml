@@ -29,13 +29,19 @@
             <GroupBox HorizontalAlignment="Left" Height="62" Header="Robot Init" Margin="10,0,0,0" VerticalAlignment="Top" Width="350"/>
             <GroupBox HorizontalAlignment="Left" Height="104" Header="Calibration" Margin="10,159,0,0" VerticalAlignment="Top" Width="350"/>
             <GroupBox HorizontalAlignment="Left" Height="104" Header="Camera Selection" Margin="10,58,0,0" VerticalAlignment="Top" Width="350"/>
-            <Label Content="UART" HorizontalAlignment="Left" Height="29" Margin="445,469,0,0" VerticalAlignment="Top" Width="54"/>
-            <ComboBox x:Name="UART_Port" HorizontalAlignment="Left" Margin="485,473,0,0" VerticalAlignment="Top" Width="82"/>
+            <Label Content="UART" HorizontalAlignment="Left" Height="29" Margin="622,519,0,0" VerticalAlignment="Top" Width="54"/>
+            <ComboBox x:Name="UART_Port" HorizontalAlignment="Left" Margin="662,523,0,0" VerticalAlignment="Top" Width="82"/>
             <!--원점 이동, 원점 설정 버튼-->
             <Button Content="원점이동"  x:Name="zeroReturn" HorizontalAlignment="Left" Margin="19,0,0,0" VerticalAlignment="Center" Height="18" Width="65" FontSize="10" Click="zeroReturn_Click"/>
 
             <Border BorderThickness="1" BorderBrush="Black" RenderTransformOrigin="0.425,0.479" Margin="372,0,28,250">
-                <Image  x:Name="view_box" Margin="2,9,0,0" HorizontalAlignment="Left" Width="448" Height="309" VerticalAlignment="Top"/>
+
+                <Canvas  x:Name="view_box_drawing" Margin="20"  Opacity="1" RenderTransformOrigin="0.5,0.5" ClipToBounds="True" Cursor="Cross" ForceCursor="True" MouseWheel="view_box_drawing_MouseWheel" MouseLeftButtonDown="view_box_drawing_MouseDown" MouseLeftButtonUp="view_box_drawing_MouseLeftButtonUp" PreviewMouseMove="view_box_drawing_PreviewMouseMove">
+                    <Canvas.Background>
+                        <ImageBrush x:Name="view_box"/>
+                    </Canvas.Background>
+                </Canvas>
+
             </Border>
 
             <!--로그 창-->
@@ -111,7 +117,7 @@
             <Button Content="작품 정보"  x:Name="art_Add" HorizontalAlignment="Left" Margin="283,435,0,0" VerticalAlignment="Top" Height="20" Width="77" RenderTransformOrigin="0.308,-0.065" FontSize="10" Click="art_Add_Click"/>
             <Button Content="자동캡쳐"  x:Name="auto_Capture" HorizontalAlignment="Left" Margin="19,312,0,0" VerticalAlignment="Top" Height="44" Width="65" RenderTransformOrigin="0.308,-0.065" FontSize="10" Click="auto_Capture_Click"/>
 
-            <TextBlock x:Name="currentPosition" HorizontalAlignment="Left" Text="Current Position will be showed" TextWrapping="Wrap" VerticalAlignment="Top" Height="33" Width="290" FontSize="20" Margin="485,317,0,0"/>
+            <TextBlock x:Name="currentPosition" HorizontalAlignment="Left" Text="Current Position will be showed" TextWrapping="Wrap" VerticalAlignment="Top" Height="33" Width="290" FontSize="20" Margin="483,323,0,0"/>
 
             <TextBlock HorizontalAlignment="Left" Margin="250,16,0,0" Text="X" TextWrapping="Wrap" VerticalAlignment="Top" FontSize="10"/>
             <TextBlock HorizontalAlignment="Left" Margin="250,30,0,0" Text="Y" TextWrapping="Wrap" VerticalAlignment="Top" FontSize="10"/>
@@ -156,8 +162,9 @@
             <Button x:Name="setStartPoint" Content="현재포지션 시작" HorizontalAlignment="Left" Margin="568,394,0,0" VerticalAlignment="Top" Click="setStartPoint_Click"/>
             <Button x:Name="setEndPoint" Content="현재포지션 끝점" HorizontalAlignment="Left" Margin="568,419,0,0" VerticalAlignment="Top" Click="setEndPoint_Click"/>
             <Button x:Name="button_cali_Vignette" Content="컬러 보정" HorizontalAlignment="Left" Height="24" Margin="109,207,0,0" VerticalAlignment="Top" Width="82" IsEnabled="False" Click="button_cali_Vignette_Click" />
-            <Button Content="JoyStickOpen" HorizontalAlignment="Left" Margin="592,507,0,0" VerticalAlignment="Top" Click="JoyStickOpen_Click"/>
+            <Button Content="JoyStickOpen" HorizontalAlignment="Left" Margin="753,522,0,0" VerticalAlignment="Top" Click="JoyStickOpen_Click"/>
             <RadioButton GroupName="Radio_Camera" Content="NIR" x:Name="Radio_Camera_NIR_Camera" HorizontalAlignment="Left" Margin="19,117,0,0" VerticalAlignment="Top"/>
+            <Button x:Name="wb_button" Content="Button" HorizontalAlignment="Left" Margin="594,448,0,0" VerticalAlignment="Top" Click="wb_button_Click"/>
 
 
 

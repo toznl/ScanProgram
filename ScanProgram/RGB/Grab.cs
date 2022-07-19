@@ -9,7 +9,6 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Drawing.Imaging;
 using DALSA.SaperaLT.SapClassBasic;
-
 using OpenCvSharp;
 
 
@@ -26,8 +25,14 @@ namespace ScanProgram
         SapView view = null;
         SapProcessing m_pro = null;
         SapColorConversion m_conv;
+        SapBayer m_bayer;
+        SapColorConversion.ColorAlign m_Align;
+        SapColorConversion.ColorMethod m_Method;
+        bool m_BayerEnabled;
+        //Buffer grab_buffer;
         Mat colorConvGrab = new Mat();
         Mat rawConvGrab = new Mat();
+        public SapDataFRGB data_FRGB;
         public Image img = null;
         // Create camera index parameter
         [Description("The index of the camera from which to acquire images.")]
@@ -83,40 +88,7 @@ namespace ScanProgram
             }
         }
 
-        // Create parameter for determining whether to automatically use the maximum possible frame rate for the current exposure time
-        private bool useMaxFrameRate;
-        [Description("Whether to set the FPS to the maximum possible value based on the current exposure time.")]
-        public bool UseMaxFrameRate
-        {
-            get
-            {
-                return useMaxFrameRate;
-            }
-            set
-            {
-                useMaxFrameRate = value;
-            }
-        }
-
-        // Create parameter for determining whether to reset the device before acquiring frames
-        private bool resetDevice;
-        [Description("Resets the camera before acquiring frames.")]
-        public bool ResetDevice
-        {
-            get
-            {
-                return resetDevice;
-            }
-            set
-            {
-                resetDevice = value;
-            }
-        }
-
-
-        // Create variables
-        readonly object captureLock = new object();
-
+       
         // Function used for destroying and disposing of sapera class objects
         public void DestroyObjects()
         {
@@ -132,6 +104,7 @@ namespace ScanProgram
                 buffer.Destroy();
             if (device != null && device.Initialized)
                 device.Destroy();
+            
         }
         public void DisposeObjects()
         {
@@ -171,50 +144,19 @@ namespace ScanProgram
 
             // obtain buffer As long as you know the address of the picture memory, you can actually have a variety of ways to get the picture (for example, convert to Bitmap)
             IntPtr addr;
-            buffer.GetAddress(out addr);
+            m_conv.OutputBuffer.GetAddress(out addr);
+            //m_conv.OutputBuffer.Load
+            //grab_buffer = m_conv.OutputBuffer.;
+            //// observation buffer Some attribute values of the picture in. The values in the comments after the statement are possible values
+            int count = m_conv.OutputBuffer.Count; //2
+            int height = m_conv.OutputBuffer.Height; //2800
+            int weight = m_conv.OutputBuffer.Width; //4096
+            int pixd = m_conv.OutputBuffer.PixelDepth; //8
 
-            // observation buffer Some attribute values of the picture in. The values in the comments after the statement are possible values
-            int count = buffer.Count; //2
-            SapFormat format = buffer.Format; //Uint8
-            double rate = buffer.FrameRate; //30.0,This value changes dynamically during continuous acquisition
-            int height = buffer.Height; //2800
-            int weight = buffer.Width; //4096
-            int pixd = buffer.PixelDepth; //8
 
-
-            // Read pictures from memory and convert them into bitmap Formats, creating palettes, printing to PictureBox
-            PixelFormat pf = PixelFormat.Format8bppIndexed;
-            Bitmap bmp = new Bitmap(weight, height, buffer.Pitch, pf, addr);
-            bmp.SetResolution(height, weight);
-            BitmapData bmpData = new BitmapData();
-
-            bmpData = bmp.LockBits(new Rectangle(0, 0, weight, height), System.Drawing.Imaging.ImageLockMode.WriteOnly, PixelFormat.Format8bppIndexed);
-
-            ColorPalette palette = bmp.Palette;
-            for (int i = 0; i < 256; i++)
-                palette.Entries[i] = Color.FromArgb(i, i, i);
-            bmp.Palette = palette;
-
-           
-
-            bmp.UnlockBits(bmpData);
-
-            //using (Bitmap tempbmp = new Bitmap(1, 1, pf))
-            //{
-            //    m_grayPalette = tempbmp.Palette;
-            //}
-            //for (int i = 0; i <= 255; i++)
-            //{
-            //    m_grayPalette.Entries[i] = Color.FromArgb(i, i, i);
-            //}
-
-            //bmp.Palette = m_grayPalette;
-            //opencv
-            rawConvGrab = OpenCvSharp.Extensions.BitmapConverter.ToMat(bmp);
-
-            Cv2.CvtColor(rawConvGrab, colorConvGrab, ColorConversionCodes.BayerRG2RGB_EA);
-            bmp = OpenCvSharp.Extensions.BitmapConverter.ToBitmap(colorConvGrab);
-            //bmp = Imagefrom
+            //// Read pictures from memory and convert them into bitmap Formats, creating palettes, printing to PictureBox
+            PixelFormat pf = PixelFormat.Format32bppArgb;
+            Bitmap bmp = new Bitmap(weight, height, m_conv.OutputBuffer.Pitch, pf, addr);
             img = (Image)bmp;
         }
 
@@ -239,6 +181,8 @@ namespace ScanProgram
             device = new SapAcqDevice(location, false);
             // Create buffer
             buffer = new SapBufferWithTrash(3, device, SapBuffer.MemoryType.ScatterGather);
+            m_bayer = new SapBayer(buffer);
+
             // Initialize transfer between device and buffer
             transfer = new SapAcqDeviceToBuf(device, buffer);
 
@@ -259,6 +203,7 @@ namespace ScanProgram
                 location.Dispose();
                 return;
             }
+            
             // Check if software color conversion is supported
             if (device.RawBayerOutput == false)
             {
@@ -271,6 +216,7 @@ namespace ScanProgram
             // creating the output buffer object.
             if (m_conv != null && !m_conv.Enable(true, false))
             {
+                m_BayerEnabled = false;
                 DestroyObjects();
                 return;
             }
@@ -284,6 +230,7 @@ namespace ScanProgram
                 }
                 buffer.Clear();
             }
+            
             // Create color conversion object
             if (m_conv != null && !m_conv.Initialized)
             {
@@ -332,16 +279,21 @@ namespace ScanProgram
                     DestroyObjects();
                     return;
                 }
-
+                
                 m_pro.AutoEmpty = true;
             }
             #endregion
+            
 
             m_conv.OutputFormat = SapFormat.RGB8888;
+            //m_conv.LutEnabled = true;
 
+            
 
-                // Start grabbing frames
-                transfer.Grab();
+            
+            // Start grabbing frames
+            transfer.Grab();
+            
            
 
         }
@@ -355,8 +307,61 @@ namespace ScanProgram
             log.AppendText(serverName);
         }
             
-        public void Grab()
+        public void WhiteBalance()
         {
+
+            //m_conv = pColorConv;
+            //transfer = pXfer;
+            //m_pro = pPro;
+            m_Align = m_conv.Align;
+            m_Method = m_conv.Method;
+
+            m_Align = SapColorConversion.ColorAlign.RGGB;
+            m_Method = SapColorConversion.ColorMethod.Method1;
+            float redgain = 1.11559f;
+            float greengain = 1;
+            float bluegain = 1.12991f;
+            //float redgain = 1;
+            //float greengain = 1;
+            //float bluegain = 1;
+            data_FRGB = new SapDataFRGB(redgain, greengain, bluegain);
+            m_conv.WBGain = data_FRGB;
+            SapBuffer.ColorAlign color_align= SapBuffer.ColorAlign.RGGB;
+
+            ////buffer.ColorWhiteBalance(color_Align, m_conv.WBGain);
+
+            m_conv.OutputBuffer.ColorWhiteBalance(color_align, data_FRGB);
+            m_conv.Convert();
+            
+        }
+        public void WhiteValue()
+        {
+            int width = 0;
+            int height = 0;
+            
+            if (rect_End_Y < rect_Start_Y)
+            {
+                height = rect_Start_Y - rect_End_Y;
+
+            }
+            else if (rect_End_Y >= rect_Start_Y)
+            {
+                height = rect_End_Y - rect_Start_Y;
+            }
+            if (rect_End_X < rect_Start_X)
+            {
+                width = rect_Start_X - rect_End_X;
+            }
+            else if (rect_End_X >= rect_Start_X)
+            {
+                width = rect_End_X - rect_Start_X;
+            }
+            SapDataFRGB temp = m_conv.WBGain;
+
+            if (m_conv.WhiteBalance(rect_Start_X, rect_Start_Y, width, height))
+            {
+                data_FRGB = m_conv.WBGain;
+            }
 
         }
     }
