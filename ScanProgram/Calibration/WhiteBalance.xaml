@@ -5,8 +5,29 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:ScanProgram.Calibration"
         mc:Ignorable="d"
-        Title="WhiteBalance" Height="450" Width="800">
-    <Grid>
-        
+        Title="WhiteBalance" Height="450" Width="644">
+    <Grid Margin="0,0,39,0">
+        <Canvas Margin="270,69,0,100" HorizontalAlignment="Left" Width="290" OpacityMask="Black">
+            <Canvas.Background>
+                <ImageBrush x:Name="WB_VIEWBOX" TileMode="None"/>
+            </Canvas.Background>
+        </Canvas>
+        <Grid HorizontalAlignment="Left" Height="58" Margin="105,187,0,0" VerticalAlignment="Top" Width="72">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="0*"/>
+                <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
+            <TextBox x:Name="WB_REDGAIN"  HorizontalAlignment="Left" Margin="12,0,0,0" Text="1" TextWrapping="Wrap" VerticalAlignment="Top" Width="60" Grid.ColumnSpan="2"/>
+            <TextBox x:Name="WB_GREENGAIN" HorizontalAlignment="Left" Margin="12,0,0,0" Text="1" TextWrapping="Wrap" VerticalAlignment="Center" Width="60" Grid.ColumnSpan="2"/>
+            <TextBox x:Name="WB_BLUEGAIN" HorizontalAlignment="Left" Margin="12,40,0,0" Text="1" TextWrapping="Wrap" VerticalAlignment="Top" Width="60" Grid.ColumnSpan="2"/>
+            <TextBlock HorizontalAlignment="Left" Margin="0,1,0,0" Text="R" TextWrapping="Wrap" VerticalAlignment="Top" Grid.ColumnSpan="2"/>
+            <TextBlock HorizontalAlignment="Left" Text="G" TextWrapping="Wrap" VerticalAlignment="Center" Grid.ColumnSpan="2"/>
+            <TextBlock HorizontalAlignment="Left" Margin="0,41,0,0" Text="B" TextWrapping="Wrap" VerticalAlignment="Top" Grid.ColumnSpan="2"/>
+
+        </Grid>
+        <Rectangle HorizontalAlignment="Left" Height="280" Margin="265,64,0,0" Stroke="Black" VerticalAlignment="Top" Width="295"/>
+        <Button Content="Apply" HorizontalAlignment="Left" Margin="130,275,0,0" VerticalAlignment="Top"/>
+        <Button Content="Auto WhiteBalance" HorizontalAlignment="Left" Margin="94,250,0,0" VerticalAlignment="Top"/>
+
     </Grid>
 </Window>

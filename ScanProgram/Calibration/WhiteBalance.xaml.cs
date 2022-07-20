@@ -22,6 +22,33 @@ namespace ScanProgram.Calibration
             InitializeComponent();
            
         }
-        
+
+        private void grabRGB(object sender, EventArgs e)
+        {
+            //try
+            //{
+            //    if (MainWindow.cap.img != null)
+            //    {
+            //        using (MemoryStream memory = new MemoryStream())
+            //        {
+            //            cap.img.Save(memory, ImageFormat.Bmp);
+            //            memory.Position = 0;
+            //            BitmapImage bitmapImage = new BitmapImage();
+            //            bitmapImage.BeginInit();
+            //            bitmapImage.StreamSource = memory;
+            //            bitmapImage.CacheOption = BitmapCacheOption.OnLoad;
+            //            bitmapImage.EndInit();
+            //            view_box.ImageSource = bitmapImage;
+            //        }
+            //    }
+
+            //}
+            //catch (Exception ex)
+            //{
+            //    log.AppendText(ex.ToString());
+            //    log.ScrollToEnd();
+            //}
+        }
+
     }
 }

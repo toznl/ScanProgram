@@ -17,104 +17,19 @@ namespace ScanProgram
     public class SaperaCapture_Nir : MainWindow
     {
         string serverName = "";
-        SapLocation location = null;
+        public SapLocation location = null;
         SapAcqDevice device = null;
         SapBuffer buffer = null;
         SapTransfer transfer = null;
         SapView view = null;
         SapProcessing m_pro = null;
+        
         public Image img = null;
-        Mat colorConvGrab = new Mat();
-        Mat rawConvGrab = new Mat();
 
         // Create camera index parameter
         [Description("The index of the camera from which to acquire images.")]
         public int Index { get; set; }
-
-        // Create exposure time parameter
-        private double exposureTime;
-        [Description("Exposure time (ms). This controls the maximum framerate.")]
-        public double ExposureTime { get => exposureTime; set => exposureTime = Math.Round(value, 2); }
-
-        // Create frame rate parameter
-        private double frameRate;
-        [Description("Desired frame rate (frames / s). This is superceded by the maximum framerate allowed by the exposure time. When UseMaxFrameRate is set to True, FrameRate is set to -1.")]
-        public double FrameRate
-        {
-            get
-            {
-                return frameRate;
-            }
-            set
-            {
-                frameRate = Math.Floor(value * 100) / 100;
-            }
-        }
-
-        // Create black level parameter
-        private double blackLevel;
-        [Description("Black level (DN). This controls the analog black level as DC offset applied to the video signal.")]
-        public double BlackLevel
-        {
-            get
-            {
-                return blackLevel;
-            }
-            set
-            {
-                blackLevel = Math.Round(value, 2);
-            }
-        }
-
-        // Create gain parameter
-        private double gain;
-        [Description("Adjusts the gain (dB). This controls the gain as an amplification factor applied to the video signal.")]
-        public double Gain
-        {
-            get
-            {
-                return gain;
-            }
-            set
-            {
-                gain = Math.Round(value, 2);
-            }
-        }
-
-        // Create parameter for determining whether to automatically use the maximum possible frame rate for the current exposure time
-        private bool useMaxFrameRate;
-        [Description("Whether to set the FPS to the maximum possible value based on the current exposure time.")]
-        public bool UseMaxFrameRate
-        {
-            get
-            {
-                return useMaxFrameRate;
-            }
-            set
-            {
-                useMaxFrameRate = value;
-            }
-        }
-
-        // Create parameter for determining whether to reset the device before acquiring frames
-        private bool resetDevice;
-        [Description("Resets the camera before acquiring frames.")]
-        public bool ResetDevice
-        {
-            get
-            {
-                return resetDevice;
-            }
-            set
-            {
-                resetDevice = value;
-            }
-        }
-
-
-        // Create variables
-        readonly object captureLock = new object();
-
+        
         // Function used for destroying and disposing of sapera class objects
         public void DestroyObjects()
         {
@@ -169,8 +84,6 @@ namespace ScanProgram
 
                 // observation buffer Some attribute values of the picture in. The values in the comments after the statement are possible values
                 int count = buffer.Count; //2
-                SapFormat format = buffer.Format; //Uint8
-                double rate = buffer.FrameRate; //30.0,This value changes dynamically during continuous acquisition
                 int height = buffer.Height; //2800
                 int weight = buffer.Width; //4096
                 int pixd = buffer.PixelDepth; //8
@@ -179,36 +92,16 @@ namespace ScanProgram
                 // Read pictures from memory and convert them into bitmap Formats, creating palettes, printing to PictureBox
                 PixelFormat pf = PixelFormat.Format8bppIndexed;
                 Bitmap bmp = new Bitmap(weight, height, buffer.Pitch, pf, addr);
-                bmp.SetResolution(height, weight);
-                BitmapData bmpData = new BitmapData();
-
-                bmpData = bmp.LockBits(new Rectangle(0, 0, weight, height), System.Drawing.Imaging.ImageLockMode.WriteOnly, PixelFormat.Format8bppIndexed);
-
-            ColorPalette palette = bmp.Palette;
+            ColorPalette _palette = bmp.Palette;
+            Color[] _entries = _palette.Entries;
             for (int i = 0; i < 256; i++)
-                palette.Entries[i] = Color.FromArgb(i, i, i);
-            bmp.Palette = palette;
+            {
+                Color b = new Color();
+                b = Color.FromArgb((byte)i, (byte)i, (byte)i);
+                _entries[i] = b;
+            }
+            bmp.Palette = _palette;
 
-
-
-            bmp.UnlockBits(bmpData);
-
-            //using (Bitmap tempbmp = new Bitmap(1, 1, pf))
-            //{
-            //    m_grayPalette = tempbmp.Palette;
-            //}
-            //for (int i = 0; i <= 255; i++)
-            //{
-            //    m_grayPalette.Entries[i] = Color.FromArgb(i, i, i);
-            //}
-
-            //bmp.Palette = m_grayPalette;
-            //opencv
-            rawConvGrab = OpenCvSharp.Extensions.BitmapConverter.ToMat(bmp);
-
-            Cv2.CvtColor(rawConvGrab, colorConvGrab, ColorConversionCodes.BayerRG2RGB_VNG);
-            bmp = OpenCvSharp.Extensions.BitmapConverter.ToBitmap(colorConvGrab);
-            //bmp = Imagefrom
             img = (Image)bmp;
 
         }
@@ -221,7 +114,7 @@ namespace ScanProgram
             if (Index >= 0 && Index < serverCount - 1)
             {
                 // Find the name of the server
-                serverName = SapManager.GetServerName(Index + 1);
+                serverName = "Nano-M2590-NIR_1";
             }
             else
             {
@@ -310,17 +203,8 @@ namespace ScanProgram
 
 
 
-            try
-            {
-                // Start grabbing frames
                 transfer.Grab();
-                view = new SapView(buffer);
-
-            }
-            finally
-            {
-                //Destroy objects
-            }
+         
         }
 
         public void Snap(int i, int x, string y)

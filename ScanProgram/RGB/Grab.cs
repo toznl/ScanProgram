@@ -25,70 +25,16 @@ namespace ScanProgram
         SapView view = null;
         SapProcessing m_pro = null;
         SapColorConversion m_conv;
-        SapBayer m_bayer;
         SapColorConversion.ColorAlign m_Align;
         SapColorConversion.ColorMethod m_Method;
         bool m_BayerEnabled;
         //Buffer grab_buffer;
-        Mat colorConvGrab = new Mat();
-        Mat rawConvGrab = new Mat();
         public SapDataFRGB data_FRGB;
         public Image img = null;
         // Create camera index parameter
         [Description("The index of the camera from which to acquire images.")]
         public int Index { get; set; }
 
-        // Create exposure time parameter
-        private double exposureTime;
-        [Description("Exposure time (ms). This controls the maximum framerate.")]
-        public double ExposureTime { get => exposureTime; set => exposureTime = Math.Round(value, 2); }
-
-        // Create frame rate parameter
-        private double frameRate;
-        [Description("Desired frame rate (frames / s). This is superceded by the maximum framerate allowed by the exposure time. When UseMaxFrameRate is set to True, FrameRate is set to -1.")]
-        public double FrameRate
-        {
-            get
-            {
-                return frameRate;
-            }
-            set
-            {
-                frameRate = Math.Floor(value * 100) / 100;
-            }
-        }
-
-        // Create black level parameter
-        private double blackLevel;
-        [Description("Black level (DN). This controls the analog black level as DC offset applied to the video signal.")]
-        public double BlackLevel
-        {
-            get
-            {
-                return blackLevel;
-            }
-            set
-            {
-                blackLevel = Math.Round(value, 2);
-            }
-        }
-
-        // Create gain parameter
-        private double gain;
-        [Description("Adjusts the gain (dB). This controls the gain as an amplification factor applied to the video signal.")]
-        public double Gain
-        {
-            get
-            {
-                return gain;
-            }
-            set
-            {
-                gain = Math.Round(value, 2);
-            }
-        }
-
-       
         // Function used for destroying and disposing of sapera class objects
         public void DestroyObjects()
         {
@@ -145,8 +91,7 @@ namespace ScanProgram
             // obtain buffer As long as you know the address of the picture memory, you can actually have a variety of ways to get the picture (for example, convert to Bitmap)
             IntPtr addr;
             m_conv.OutputBuffer.GetAddress(out addr);
-            //m_conv.OutputBuffer.Load
-            //grab_buffer = m_conv.OutputBuffer.;
+            
             //// observation buffer Some attribute values of the picture in. The values in the comments after the statement are possible values
             int count = m_conv.OutputBuffer.Count; //2
             int height = m_conv.OutputBuffer.Height; //2800
@@ -169,26 +114,23 @@ namespace ScanProgram
             if (Index >= 0 && Index < serverCount - 1)
             {
                 // Find the name of the server
-                serverName = SapManager.GetServerName(Index + 1);
+                serverName = "Nano-C4020_2";
             }
             else
             {
+                log.AppendText("서버를 찾지 못했습니다");
                 return;
             }
             // Find server location
-            location = new SapLocation(serverName, 0);
+            location = new SapLocation(serverName,0) ;
             // Find device
             device = new SapAcqDevice(location, false);
             // Create buffer
             buffer = new SapBufferWithTrash(3, device, SapBuffer.MemoryType.ScatterGather);
-            m_bayer = new SapBayer(buffer);
-
             // Initialize transfer between device and buffer
             transfer = new SapAcqDeviceToBuf(device, buffer);
-
             m_conv = new SapColorConversion(device, buffer);
             m_pro = new SapMyProcessing(buffer, m_conv);
-            //view = new SapView(m_conv.OutputBuffer);
 
             // Initialize frame handler for end of frame events
             transfer.Pairs[0].EventType = SapXferPair.XferEventType.EndOfFrame;

@@ -33,12 +33,11 @@ namespace ScanProgram
 
     public partial class MainWindow : System.Windows.Window
     {
+
         int bytesreceived = 0;
         byte[] inputdata = new byte[65535];
         SerialPort Serial_Uart = new SerialPort();
-
-        private System.Drawing.Point origin;
-        private System.Drawing.Point start;
+        const double ScaleRate = 1.1;
 
         #region Thread
         private DispatcherTimer kernelTimer = new DispatcherTimer(); //RobotTimer
@@ -524,7 +523,12 @@ namespace ScanProgram
         private System.Windows.Shapes.Rectangle rect;
 
         #endregion
-
+        public MainWindow()
+        {
+            InitializeComponent();
+            makeSerialInit();
+            view_box_drawing.MouseWheel += new MouseWheelEventHandler(view_box_drawing_MouseWheel);
+        }
         #region RobotInit
         private void power_Robot_Click(object sender, RoutedEventArgs e)
         {
@@ -538,17 +542,16 @@ namespace ScanProgram
                 Motion_Function.MXP_MC_Power(i, IndexCal((UInt32)MXP_MotionBlockIndex.mcPower) + i, 1, false, Out);
             }
 
-
+            if(MXP.MXP_AXISSTATUS == MXP.MXP_AXISSTATUS.STANDSTILL)
             log.AppendText("Robot_Servo_On\r");
             log.ScrollToEnd();
-
-
             cur_Position.Start();
         }
         //Zero Setting
         private void zeroSetting_Click(object sender, RoutedEventArgs e)
         {
             MXP.MXP_HOME_OUT Out = new MXP.MXP_HOME_OUT { };
+            
             log.AppendText("Homing\r");
             log.ScrollToEnd();
             for (UInt32 i = 0; i < MaxAxis; i++)
@@ -558,7 +561,8 @@ namespace ScanProgram
             offset_X.Text = "0";
             offset_Y.Text = "0";
             offset_Z.Text = "0";
-
+            
+            if(Out.Axis)
             log.AppendText("Homing Completed\r");
             log.ScrollToEnd();
 
@@ -729,17 +733,32 @@ namespace ScanProgram
             log.AppendText("ArtAdd Windows Opened\r");
         }
         #endregion
-        public MainWindow()
-        {
-            InitializeComponent();
-            makeSerialInit();
-        }
+        #region RobotMovingJoystick
         private void makeSerialInit()
         {
             // Ultra sonic CH1
             foreach (string comport in SerialPort.GetPortNames()) { UART_Port.Items.Add(comport); }
             UART_Port.SelectedIndex = 1; UART_Port.EndInit();
 
+        }
+        private void JoyStickOpen_Click(object sender, RoutedEventArgs e)
+        {
+            Serial_Uart.PortName = UART_Port.Text;       // Port Name
+            Serial_Uart.BaudRate = (int)9600;
+
+            Serial_Uart.DataBits = (int)8;
+            Serial_Uart.Parity = Parity.None;
+            Serial_Uart.StopBits = StopBits.One;
+            Serial_Uart.Open();
+            if (Serial_Uart.IsOpen)
+            {
+                Serial_Uart.DataReceived += new System.IO.Ports.SerialDataReceivedEventHandler(Uart_DataReceived);
+            }
+
+            if (Serial_Uart.IsOpen)
+            {
+                //Serial_Uart.Close();
+            }
         }
         public static class PelcoD
         {
@@ -1132,9 +1151,7 @@ namespace ScanProgram
                 if (inputdata[0] == (byte)0xff)  // Sync Frame
                 {
                     //checksum 
-                    byte SyncByte = 0xff;
                     byte Address;
-                    byte CheckSum;
 
                     byte Command1, Command2, Data1, Data2;
                     Address = inputdata[1];
@@ -1320,22 +1337,750 @@ namespace ScanProgram
                 }
                 bool uiAccess = log.Dispatcher.CheckAccess();
 
-                if (uiAccess)
-                {
-                    log.AppendText(msg_str + "\r");
-                    log.AppendText(JoyStick_Speed.ToString() + "\r");
-                    log.ScrollToEnd();
-                }
-                else
-                {
-                    log.Dispatcher.Invoke(() => { log.AppendText(msg_str + "\r"); });
-                    log.Dispatcher.Invoke(() => { log.AppendText(JoyStick_Speed.ToString() + "\r"); });
-                    log.Dispatcher.Invoke(() => { log.ScrollToEnd(); });
-                }
+                //if (uiAccess)
+                //{
+                //    log.AppendText(msg_str + "\r");
+                //    log.AppendText(JoyStick_Speed.ToString() + "\r");
+                //    log.ScrollToEnd();
+                //}
+                //else
+                //{
+                //    log.Dispatcher.Invoke(() => { log.AppendText(msg_str + "\r"); });
+                //    log.Dispatcher.Invoke(() => { log.AppendText(JoyStick_Speed.ToString() + "\r"); });
+                //    log.Dispatcher.Invoke(() => { log.ScrollToEnd(); });
+                //}
 
                 bytesreceived = 0;
             }
         }
+        #endregion
+        #region Grab Method For Cameras
+        private void grabRGB(object sender, EventArgs e)
+        {
+            try
+            {
+                if (cap.img != null)
+                {
+                    using (MemoryStream memory = new MemoryStream())
+                    {
+                        cap.img.Save(memory, ImageFormat.Bmp);
+                        memory.Position = 0;
+                        BitmapImage bitmapImage = new BitmapImage();
+                        bitmapImage.BeginInit();
+                        bitmapImage.StreamSource = memory;
+                        bitmapImage.CacheOption = BitmapCacheOption.OnLoad;
+                        bitmapImage.EndInit();
+                        view_box.ImageSource = bitmapImage;
+                    }
+                }
+
+            }
+            catch (Exception ex)
+            {
+                log.AppendText(ex.ToString());
+                log.ScrollToEnd();
+            }
+        }
+        private void grabNIR(object sender, EventArgs e)
+        {
+            try
+            {
+                if (cap_nir.img != null)
+                {
+                    using (MemoryStream memory_nir = new MemoryStream())
+                    {
+                        cap_nir.img.Save(memory_nir, ImageFormat.Bmp);
+                        memory_nir.Position = 0;
+                        BitmapImage bitmapImage = new BitmapImage();
+                        bitmapImage.BeginInit();
+                        bitmapImage.StreamSource = memory_nir;
+                        bitmapImage.CacheOption = BitmapCacheOption.OnLoad;
+                        bitmapImage.EndInit();
+                        view_box.ImageSource = bitmapImage;
+                    }
+                }
+
+            }
+            catch (Exception ex)
+            {
+                log.AppendText(ex.ToString());
+                log.ScrollToEnd();
+            }
+        }
+        private void grabUV(object sender, EventArgs e)
+        {
+            int err = 0;
+            int size;
+            System.IntPtr evhandle;
+            Bitmap imagebmp;
+            UIntPtr buf;
+            bool bauto = true;              // set this to true to get auto min max
+            UInt16 width = 0;
+            UInt16 height = 0;
+            UInt16 widthmax = 0;
+            UInt16 heightmax = 0;
+            int ishift = 16 - pcoDescr.wDynResDESC;
+            int ipadd = width / 4;
+            int iconvertcol = pcoDescr.wColorPatternDESC / 0x1000;
+            int max;
+            int min;
+            int ival;
+            ipadd *= 4;
+            ipadd = width - ipadd;
+
+            err = PCO_SDK_LibWrapper.PCO_GetSizes(cameraHandle, ref width, ref height, ref widthmax, ref heightmax);
+            size = width * height * 2;
+
+            buf = UIntPtr.Zero;
+            evhandle = IntPtr.Zero;
+            if ((bufwidth != width) || (bufheight != height))
+            {
+                if (bufnr != -1)
+                {
+                    PCO_SDK_LibWrapper.PCO_FreeBuffer(cameraHandle, bufnr);
+                }
+                bufnr = -1;
+                imagedata = new byte[(width + ipadd) * height * 3];
+
+                err = PCO_SDK_LibWrapper.PCO_AllocateBuffer(cameraHandle, ref bufnr, size, ref buf, ref evhandle);
+                if (err == 0)
+                {
+                    bufwidth = width;
+                    bufheight = height;
+                }
+            }
+            else
+                err = PCO_SDK_LibWrapper.PCO_GetBuffer(cameraHandle, bufnr, ref buf, ref evhandle);
+
+            //Mandatory for Cameralink and GigE. Don't care for all other interfaces, so leave it intact here.
+
+            err = PCO_SDK_LibWrapper.PCO_AddBufferEx(cameraHandle, 0, 0, bufnr, (UInt16)width, (UInt16)height, (UInt16)pcoDescr.wDynResDESC);
+
+            // There are two possibilities to synch. with the camera. Either by polling or by event.
+            // To use polling uncomment the Polling Block and comment the Event Block
+            // Begin Polling Block
+            // UInt32 dwStatusDll = 0, dwStatusDrv = 0;
+            // do
+            // {
+            //   err = PCO_SDK_LibWrapper.PCO_GetBufferStatus(cameraHandle, bufnr, ref dwStatusDll, ref dwStatusDrv);
+            // } while ((dwStatusDll & 0x8000) == 0);
+            // End Polling Block
+
+            //// Begin Event Block
+            //bool bImageIsOk = false;
+            //uint res = WaitForSingleObject(evhandle, 3000);
+            //if (res == 0)
+            //{
+            //    bImageIsOk = true;
+            //}
+            //if (!bImageIsOk)
+            //    return;
+            // End Event Block
+
+            unsafe
+            {
+                Int16* bufi = (Int16*)buf.ToPointer();
+                max = 1500;
+                min = 100;
+                for (int i = 10 * width; i < height * width; i++)
+                {
+                    if (bufi[i] > max)
+                        max = bufi[i];
+                    if (bufi[i] < min)
+                        min = bufi[i];
+                }
+                max >>= ishift;
+                min >>= ishift;
+                if (max <= min)
+                    max = min + 1;
+            }
+            PCO_Convert_LibWrapper.PCO_Convert16TOCOL(convertHandle, 0, iconvertcol, width, height,
+                buf, imagedata);
+
+            if ((convertDialog != IntPtr.Zero) && (convertHandle != IntPtr.Zero))
+            {
+                PCO_Convert_LibWrapper.PCO_SetDataToDialog(convertDialog, width, height, buf, imagedata);
+            }
+
+            if (bauto)
+            {
+                PCO_ConvertStructures.PCO_Display strDisplay = new PCO_ConvertStructures.PCO_Display(1);
+
+                strDisplay.wSize = (ushort)Marshal.SizeOf(typeof(PCO_ConvertStructures.PCO_Display));
+
+                err = PCO_Convert_LibWrapper.PCO_ConvertGetDisplay(convertHandle, ref strDisplay);
+                strDisplay.iScale_min = min;
+                strDisplay.iScale_max = max;
+
+                err = PCO_Convert_LibWrapper.PCO_ConvertSetDisplay(convertHandle, ref strDisplay);
+                err = PCO_Convert_LibWrapper.PCO_SetConvertDialog(convertDialog, convertHandle);
+            }
+
+            imagebmp = new Bitmap(width, height, PixelFormat.Format24bppRgb);
+            Rectangle dimension = new Rectangle(0, 0, imagebmp.Width, imagebmp.Height);
+            BitmapData picData = imagebmp.LockBits(dimension, ImageLockMode.ReadWrite, PixelFormat.Format24bppRgb);
+            IntPtr pixelStartAddress = picData.Scan0;
+
+            //Copy the pixel data into the bitmap structure
+            System.Runtime.InteropServices.Marshal.Copy(imagedata, 0, pixelStartAddress, imagedata.Length);
+
+            //[uv image save]
+
+            //
+
+            imagebmp.UnlockBits(picData);
+
+            using (MemoryStream memory = new MemoryStream())
+            {
+                imagebmp.Save(memory, System.Drawing.Imaging.ImageFormat.Bmp);
+                memory.Position = 0;
+                BitmapImage bitmapImage = new BitmapImage();
+                bitmapImage.BeginInit();
+                bitmapImage.StreamSource = memory;
+                bitmapImage.CacheOption = BitmapCacheOption.OnLoad;
+                bitmapImage.EndInit();
+                view_box.ImageSource = bitmapImage;
+            }
+
+        }
+        #endregion
+        #region Snap Method For Cameras
+        private void UV_Camera_Grab(object sender, RoutedEventArgs e)
+        {
+
+
+            int err = 0;
+            int size;
+            System.IntPtr evhandle;
+            Bitmap imagebmp;
+            UIntPtr buf;
+            bool bauto = true;              // set this to true to get auto min max
+            UInt16 width = 0;
+            UInt16 height = 0;
+            UInt16 widthmax = 0;
+            UInt16 heightmax = 0;
+            int ishift = 16 - pcoDescr.wDynResDESC;
+            int ipadd = width / 4;
+            int iconvertcol = pcoDescr.wColorPatternDESC / 0x1000;
+            int max;
+            int min;
+            int ival;
+            ipadd *= 4;
+            ipadd = width - ipadd;
+
+            err = PCO_SDK_LibWrapper.PCO_GetSizes(cameraHandle, ref width, ref height, ref widthmax, ref heightmax);
+            size = width * height * 2;
+
+            buf = UIntPtr.Zero;
+            evhandle = IntPtr.Zero;
+            if ((bufwidth != width) || (bufheight != height))
+            {
+                if (bufnr != -1)
+                {
+                    PCO_SDK_LibWrapper.PCO_FreeBuffer(cameraHandle, bufnr);
+                }
+                bufnr = -1;
+                imagedata = new byte[(width + ipadd) * height * 3];
+
+                err = PCO_SDK_LibWrapper.PCO_AllocateBuffer(cameraHandle, ref bufnr, size, ref buf, ref evhandle);
+                if (err == 0)
+                {
+                    bufwidth = width;
+                    bufheight = height;
+                }
+            }
+            else
+                err = PCO_SDK_LibWrapper.PCO_GetBuffer(cameraHandle, bufnr, ref buf, ref evhandle);
+
+            //Mandatory for Cameralink and GigE. Don't care for all other interfaces, so leave it intact here.
+
+            err = PCO_SDK_LibWrapper.PCO_AddBufferEx(cameraHandle, 0, 0, bufnr, (UInt16)width, (UInt16)height, (UInt16)pcoDescr.wDynResDESC);
+
+            // There are two possibilities to synch. with the camera. Either by polling or by event.
+            // To use polling uncomment the Polling Block and comment the Event Block
+            // Begin Polling Block
+            // UInt32 dwStatusDll = 0, dwStatusDrv = 0;
+            // do
+            // {
+            //   err = PCO_SDK_LibWrapper.PCO_GetBufferStatus(cameraHandle, bufnr, ref dwStatusDll, ref dwStatusDrv);
+            // } while ((dwStatusDll & 0x8000) == 0);
+            // End Polling Block
+
+            //// Begin Event Block
+            //bool bImageIsOk = false;
+            //uint res = WaitForSingleObject(evhandle, 3000);
+            //if (res == 0)
+            //{
+            //    bImageIsOk = true;
+            //}
+            //if (!bImageIsOk)
+            //    return;
+            // End Event Block
+
+            unsafe
+            {
+                Int16* bufi = (Int16*)buf.ToPointer();
+                max = 1500;
+                min = 100;
+                for (int i = 10 * width; i < height * width; i++)
+                {
+                    if (bufi[i] > max)
+                        max = bufi[i];
+                    if (bufi[i] < min)
+                        min = bufi[i];
+                }
+                max >>= ishift;
+                min >>= ishift;
+                if (max <= min)
+                    max = min + 1;
+            }
+            PCO_Convert_LibWrapper.PCO_Convert16TOCOL(convertHandle, 0, iconvertcol, width, height,
+                buf, imagedata);
+
+            if ((convertDialog != IntPtr.Zero) && (convertHandle != IntPtr.Zero))
+            {
+                PCO_Convert_LibWrapper.PCO_SetDataToDialog(convertDialog, width, height, buf, imagedata);
+            }
+
+            if (bauto)
+            {
+                PCO_ConvertStructures.PCO_Display strDisplay = new PCO_ConvertStructures.PCO_Display(1);
+
+                strDisplay.wSize = (ushort)Marshal.SizeOf(typeof(PCO_ConvertStructures.PCO_Display));
+
+                err = PCO_Convert_LibWrapper.PCO_ConvertGetDisplay(convertHandle, ref strDisplay);
+                strDisplay.iScale_min = min;
+                strDisplay.iScale_max = max;
+
+                err = PCO_Convert_LibWrapper.PCO_ConvertSetDisplay(convertHandle, ref strDisplay);
+                err = PCO_Convert_LibWrapper.PCO_SetConvertDialog(convertDialog, convertHandle);
+            }
+
+            imagebmp = new Bitmap(width, height, PixelFormat.Format24bppRgb);
+            Rectangle dimension = new Rectangle(0, 0, imagebmp.Width, imagebmp.Height);
+            BitmapData picData = imagebmp.LockBits(dimension, ImageLockMode.ReadWrite, PixelFormat.Format24bppRgb);
+            IntPtr pixelStartAddress = picData.Scan0;
+
+            //Copy the pixel data into the bitmap structure
+            System.Runtime.InteropServices.Marshal.Copy(imagedata, 0, pixelStartAddress, imagedata.Length);
+
+            //[uv image save]
+            imagebmp.Save("c:\\test\\button.bmp", System.Drawing.Imaging.ImageFormat.Bmp);
+            //
+
+            imagebmp.UnlockBits(picData);
+
+            using (MemoryStream memory = new MemoryStream())
+            {
+                imagebmp.Save(memory, System.Drawing.Imaging.ImageFormat.Bmp);
+                memory.Position = 0;
+                BitmapImage bitmapImage = new BitmapImage();
+                bitmapImage.BeginInit();
+                bitmapImage.StreamSource = memory;
+                bitmapImage.CacheOption = BitmapCacheOption.OnLoad;
+                bitmapImage.EndInit();
+                view_box.ImageSource = bitmapImage;
+            }
+        }
+        private void Setupconvert()
+        {
+            pcoDescr = new PCO_Description();
+            pcoDescr.wSize = (ushort)Marshal.SizeOf(pcoDescr);
+            int err = 0;
+
+            err = PCO_SDK_LibWrapper.PCO_GetCameraDescription(cameraHandle, ref pcoDescr);
+            PCO_ConvertStructures.PCO_SensorInfo strsensorinf = new PCO_ConvertStructures.PCO_SensorInfo();
+            PCO_ConvertStructures.PCO_Display strDisplay = new PCO_ConvertStructures.PCO_Display();
+            strsensorinf.wSize = (ushort)Marshal.SizeOf(strsensorinf);
+            strDisplay.wSize = (ushort)Marshal.SizeOf(strDisplay);
+            strsensorinf.wDummy = 0;
+            strsensorinf.iConversionFactor = 0;
+            strsensorinf.iDataBits = pcoDescr.wDynResDESC;
+            strsensorinf.iSensorInfoBits = 1;
+            strsensorinf.iDarkOffset = 100;
+            strsensorinf.dwzzDummy0 = 0;
+            strsensorinf.strColorCoeff.da11 = 1.0;
+            strsensorinf.strColorCoeff.da12 = 0.0;
+            strsensorinf.strColorCoeff.da13 = 0.0;
+            strsensorinf.strColorCoeff.da21 = 0.0;
+            strsensorinf.strColorCoeff.da22 = 1.0;
+            strsensorinf.strColorCoeff.da23 = 0.0;
+            strsensorinf.strColorCoeff.da31 = 0.0;
+            strsensorinf.strColorCoeff.da32 = 0.0;
+            strsensorinf.strColorCoeff.da33 = 1.0;
+            strsensorinf.iCamNum = 0;
+            strsensorinf.hCamera = cameraHandle;
+
+            int errorCode;
+            /* We created a pointer to a convert object here */
+            errorCode = PCO_Convert_LibWrapper.PCO_ConvertCreate(ref convertHandle, ref strsensorinf, PCO_Convert_LibWrapper.PCO_COLOR_CONVERT);
+
+            PCO_ConvertStructures.PCO_Convert pcoConv = new PCO_ConvertStructures.PCO_Convert(); ;
+
+            pcoConv.wSize = (ushort)Marshal.SizeOf(pcoConv);
+            errorCode = PCOConvertDll.PCO_Convert_LibWrapper.PCO_ConvertGet(convertHandle, ref pcoConv);
+            pcoConv.wSize = (ushort)Marshal.SizeOf(pcoConv);
+
+            IntPtr debugIntPtr = convertHandle;
+            PCO_ConvertStructures.PCO_Convert pcoConvertlocal = (PCO_ConvertStructures.PCO_Convert)Marshal.PtrToStructure(debugIntPtr, typeof(PCO_ConvertStructures.PCO_Convert));
+
+        }
+        private void snapUV(int ii, int xx, string y)
+        {
+            int err = 0;
+            int size;
+            String fileName = ii.ToString("D2") + "_" + xx.ToString("D2") + "_" + y;
+            System.IntPtr evhandle;
+            Bitmap imagebmp;
+            UIntPtr buf;
+            bool bauto = true;              // set this to true to get auto min max
+            UInt16 width = 0;
+            UInt16 height = 0;
+            UInt16 widthmax = 0;
+            UInt16 heightmax = 0;
+            int ishift = 16 - pcoDescr.wDynResDESC;
+            int ipadd = width / 4;
+            int iconvertcol = pcoDescr.wColorPatternDESC / 0x1000;
+            int max;
+            int min;
+            int ival;
+            ipadd *= 4;
+            ipadd = width - ipadd;
+
+            err = PCO_SDK_LibWrapper.PCO_GetSizes(cameraHandle, ref width, ref height, ref widthmax, ref heightmax);
+            size = width * height * 2;
+
+            buf = UIntPtr.Zero;
+            evhandle = IntPtr.Zero;
+            if ((bufwidth != width) || (bufheight != height))
+            {
+                if (bufnr != -1)
+                {
+                    PCO_SDK_LibWrapper.PCO_FreeBuffer(cameraHandle, bufnr);
+                }
+                bufnr = -1;
+                imagedata = new byte[(width + ipadd) * height * 3];
+
+                err = PCO_SDK_LibWrapper.PCO_AllocateBuffer(cameraHandle, ref bufnr, size, ref buf, ref evhandle);
+                if (err == 0)
+                {
+                    bufwidth = width;
+                    bufheight = height;
+                }
+            }
+            else
+                err = PCO_SDK_LibWrapper.PCO_GetBuffer(cameraHandle, bufnr, ref buf, ref evhandle);
+
+            //Mandatory for Cameralink and GigE. Don't care for all other interfaces, so leave it intact here.
+
+            err = PCO_SDK_LibWrapper.PCO_AddBufferEx(cameraHandle, 0, 0, bufnr, (UInt16)width, (UInt16)height, (UInt16)pcoDescr.wDynResDESC);
+
+            // There are two possibilities to synch. with the camera. Either by polling or by event.
+            // To use polling uncomment the Polling Block and comment the Event Block
+            // Begin Polling Block
+            // UInt32 dwStatusDll = 0, dwStatusDrv = 0;
+            // do
+            // {
+            //   err = PCO_SDK_LibWrapper.PCO_GetBufferStatus(cameraHandle, bufnr, ref dwStatusDll, ref dwStatusDrv);
+            // } while ((dwStatusDll & 0x8000) == 0);
+            // End Polling Block
+
+            //// Begin Event Block
+            //bool bImageIsOk = false;
+            //uint res = WaitForSingleObject(evhandle, 3000);
+            //if (res == 0)
+            //{
+            //    bImageIsOk = true;
+            //}
+            //if (!bImageIsOk)
+            //    return;
+            // End Event Block
+
+            unsafe
+            {
+                Int16* bufi = (Int16*)buf.ToPointer();
+                max = 1500;
+                min = 100;
+                for (int i = 10 * width; i < height * width; i++)
+                {
+                    if (bufi[i] > max)
+                        max = bufi[i];
+                    if (bufi[i] < min)
+                        min = bufi[i];
+                }
+                max >>= ishift;
+                min >>= ishift;
+                if (max <= min)
+                    max = min + 1;
+            }
+            PCO_Convert_LibWrapper.PCO_Convert16TOCOL(convertHandle, 0, iconvertcol, width, height,
+                buf, imagedata);
+
+            if ((convertDialog != IntPtr.Zero) && (convertHandle != IntPtr.Zero))
+            {
+                PCO_Convert_LibWrapper.PCO_SetDataToDialog(convertDialog, width, height, buf, imagedata);
+            }
+
+            if (bauto)
+            {
+                PCO_ConvertStructures.PCO_Display strDisplay = new PCO_ConvertStructures.PCO_Display(1);
+
+                strDisplay.wSize = (ushort)Marshal.SizeOf(typeof(PCO_ConvertStructures.PCO_Display));
+
+                err = PCO_Convert_LibWrapper.PCO_ConvertGetDisplay(convertHandle, ref strDisplay);
+                strDisplay.iScale_min = min;
+                strDisplay.iScale_max = max;
+
+                err = PCO_Convert_LibWrapper.PCO_ConvertSetDisplay(convertHandle, ref strDisplay);
+                err = PCO_Convert_LibWrapper.PCO_SetConvertDialog(convertDialog, convertHandle);
+            }
+
+            imagebmp = new Bitmap(width, height, PixelFormat.Format24bppRgb);
+            Rectangle dimension = new Rectangle(0, 0, imagebmp.Width, imagebmp.Height);
+            BitmapData picData = imagebmp.LockBits(dimension, ImageLockMode.ReadWrite, PixelFormat.Format24bppRgb);
+            IntPtr pixelStartAddress = picData.Scan0;
+
+            //Copy the pixel data into the bitmap structure
+            System.Runtime.InteropServices.Marshal.Copy(imagedata, 0, pixelStartAddress, imagedata.Length);
+
+            //[uv image save]
+            imagebmp.Save(fileName + ".tiff", ImageFormat.Tiff);
+            //
+
+
+
+        }
+        private void Camera_Connect_Button_Click(object sender, RoutedEventArgs e)
+        {
+            if (Radio_Camera_RGB_Camera.IsChecked == true)
+            {
+                if (cap == null)
+                {
+                    cap = new SaperaCapture();
+                    if (cap.location == null)
+                    {
+                        log.AppendText("Camera연결에 실패했습니다\r");
+                        log.ScrollToEnd();
+                    }
+                }
+
+                CameraMod = 1;
+                Radio_Camera_RGB_Camera.IsEnabled = false;
+                Radio_Camera_VNIR_Camera.IsEnabled = false;
+                Radio_Camera_UV_Camera.IsEnabled = false;
+                Radio_Camera_SWIR_Camera.IsEnabled = false;
+                Radio_Camera_NIR_Camera.IsEnabled = false;
+
+                button_cali_WB.IsEnabled = true;
+                button_cali_Light.IsEnabled = true;
+                button_cali_Lens.IsEnabled = true;
+                button_cali_Color.IsEnabled = true;
+
+                snap_pic.Tick += new EventHandler(grabRGB);
+                snap_pic.Interval = TimeSpan.FromMilliseconds(100);
+                snap_pic.Start();
+
+            }
+            else if (Radio_Camera_VNIR_Camera.IsChecked == true)
+            {
+                CameraMod = 2;
+                //SnapScan snapScan = new SnapScan();
+                string path_snapscan_file = Environment.CurrentDirectory + "\\Snapscan\\C100U-0021.xml";
+                byte[] bytes = Encoding.ASCII.GetBytes(path_snapscan_file);
+                sbyte[] sbytes = new sbyte[bytes.Length];
+                unsafe
+                {
+                    fixed (sbyte* sbyte_point = sbytes)
+                    {
+                        sbyte* sbyte_pointer = sbyte_point;
+                        // snapScan.Example_CubeAcquisition_MinimumRequired(sbyte_point);
+                    }
+
+                }
+            }
+            else if (Radio_Camera_UV_Camera.IsChecked == true)
+            {
+                CameraMod = 3;
+                Radio_Camera_RGB_Camera.IsEnabled = false;
+                Radio_Camera_VNIR_Camera.IsEnabled = false;
+                Radio_Camera_UV_Camera.IsEnabled = false;
+                Radio_Camera_SWIR_Camera.IsEnabled = false;
+                snap_pic.Tick -= new EventHandler(grabUV);
+                snap_pic.Interval = TimeSpan.FromMilliseconds(100);
+                snap_pic.Start();
+            }
+            else if (Radio_Camera_NIR_Camera.IsChecked == true)
+            {
+                if (cap_nir == null)
+                {
+                    cap_nir = new SaperaCapture_Nir();
+                    if (cap_nir.location == null)
+                    {
+                        log.AppendText("Camera연결에 실패했습니다\r");
+                        log.ScrollToEnd();
+                    }
+                }
+                CameraMod = 4;
+                Radio_Camera_RGB_Camera.IsEnabled = false;
+                Radio_Camera_VNIR_Camera.IsEnabled = false;
+                Radio_Camera_UV_Camera.IsEnabled = false;
+                Radio_Camera_SWIR_Camera.IsEnabled = false;
+                Radio_Camera_NIR_Camera.IsEnabled = false;
+
+                snap_pic.Tick += new EventHandler(grabNIR);
+                snap_pic.Interval = TimeSpan.FromMilliseconds(100);
+                snap_pic.Start();
+            }
+            else
+            {
+                System.Windows.MessageBox.Show("Camera Mode를 선택하셔야합니다.", "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
+
+            }
+            if (cap == null && CameraMod == 1)
+            {
+                cap = new SaperaCapture();
+            }
+
+            else if (cap == null && CameraMod == 2)
+            {
+            }
+            else if (cap == null && CameraMod == 3)
+            {
+                int err = 0;
+                ushort boardNum = 0;
+
+                cameraHandle = IntPtr.Zero;
+                convertHandle = IntPtr.Zero;
+                convertDialog = IntPtr.Zero;
+                camDialog = IntPtr.Zero;
+                bufwidth = 0;
+                bufheight = 0;
+
+                // Verify board number validity
+                // Open a handle to the camera
+                err = PCO_SDK_LibWrapper.PCO_OpenCamera(ref cameraHandle, boardNum);
+                if (err == 0)
+                {
+                    UInt16 wrecstate = 0;
+
+
+                    PCO_SDK_LibWrapper.PCO_GetRecordingState(cameraHandle, ref wrecstate);
+                    if (wrecstate != 0)
+                        PCO_SDK_LibWrapper.PCO_SetRecordingState(cameraHandle, 0);
+
+                }
+                else
+                {
+                    err = PCO_SDK_LibWrapper.PCO_ResetLib();
+                }
+
+                pcoCameraType = new PCO_CameraType();
+                pcoDescr = new PCO_Description();
+                pcoStorage = new PCO_Storage();
+                pcoImage = new PCO_Image();
+
+                pcoDescr.wSize = (ushort)Marshal.SizeOf(pcoDescr);
+                pcoStorage.wSize = (ushort)Marshal.SizeOf(pcoStorage);
+                pcoImage.wSize = (ushort)Marshal.SizeOf(pcoImage);
+
+
+                err = PCO_SDK_LibWrapper.PCO_GetCameraDescription(cameraHandle, ref pcoDescr);
+
+                err = PCO_SDK_LibWrapper.PCO_GetStorageStruct(cameraHandle, ref pcoStorage);
+
+                pcoImage.strSegment = new PCO_Segment[4];
+
+                pcoImage.strSegment[0].wSize = (ushort)Marshal.SizeOf(typeof(PCO_Segment));
+                pcoImage.strSegment[1].wSize = (ushort)Marshal.SizeOf(typeof(PCO_Segment));
+                pcoImage.strSegment[2].wSize = (ushort)Marshal.SizeOf(typeof(PCO_Segment));
+                pcoImage.strSegment[3].wSize = (ushort)Marshal.SizeOf(typeof(PCO_Segment));
+
+                err = PCO_SDK_LibWrapper.PCO_GetImageStruct(cameraHandle, ref pcoImage);
+
+                ushort usfwsize;// = (ushort)Marshal.SizeOf(typeof(PCO_SC2_Firmware_DESC));
+
+                usfwsize = (ushort)Marshal.SizeOf(typeof(PCO_FW_Vers));
+                pcoCameraType.strHardwareVersion.Board = new PCO_SC2_Hardware_DESC[10];
+                pcoCameraType.strFirmwareVersion.Device = new PCO_SC2_Firmware_DESC[10];
+                for (int i = 0; i < 10; i++)
+                {
+                    pcoCameraType.strHardwareVersion.Board[i].szName = "123456789012345";
+                    pcoCameraType.strFirmwareVersion.Device[i].szName = "123456789012345";
+                }
+                pcoCameraType.wSize = (ushort)Marshal.SizeOf(pcoCameraType);
+
+                err = PCO_SDK_LibWrapper.PCO_GetCameraType(cameraHandle, ref pcoCameraType);
+
+                byte[] szCameraName;
+                szCameraName = new byte[30];
+                string cameraname;
+
+                err = PCO_SDK_LibWrapper.PCO_GetCameraName(cameraHandle, szCameraName, 30);
+                cameraname = System.Text.Encoding.Default.GetString(szCameraName);
+
+                Setupconvert();
+
+
+
+                UInt32 dwWarn = 0, dwError = 0, dwStatus = 0;
+                UInt16 width = 0;
+                UInt16 height = 0;
+                UInt16 widthmax = 0;
+                UInt16 heightmax = 0;
+
+                // It is recommended to call this function in order to get information about the camera internal state
+                err = PCO_SDK_LibWrapper.PCO_GetCameraHealthStatus(cameraHandle, ref dwWarn, ref dwError, ref dwStatus);
+                PCO_SDK_LibWrapper.PCO_SetTriggerMode(cameraHandle, 0);
+                err = PCO_SDK_LibWrapper.PCO_ArmCamera(cameraHandle);
+                err = PCO_SDK_LibWrapper.PCO_GetSizes(cameraHandle, ref width, ref height, ref widthmax, ref heightmax);
+                err = PCO_SDK_LibWrapper.PCO_CamLinkSetImageParameters(cameraHandle, (UInt16)width, (UInt16)height);
+
+                err = PCO_SDK_LibWrapper.PCO_SetRecordingState(cameraHandle, 1);
+                if (camDialog != IntPtr.Zero)
+                {
+                    PCO_SDK_LibWrapper.PCO_EnableDialogCam(camDialog, false);
+                }
+            }
+            else if (cap_nir == null && CameraMod == 4)
+            {
+                cap_nir = new SaperaCapture_Nir();
+            }
+        }
+        private void Camera_Disconnect_Button_Click(object sender, RoutedEventArgs e)
+        {
+            if (CameraMod == 1)
+            {
+                cap.DestroyObjects();
+                cap.DisposeObjects();
+                snap_pic.Stop();
+                view_box.ImageSource = null;
+                snap_pic.Tick -= grabRGB;
+                cap = null;
+
+            }
+            else if (CameraMod == 3)
+            {
+
+            }
+            else if (CameraMod == 4)
+            {
+                cap_nir.DestroyObjects();
+                cap_nir.DisposeObjects();
+                snap_pic.Stop();
+                view_box.ImageSource = null;
+                snap_pic.Tick -= grabNIR;
+                cap_nir = null;
+            }
+            Radio_Camera_RGB_Camera.IsEnabled = true;
+            //Radio_Camera_VNIR_Camera.IsEnabled = true;
+            //Radio_Camera_UV_Camera.IsEnabled = true;
+            //Radio_Camera_SWIR_Camera.IsEnabled = true;
+            Radio_Camera_NIR_Camera.IsEnabled = true;
+
+
+        }
+        #endregion
+
         private void emergencyStop_Click(object sender, RoutedEventArgs e)
         {
             ProcState = (UInt16)MXP_KernelState.Close;
@@ -1653,735 +2398,12 @@ namespace ScanProgram
             log.AppendText("Auto Capture Start\r");
             log.ScrollToEnd();
         }
-        #region Grab Method For Cameras
-        private void grabRGB(object sender, EventArgs e)
-        {
-            try
-            {
-                if (cap.img != null)
-                {
-                    using (MemoryStream memory = new MemoryStream())
-                    {
-                        cap.img.Save(memory, ImageFormat.Bmp);
-                        memory.Position = 0;
-                        BitmapImage bitmapImage = new BitmapImage();
-                        bitmapImage.BeginInit();
-                        bitmapImage.StreamSource = memory;
-                        bitmapImage.CacheOption = BitmapCacheOption.OnLoad;
-                        bitmapImage.EndInit();
-                        view_box.ImageSource = bitmapImage;
-                    }
-                }
-
-            }
-            catch (Exception ex)
-            {
-                log.AppendText(ex.ToString());
-                log.ScrollToEnd();
-            }
-        }
-        private void grabNIR(object sender, EventArgs e)
-        {
-            try
-            {
-                if (cap_nir.img != null)
-                {
-                    using (MemoryStream memory = new MemoryStream())
-                    {
-                        cap_nir.img.Save(memory, ImageFormat.Bmp);
-                        memory.Position = 0;
-                        BitmapImage bitmapImage = new BitmapImage();
-                        bitmapImage.BeginInit();
-                        bitmapImage.StreamSource = memory;
-                        bitmapImage.CacheOption = BitmapCacheOption.OnLoad;
-                        bitmapImage.EndInit();
-                        view_box.ImageSource = bitmapImage;
-                    }
-                }
-
-            }
-            catch (Exception ex)
-            {
-                log.AppendText(ex.ToString());
-                log.ScrollToEnd();
-            }
-        }
-        private void grabUV(object sender, EventArgs e)
-        {
-            int err = 0;
-            int size;
-            System.IntPtr evhandle;
-            Bitmap imagebmp;
-            UIntPtr buf;
-            bool bauto = true;              // set this to true to get auto min max
-            UInt16 width = 0;
-            UInt16 height = 0;
-            UInt16 widthmax = 0;
-            UInt16 heightmax = 0;
-            int ishift = 16 - pcoDescr.wDynResDESC;
-            int ipadd = width / 4;
-            int iconvertcol = pcoDescr.wColorPatternDESC / 0x1000;
-            int max;
-            int min;
-            int ival;
-            ipadd *= 4;
-            ipadd = width - ipadd;
-
-            err = PCO_SDK_LibWrapper.PCO_GetSizes(cameraHandle, ref width, ref height, ref widthmax, ref heightmax);
-            size = width * height * 2;
-
-            buf = UIntPtr.Zero;
-            evhandle = IntPtr.Zero;
-            if ((bufwidth != width) || (bufheight != height))
-            {
-                if (bufnr != -1)
-                {
-                    PCO_SDK_LibWrapper.PCO_FreeBuffer(cameraHandle, bufnr);
-                }
-                bufnr = -1;
-                imagedata = new byte[(width + ipadd) * height * 3];
-
-                err = PCO_SDK_LibWrapper.PCO_AllocateBuffer(cameraHandle, ref bufnr, size, ref buf, ref evhandle);
-                if (err == 0)
-                {
-                    bufwidth = width;
-                    bufheight = height;
-                }
-            }
-            else
-                err = PCO_SDK_LibWrapper.PCO_GetBuffer(cameraHandle, bufnr, ref buf, ref evhandle);
-
-            //Mandatory for Cameralink and GigE. Don't care for all other interfaces, so leave it intact here.
-
-            err = PCO_SDK_LibWrapper.PCO_AddBufferEx(cameraHandle, 0, 0, bufnr, (UInt16)width, (UInt16)height, (UInt16)pcoDescr.wDynResDESC);
-
-            // There are two possibilities to synch. with the camera. Either by polling or by event.
-            // To use polling uncomment the Polling Block and comment the Event Block
-            // Begin Polling Block
-            // UInt32 dwStatusDll = 0, dwStatusDrv = 0;
-            // do
-            // {
-            //   err = PCO_SDK_LibWrapper.PCO_GetBufferStatus(cameraHandle, bufnr, ref dwStatusDll, ref dwStatusDrv);
-            // } while ((dwStatusDll & 0x8000) == 0);
-            // End Polling Block
-
-            //// Begin Event Block
-            //bool bImageIsOk = false;
-            //uint res = WaitForSingleObject(evhandle, 3000);
-            //if (res == 0)
-            //{
-            //    bImageIsOk = true;
-            //}
-            //if (!bImageIsOk)
-            //    return;
-            // End Event Block
-
-            unsafe
-            {
-                Int16* bufi = (Int16*)buf.ToPointer();
-                max = 1500;
-                min = 100;
-                for (int i = 10 * width; i < height * width; i++)
-                {
-                    if (bufi[i] > max)
-                        max = bufi[i];
-                    if (bufi[i] < min)
-                        min = bufi[i];
-                }
-                max >>= ishift;
-                min >>= ishift;
-                if (max <= min)
-                    max = min + 1;
-            }
-            PCO_Convert_LibWrapper.PCO_Convert16TOCOL(convertHandle, 0, iconvertcol, width, height,
-                buf, imagedata);
-
-            if ((convertDialog != IntPtr.Zero) && (convertHandle != IntPtr.Zero))
-            {
-                PCO_Convert_LibWrapper.PCO_SetDataToDialog(convertDialog, width, height, buf, imagedata);
-            }
-
-            if (bauto)
-            {
-                PCO_ConvertStructures.PCO_Display strDisplay = new PCO_ConvertStructures.PCO_Display(1);
-
-                strDisplay.wSize = (ushort)Marshal.SizeOf(typeof(PCO_ConvertStructures.PCO_Display));
-
-                err = PCO_Convert_LibWrapper.PCO_ConvertGetDisplay(convertHandle, ref strDisplay);
-                strDisplay.iScale_min = min;
-                strDisplay.iScale_max = max;
-
-                err = PCO_Convert_LibWrapper.PCO_ConvertSetDisplay(convertHandle, ref strDisplay);
-                err = PCO_Convert_LibWrapper.PCO_SetConvertDialog(convertDialog, convertHandle);
-            }
-
-            imagebmp = new Bitmap(width, height, PixelFormat.Format24bppRgb);
-            Rectangle dimension = new Rectangle(0, 0, imagebmp.Width, imagebmp.Height);
-            BitmapData picData = imagebmp.LockBits(dimension, ImageLockMode.ReadWrite, PixelFormat.Format24bppRgb);
-            IntPtr pixelStartAddress = picData.Scan0;
-
-            //Copy the pixel data into the bitmap structure
-            System.Runtime.InteropServices.Marshal.Copy(imagedata, 0, pixelStartAddress, imagedata.Length);
-
-            //[uv image save]
-
-            //
-
-            imagebmp.UnlockBits(picData);
-
-            using (MemoryStream memory = new MemoryStream())
-            {
-                imagebmp.Save(memory, System.Drawing.Imaging.ImageFormat.Bmp);
-                memory.Position = 0;
-                BitmapImage bitmapImage = new BitmapImage();
-                bitmapImage.BeginInit();
-                bitmapImage.StreamSource = memory;
-                bitmapImage.CacheOption = BitmapCacheOption.OnLoad;
-                bitmapImage.EndInit();
-                view_box.ImageSource = bitmapImage;
-            }
-
-        }
-        #endregion
-        #region Snap Method For Cameras
-        private void snapUV(int ii, int xx, string y)
-        {
-            int err = 0;
-            int size;
-            String fileName = ii.ToString("D2") + "_" + xx.ToString("D2") + "_" + y;
-            System.IntPtr evhandle;
-            Bitmap imagebmp;
-            UIntPtr buf;
-            bool bauto = true;              // set this to true to get auto min max
-            UInt16 width = 0;
-            UInt16 height = 0;
-            UInt16 widthmax = 0;
-            UInt16 heightmax = 0;
-            int ishift = 16 - pcoDescr.wDynResDESC;
-            int ipadd = width / 4;
-            int iconvertcol = pcoDescr.wColorPatternDESC / 0x1000;
-            int max;
-            int min;
-            int ival;
-            ipadd *= 4;
-            ipadd = width - ipadd;
-
-            err = PCO_SDK_LibWrapper.PCO_GetSizes(cameraHandle, ref width, ref height, ref widthmax, ref heightmax);
-            size = width * height * 2;
-
-            buf = UIntPtr.Zero;
-            evhandle = IntPtr.Zero;
-            if ((bufwidth != width) || (bufheight != height))
-            {
-                if (bufnr != -1)
-                {
-                    PCO_SDK_LibWrapper.PCO_FreeBuffer(cameraHandle, bufnr);
-                }
-                bufnr = -1;
-                imagedata = new byte[(width + ipadd) * height * 3];
-
-                err = PCO_SDK_LibWrapper.PCO_AllocateBuffer(cameraHandle, ref bufnr, size, ref buf, ref evhandle);
-                if (err == 0)
-                {
-                    bufwidth = width;
-                    bufheight = height;
-                }
-            }
-            else
-                err = PCO_SDK_LibWrapper.PCO_GetBuffer(cameraHandle, bufnr, ref buf, ref evhandle);
-
-            //Mandatory for Cameralink and GigE. Don't care for all other interfaces, so leave it intact here.
-
-            err = PCO_SDK_LibWrapper.PCO_AddBufferEx(cameraHandle, 0, 0, bufnr, (UInt16)width, (UInt16)height, (UInt16)pcoDescr.wDynResDESC);
-
-            // There are two possibilities to synch. with the camera. Either by polling or by event.
-            // To use polling uncomment the Polling Block and comment the Event Block
-            // Begin Polling Block
-            // UInt32 dwStatusDll = 0, dwStatusDrv = 0;
-            // do
-            // {
-            //   err = PCO_SDK_LibWrapper.PCO_GetBufferStatus(cameraHandle, bufnr, ref dwStatusDll, ref dwStatusDrv);
-            // } while ((dwStatusDll & 0x8000) == 0);
-            // End Polling Block
-
-            //// Begin Event Block
-            //bool bImageIsOk = false;
-            //uint res = WaitForSingleObject(evhandle, 3000);
-            //if (res == 0)
-            //{
-            //    bImageIsOk = true;
-            //}
-            //if (!bImageIsOk)
-            //    return;
-            // End Event Block
-
-            unsafe
-            {
-                Int16* bufi = (Int16*)buf.ToPointer();
-                max = 1500;
-                min = 100;
-                for (int i = 10 * width; i < height * width; i++)
-                {
-                    if (bufi[i] > max)
-                        max = bufi[i];
-                    if (bufi[i] < min)
-                        min = bufi[i];
-                }
-                max >>= ishift;
-                min >>= ishift;
-                if (max <= min)
-                    max = min + 1;
-            }
-            PCO_Convert_LibWrapper.PCO_Convert16TOCOL(convertHandle, 0, iconvertcol, width, height,
-                buf, imagedata);
-
-            if ((convertDialog != IntPtr.Zero) && (convertHandle != IntPtr.Zero))
-            {
-                PCO_Convert_LibWrapper.PCO_SetDataToDialog(convertDialog, width, height, buf, imagedata);
-            }
-
-            if (bauto)
-            {
-                PCO_ConvertStructures.PCO_Display strDisplay = new PCO_ConvertStructures.PCO_Display(1);
-
-                strDisplay.wSize = (ushort)Marshal.SizeOf(typeof(PCO_ConvertStructures.PCO_Display));
-
-                err = PCO_Convert_LibWrapper.PCO_ConvertGetDisplay(convertHandle, ref strDisplay);
-                strDisplay.iScale_min = min;
-                strDisplay.iScale_max = max;
-
-                err = PCO_Convert_LibWrapper.PCO_ConvertSetDisplay(convertHandle, ref strDisplay);
-                err = PCO_Convert_LibWrapper.PCO_SetConvertDialog(convertDialog, convertHandle);
-            }
-
-            imagebmp = new Bitmap(width, height, PixelFormat.Format24bppRgb);
-            Rectangle dimension = new Rectangle(0, 0, imagebmp.Width, imagebmp.Height);
-            BitmapData picData = imagebmp.LockBits(dimension, ImageLockMode.ReadWrite, PixelFormat.Format24bppRgb);
-            IntPtr pixelStartAddress = picData.Scan0;
-
-            //Copy the pixel data into the bitmap structure
-            System.Runtime.InteropServices.Marshal.Copy(imagedata, 0, pixelStartAddress, imagedata.Length);
-
-            //[uv image save]
-            imagebmp.Save(fileName + ".tiff", ImageFormat.Tiff);
-            //
-
-
-
-        }
-        private void Camera_Connect_Button_Click(object sender, RoutedEventArgs e)
-        {
-            if (Radio_Camera_RGB_Camera.IsChecked == true)
-            {
-                if (cap == null)
-                {
-                    cap = new SaperaCapture();
-                    if (cap.location == null)
-                    {
-                        log.AppendText("Camera연결에 실패했습니다\r");
-                        log.ScrollToEnd();
-                    }
-                }
-
-                CameraMod = 1;
-                //cap.RGB_Cameara_Init();
-                Radio_Camera_RGB_Camera.IsEnabled = false;
-                Radio_Camera_VNIR_Camera.IsEnabled = false;
-                Radio_Camera_UV_Camera.IsEnabled = false;
-                Radio_Camera_SWIR_Camera.IsEnabled = false;
-                Radio_Camera_NIR_Camera.IsEnabled = false;
-
-                button_cali_WB.IsEnabled = true;
-                button_cali_Light.IsEnabled = true;
-                button_cali_Lens.IsEnabled = true;
-                button_cali_Color.IsEnabled = true;
-
-                snap_pic.Tick += new EventHandler(grabRGB);
-                snap_pic.Interval = TimeSpan.FromMilliseconds(100);
-                snap_pic.Start();
-
-            }
-            else if (Radio_Camera_VNIR_Camera.IsChecked == true)
-            {
-                CameraMod = 2;
-                //SnapScan snapScan = new SnapScan();
-                string path_snapscan_file = Environment.CurrentDirectory + "\\Snapscan\\C100U-0021.xml";
-                byte[] bytes = Encoding.ASCII.GetBytes(path_snapscan_file);
-                sbyte[] sbytes = new sbyte[bytes.Length];
-                unsafe
-                {
-                    fixed (sbyte* sbyte_point = sbytes)
-                    {
-                        sbyte* sbyte_pointer = sbyte_point;
-                        // snapScan.Example_CubeAcquisition_MinimumRequired(sbyte_point);
-                    }
-
-                }
-            }
-            else if (Radio_Camera_UV_Camera.IsChecked == true)
-            {
-                CameraMod = 3;
-                Radio_Camera_RGB_Camera.IsEnabled = false;
-                Radio_Camera_VNIR_Camera.IsEnabled = false;
-                Radio_Camera_UV_Camera.IsEnabled = false;
-                Radio_Camera_SWIR_Camera.IsEnabled = false;
-                snap_pic.Tick -= new EventHandler(grabUV);
-                snap_pic.Interval = TimeSpan.FromMilliseconds(100);
-                snap_pic.Start();
-            }
-            else if (Radio_Camera_NIR_Camera.IsChecked == true)
-            {
-                if (cap_nir == null)
-                {
-                    cap_nir = new SaperaCapture_Nir();
-                }
-                CameraMod = 4;
-                Radio_Camera_RGB_Camera.IsEnabled = false;
-                Radio_Camera_VNIR_Camera.IsEnabled = false;
-                Radio_Camera_UV_Camera.IsEnabled = false;
-                Radio_Camera_SWIR_Camera.IsEnabled = false;
-                Radio_Camera_NIR_Camera.IsEnabled = false;
-
-                snap_pic.Tick -= new EventHandler(grabNIR);
-                snap_pic.Interval = TimeSpan.FromMilliseconds(100);
-                snap_pic.Start();
-            }
-            else
-            {
-                System.Windows.MessageBox.Show("Camera Mode를 선택하셔야합니다.", "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
-
-            }
-            if (cap == null && CameraMod == 1)
-            {
-                cap = new SaperaCapture();
-            }
-
-            else if (cap == null && CameraMod == 2)
-            {
-            }
-            else if (cap == null && CameraMod == 3)
-            {
-                int err = 0;
-                ushort boardNum = 0;
-
-                cameraHandle = IntPtr.Zero;
-                convertHandle = IntPtr.Zero;
-                convertDialog = IntPtr.Zero;
-                camDialog = IntPtr.Zero;
-                bufwidth = 0;
-                bufheight = 0;
-
-                // Verify board number validity
-                // Open a handle to the camera
-                err = PCO_SDK_LibWrapper.PCO_OpenCamera(ref cameraHandle, boardNum);
-                if (err == 0)
-                {
-                    UInt16 wrecstate = 0;
-
-
-                    PCO_SDK_LibWrapper.PCO_GetRecordingState(cameraHandle, ref wrecstate);
-                    if (wrecstate != 0)
-                        PCO_SDK_LibWrapper.PCO_SetRecordingState(cameraHandle, 0);
-
-                }
-                else
-                {
-                    err = PCO_SDK_LibWrapper.PCO_ResetLib();
-                }
-
-                pcoCameraType = new PCO_CameraType();
-                pcoDescr = new PCO_Description();
-                pcoStorage = new PCO_Storage();
-                pcoImage = new PCO_Image();
-
-                pcoDescr.wSize = (ushort)Marshal.SizeOf(pcoDescr);
-                pcoStorage.wSize = (ushort)Marshal.SizeOf(pcoStorage);
-                pcoImage.wSize = (ushort)Marshal.SizeOf(pcoImage);
-
-
-                err = PCO_SDK_LibWrapper.PCO_GetCameraDescription(cameraHandle, ref pcoDescr);
-
-                err = PCO_SDK_LibWrapper.PCO_GetStorageStruct(cameraHandle, ref pcoStorage);
-
-                pcoImage.strSegment = new PCO_Segment[4];
-
-                pcoImage.strSegment[0].wSize = (ushort)Marshal.SizeOf(typeof(PCO_Segment));
-                pcoImage.strSegment[1].wSize = (ushort)Marshal.SizeOf(typeof(PCO_Segment));
-                pcoImage.strSegment[2].wSize = (ushort)Marshal.SizeOf(typeof(PCO_Segment));
-                pcoImage.strSegment[3].wSize = (ushort)Marshal.SizeOf(typeof(PCO_Segment));
-
-                err = PCO_SDK_LibWrapper.PCO_GetImageStruct(cameraHandle, ref pcoImage);
-
-                ushort usfwsize;// = (ushort)Marshal.SizeOf(typeof(PCO_SC2_Firmware_DESC));
-
-                usfwsize = (ushort)Marshal.SizeOf(typeof(PCO_FW_Vers));
-                pcoCameraType.strHardwareVersion.Board = new PCO_SC2_Hardware_DESC[10];
-                pcoCameraType.strFirmwareVersion.Device = new PCO_SC2_Firmware_DESC[10];
-                for (int i = 0; i < 10; i++)
-                {
-                    pcoCameraType.strHardwareVersion.Board[i].szName = "123456789012345";
-                    pcoCameraType.strFirmwareVersion.Device[i].szName = "123456789012345";
-                }
-                pcoCameraType.wSize = (ushort)Marshal.SizeOf(pcoCameraType);
-
-                err = PCO_SDK_LibWrapper.PCO_GetCameraType(cameraHandle, ref pcoCameraType);
-
-                byte[] szCameraName;
-                szCameraName = new byte[30];
-                string cameraname;
-
-                err = PCO_SDK_LibWrapper.PCO_GetCameraName(cameraHandle, szCameraName, 30);
-                cameraname = System.Text.Encoding.Default.GetString(szCameraName);
-
-                Setupconvert();
-
-
-
-                UInt32 dwWarn = 0, dwError = 0, dwStatus = 0;
-                UInt16 width = 0;
-                UInt16 height = 0;
-                UInt16 widthmax = 0;
-                UInt16 heightmax = 0;
-
-                // It is recommended to call this function in order to get information about the camera internal state
-                err = PCO_SDK_LibWrapper.PCO_GetCameraHealthStatus(cameraHandle, ref dwWarn, ref dwError, ref dwStatus);
-                PCO_SDK_LibWrapper.PCO_SetTriggerMode(cameraHandle, 0);
-                err = PCO_SDK_LibWrapper.PCO_ArmCamera(cameraHandle);
-                err = PCO_SDK_LibWrapper.PCO_GetSizes(cameraHandle, ref width, ref height, ref widthmax, ref heightmax);
-                err = PCO_SDK_LibWrapper.PCO_CamLinkSetImageParameters(cameraHandle, (UInt16)width, (UInt16)height);
-
-                err = PCO_SDK_LibWrapper.PCO_SetRecordingState(cameraHandle, 1);
-                if (camDialog != IntPtr.Zero)
-                {
-                    PCO_SDK_LibWrapper.PCO_EnableDialogCam(camDialog, false);
-                }
-            }
-
-
-
-
-            else if (cap_nir == null && CameraMod == 4)
-            {
-                cap_nir = new SaperaCapture_Nir();
-            }
-            log.AppendText(CameraMod.ToString());
-            log.ScrollToEnd();
-        }
-        private void Camera_Disconnect_Button_Click(object sender, RoutedEventArgs e)
-        {
-            if (CameraMod == 1)
-            {
-                cap.DestroyObjects();
-                cap.DisposeObjects();
-                snap_pic.Stop();
-                view_box.ImageSource = null;
-            }
-            else if (CameraMod == 3)
-            {
-
-            }
-            else if (CameraMod == 4)
-            {
-                cap_nir.DestroyObjects();
-                cap_nir.DisposeObjects();
-                snap_pic.Stop();
-                view_box.ImageSource = null;
-            }
-            Radio_Camera_RGB_Camera.IsEnabled = true;
-            Radio_Camera_VNIR_Camera.IsEnabled = true;
-            Radio_Camera_UV_Camera.IsEnabled = true;
-            Radio_Camera_SWIR_Camera.IsEnabled = true;
-            Radio_Camera_NIR_Camera.IsEnabled = true;
-
-        }
-        #endregion
-        private void Setupconvert()
-        {
-            pcoDescr = new PCO_Description();
-            pcoDescr.wSize = (ushort)Marshal.SizeOf(pcoDescr);
-            int err = 0;
-
-            err = PCO_SDK_LibWrapper.PCO_GetCameraDescription(cameraHandle, ref pcoDescr);
-            PCO_ConvertStructures.PCO_SensorInfo strsensorinf = new PCO_ConvertStructures.PCO_SensorInfo();
-            PCO_ConvertStructures.PCO_Display strDisplay = new PCO_ConvertStructures.PCO_Display();
-            strsensorinf.wSize = (ushort)Marshal.SizeOf(strsensorinf);
-            strDisplay.wSize = (ushort)Marshal.SizeOf(strDisplay);
-            strsensorinf.wDummy = 0;
-            strsensorinf.iConversionFactor = 0;
-            strsensorinf.iDataBits = pcoDescr.wDynResDESC;
-            strsensorinf.iSensorInfoBits = 1;
-            strsensorinf.iDarkOffset = 100;
-            strsensorinf.dwzzDummy0 = 0;
-            strsensorinf.strColorCoeff.da11 = 1.0;
-            strsensorinf.strColorCoeff.da12 = 0.0;
-            strsensorinf.strColorCoeff.da13 = 0.0;
-            strsensorinf.strColorCoeff.da21 = 0.0;
-            strsensorinf.strColorCoeff.da22 = 1.0;
-            strsensorinf.strColorCoeff.da23 = 0.0;
-            strsensorinf.strColorCoeff.da31 = 0.0;
-            strsensorinf.strColorCoeff.da32 = 0.0;
-            strsensorinf.strColorCoeff.da33 = 1.0;
-            strsensorinf.iCamNum = 0;
-            strsensorinf.hCamera = cameraHandle;
-
-            int errorCode;
-            /* We created a pointer to a convert object here */
-            errorCode = PCO_Convert_LibWrapper.PCO_ConvertCreate(ref convertHandle, ref strsensorinf, PCO_Convert_LibWrapper.PCO_COLOR_CONVERT);
-
-            PCO_ConvertStructures.PCO_Convert pcoConv = new PCO_ConvertStructures.PCO_Convert(); ;
-
-            pcoConv.wSize = (ushort)Marshal.SizeOf(pcoConv);
-            errorCode = PCOConvertDll.PCO_Convert_LibWrapper.PCO_ConvertGet(convertHandle, ref pcoConv);
-            pcoConv.wSize = (ushort)Marshal.SizeOf(pcoConv);
-
-            IntPtr debugIntPtr = convertHandle;
-            PCO_ConvertStructures.PCO_Convert pcoConvertlocal = (PCO_ConvertStructures.PCO_Convert)Marshal.PtrToStructure(debugIntPtr, typeof(PCO_ConvertStructures.PCO_Convert));
-
-        }
+       
+       
         #region Calibration
-        private void UV_Camera_Grab(object sender, RoutedEventArgs e)
-        {
-
-
-            int err = 0;
-            int size;
-            System.IntPtr evhandle;
-            Bitmap imagebmp;
-            UIntPtr buf;
-            bool bauto = true;              // set this to true to get auto min max
-            UInt16 width = 0;
-            UInt16 height = 0;
-            UInt16 widthmax = 0;
-            UInt16 heightmax = 0;
-            int ishift = 16 - pcoDescr.wDynResDESC;
-            int ipadd = width / 4;
-            int iconvertcol = pcoDescr.wColorPatternDESC / 0x1000;
-            int max;
-            int min;
-            int ival;
-            ipadd *= 4;
-            ipadd = width - ipadd;
-
-            err = PCO_SDK_LibWrapper.PCO_GetSizes(cameraHandle, ref width, ref height, ref widthmax, ref heightmax);
-            size = width * height * 2;
-
-            buf = UIntPtr.Zero;
-            evhandle = IntPtr.Zero;
-            if ((bufwidth != width) || (bufheight != height))
-            {
-                if (bufnr != -1)
-                {
-                    PCO_SDK_LibWrapper.PCO_FreeBuffer(cameraHandle, bufnr);
-                }
-                bufnr = -1;
-                imagedata = new byte[(width + ipadd) * height * 3];
-
-                err = PCO_SDK_LibWrapper.PCO_AllocateBuffer(cameraHandle, ref bufnr, size, ref buf, ref evhandle);
-                if (err == 0)
-                {
-                    bufwidth = width;
-                    bufheight = height;
-                }
-            }
-            else
-                err = PCO_SDK_LibWrapper.PCO_GetBuffer(cameraHandle, bufnr, ref buf, ref evhandle);
-
-            //Mandatory for Cameralink and GigE. Don't care for all other interfaces, so leave it intact here.
-
-            err = PCO_SDK_LibWrapper.PCO_AddBufferEx(cameraHandle, 0, 0, bufnr, (UInt16)width, (UInt16)height, (UInt16)pcoDescr.wDynResDESC);
-
-            // There are two possibilities to synch. with the camera. Either by polling or by event.
-            // To use polling uncomment the Polling Block and comment the Event Block
-            // Begin Polling Block
-            // UInt32 dwStatusDll = 0, dwStatusDrv = 0;
-            // do
-            // {
-            //   err = PCO_SDK_LibWrapper.PCO_GetBufferStatus(cameraHandle, bufnr, ref dwStatusDll, ref dwStatusDrv);
-            // } while ((dwStatusDll & 0x8000) == 0);
-            // End Polling Block
-
-            //// Begin Event Block
-            //bool bImageIsOk = false;
-            //uint res = WaitForSingleObject(evhandle, 3000);
-            //if (res == 0)
-            //{
-            //    bImageIsOk = true;
-            //}
-            //if (!bImageIsOk)
-            //    return;
-            // End Event Block
-
-            unsafe
-            {
-                Int16* bufi = (Int16*)buf.ToPointer();
-                max = 1500;
-                min = 100;
-                for (int i = 10 * width; i < height * width; i++)
-                {
-                    if (bufi[i] > max)
-                        max = bufi[i];
-                    if (bufi[i] < min)
-                        min = bufi[i];
-                }
-                max >>= ishift;
-                min >>= ishift;
-                if (max <= min)
-                    max = min + 1;
-            }
-            PCO_Convert_LibWrapper.PCO_Convert16TOCOL(convertHandle, 0, iconvertcol, width, height,
-                buf, imagedata);
-
-            if ((convertDialog != IntPtr.Zero) && (convertHandle != IntPtr.Zero))
-            {
-                PCO_Convert_LibWrapper.PCO_SetDataToDialog(convertDialog, width, height, buf, imagedata);
-            }
-
-            if (bauto)
-            {
-                PCO_ConvertStructures.PCO_Display strDisplay = new PCO_ConvertStructures.PCO_Display(1);
-
-                strDisplay.wSize = (ushort)Marshal.SizeOf(typeof(PCO_ConvertStructures.PCO_Display));
-
-                err = PCO_Convert_LibWrapper.PCO_ConvertGetDisplay(convertHandle, ref strDisplay);
-                strDisplay.iScale_min = min;
-                strDisplay.iScale_max = max;
-
-                err = PCO_Convert_LibWrapper.PCO_ConvertSetDisplay(convertHandle, ref strDisplay);
-                err = PCO_Convert_LibWrapper.PCO_SetConvertDialog(convertDialog, convertHandle);
-            }
-
-            imagebmp = new Bitmap(width, height, PixelFormat.Format24bppRgb);
-            Rectangle dimension = new Rectangle(0, 0, imagebmp.Width, imagebmp.Height);
-            BitmapData picData = imagebmp.LockBits(dimension, ImageLockMode.ReadWrite, PixelFormat.Format24bppRgb);
-            IntPtr pixelStartAddress = picData.Scan0;
-
-            //Copy the pixel data into the bitmap structure
-            System.Runtime.InteropServices.Marshal.Copy(imagedata, 0, pixelStartAddress, imagedata.Length);
-
-            //[uv image save]
-            imagebmp.Save("c:\\test\\button.bmp", System.Drawing.Imaging.ImageFormat.Bmp);
-            //
-
-            imagebmp.UnlockBits(picData);
-
-            using (MemoryStream memory = new MemoryStream())
-            {
-                imagebmp.Save(memory, System.Drawing.Imaging.ImageFormat.Bmp);
-                memory.Position = 0;
-                BitmapImage bitmapImage = new BitmapImage();
-                bitmapImage.BeginInit();
-                bitmapImage.StreamSource = memory;
-                bitmapImage.CacheOption = BitmapCacheOption.OnLoad;
-                bitmapImage.EndInit();
-                view_box.ImageSource = bitmapImage;
-            }
-
-
-
-
-        }
-
       
+
+
 
         private void cali_WB_Click(object sender, RoutedEventArgs e)
         {
@@ -2473,83 +2495,77 @@ namespace ScanProgram
 
         }
 
-        private void JoyStickOpen_Click(object sender, RoutedEventArgs e)
-        {
-            Serial_Uart.PortName = UART_Port.Text;       // Port Name
-            Serial_Uart.BaudRate = (int)9600;
 
-            Serial_Uart.DataBits = (int)8;
-            Serial_Uart.Parity = Parity.None;
-            Serial_Uart.StopBits = StopBits.One;
-            Serial_Uart.Open();
-            if (Serial_Uart.IsOpen)
-            {
-                Serial_Uart.DataReceived += new System.IO.Ports.SerialDataReceivedEventHandler(Uart_DataReceived);
-            }
-
-            if (Serial_Uart.IsOpen)
-            {
-                //Serial_Uart.Close();
-            }
-        }
 
         private void view_box_drawing_MouseDown(object sender, MouseButtonEventArgs e)
         {
             view_box_drawing.Children.Clear();
             base.OnMouseLeftButtonDown(e);
-            
+
             System.Windows.Point clickPos = e.GetPosition(this.view_box_drawing);
 
             rect_Start_X = (int)clickPos.X;
             rect_Start_Y = (int)clickPos.Y;
-            
-            if (this.isDragging)
-            {
-                
-                return;
-            }
+
         }
         private void view_box_drawing_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
             view_box_drawing.Children.Clear();
 
             System.Windows.Point clickPos = e.GetPosition(this.view_box_drawing);
-                rect_End_X = (int)clickPos.X;
-                rect_End_Y = (int)clickPos.Y;
-                this.rect = new System.Windows.Shapes.Rectangle();
+            rect_End_X = (int)clickPos.X;
+            rect_End_Y = (int)clickPos.Y;
+            this.rect = new System.Windows.Shapes.Rectangle();
 
-                this.rect.Stroke = System.Windows.Media.Brushes.AliceBlue;
-                this.rect.Fill = System.Windows.Media.Brushes.GreenYellow;
-                this.rect.Opacity = 0.5;
-                
-                if (rect_End_Y < rect_Start_Y)
-                {
-                    this.rect.Height = rect_Start_Y - rect_End_Y;
-                    Canvas.SetTop(this.rect, (int)clickPos.Y);
+            this.rect.Stroke = System.Windows.Media.Brushes.AliceBlue;
+            this.rect.Fill = System.Windows.Media.Brushes.GreenYellow;
+            this.rect.Opacity = 0.5;
 
-                }
-                else if (rect_End_Y >= rect_Start_Y)
-                {
-                    this.rect.Height = rect_End_Y - rect_Start_Y;
-                    Canvas.SetTop(this.rect, rect_Start_Y);
-                }
-                if (rect_End_X < rect_Start_X)
-                {
-                    this.rect.Width = rect_Start_X - rect_End_X;
-                    Canvas.SetLeft(this.rect, rect_End_X);
-                }
-                else if (rect_End_X >= rect_Start_X)
-                {
-                    this.rect.Width = rect_End_X - rect_Start_X;
-                    Canvas.SetLeft(this.rect, rect_Start_X);
-                }
+            if (rect_End_Y < rect_Start_Y)
+            {
+                this.rect.Height = rect_Start_Y - rect_End_Y;
+                Canvas.SetTop(this.rect, (int)clickPos.Y);
+
+            }
+            else if (rect_End_Y >= rect_Start_Y)
+            {
+                this.rect.Height = rect_End_Y - rect_Start_Y;
+                Canvas.SetTop(this.rect, rect_Start_Y);
+            }
+            if (rect_End_X < rect_Start_X)
+            {
+                this.rect.Width = rect_Start_X - rect_End_X;
+                Canvas.SetLeft(this.rect, rect_End_X);
+            }
+            else if (rect_End_X >= rect_Start_X)
+            {
+                this.rect.Width = rect_End_X - rect_Start_X;
+                Canvas.SetLeft(this.rect, rect_Start_X);
+            }
 
             view_box_drawing.Children.Add(rect);
-            
+
         }
         private void view_box_drawing_MouseWheel(object sender, MouseWheelEventArgs e)
         {
+            System.Windows.Point clickPos = e.GetPosition(this.view_box_drawing);
 
+            if (e.Delta > 0)
+            {
+                st.CenterX = 0 ;
+                st.CenterY = 0 ;
+                
+                st.ScaleX *= ScaleRate;
+                st.ScaleY *= ScaleRate;
+            }
+            else
+            {
+                //st.CenterX = clickPos.X;
+                //st.CenterY = clickPos.Y;
+                st.ScaleX /= ScaleRate;
+                st.ScaleY /= ScaleRate;
+            }
+            
         }
 
         private void view_box_drawing_PreviewMouseMove(object sender, System.Windows.Input.MouseEventArgs e)
@@ -2569,12 +2585,12 @@ namespace ScanProgram
                 this.rect.StrokeDashArray = new System.Windows.Media.DoubleCollection { 2, 2 };
                 this.rect.Fill = System.Windows.Media.Brushes.Black;
                 this.rect.Opacity = 0.25;
-                
+
                 if ((int)clickPos.Y < rect_Start_Y)
                 {
-                    this.rect.Height =  rect_Start_Y-(int)clickPos.Y;
+                    this.rect.Height = rect_Start_Y - (int)clickPos.Y;
                     Canvas.SetTop(this.rect, (int)clickPos.Y);
-                    
+
                 }
                 else if ((int)clickPos.Y >= rect_Start_Y)
                 {
@@ -2583,7 +2599,7 @@ namespace ScanProgram
                 }
                 if ((int)clickPos.X < rect_Start_X)
                 {
-                    this.rect.Width =  rect_Start_X-(int)clickPos.X;
+                    this.rect.Width = rect_Start_X - (int)clickPos.X;
                     Canvas.SetLeft(this.rect, (int)clickPos.X);
                 }
                 else if ((int)clickPos.X >= rect_Start_X)
@@ -2591,7 +2607,7 @@ namespace ScanProgram
                     this.rect.Width = (int)clickPos.X - rect_Start_X;
                     Canvas.SetLeft(this.rect, rect_Start_X);
                 }
-                
+
                 view_box_drawing.Children.Add(rect);
 
             }
@@ -2607,7 +2623,6 @@ namespace ScanProgram
             if (CameraMod == 1)
             {
                 cap.Snap(1, 1, "ddd");
-                cap.WhiteBalance();
             }
             else if (CameraMod == 3)
             {
@@ -2615,7 +2630,7 @@ namespace ScanProgram
             }
             else if (CameraMod == 4)
             {
-
+                cap_nir.Snap(1, 1, "ddd");
             }
         }
 
